@@ -1,4 +1,4 @@
-package com.zzz.entitymodel.servicebase;
+package com.zzz.entitymodel.servicebase.DO;
 
 public class TestDemoEntity {
     private String name;

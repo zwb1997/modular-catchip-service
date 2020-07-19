@@ -14,6 +14,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -27,11 +28,10 @@ public class DBConfig {
 
     @Value("${druid.jdbc.url}")
     private String url;
-
-    @PostConstruct
-    public void initParams(@Value("${druid.jdbc.url}")String url) {
-      this.url = url;
-    }
+    @Value("${druid.jdbc.user}")
+    private String user;
+    @Value("${druid.jdbc.password}")
+    private String password;
 
     @Bean(initMethod = "init", destroyMethod = "close")
     public DruidDataSource druidDataSource() {
@@ -39,8 +39,9 @@ public class DBConfig {
 
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setUrl(url);
-     /*   druidDataSource.setUsername(user);
-        druidDataSource.setPassword(password);*/
+        druidDataSource.setUsername(user);
+        druidDataSource.setPassword(password);
+        druidDataSource.setDriverClassName("com.mysql.cj.jdbc.Driver");
         druidDataSource.setMaxActive(20);
         druidDataSource.setInitialSize(1);
         druidDataSource.setMaxWait(60000L);
@@ -88,9 +89,12 @@ public class DBConfig {
      * @return
      */
     @Bean
-    public MapperScannerConfigurer mapperScannerConfigurer() {
+    public static MapperScannerConfigurer mapperScannerConfigurer() {
         MapperScannerConfigurer mapperScannerConfigurer = new MapperScannerConfigurer();
         mapperScannerConfigurer.setBasePackage("com.zzz.service.module.mapper");
         return mapperScannerConfigurer;
     }
+
+
+
 }

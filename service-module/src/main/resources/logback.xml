@@ -11,7 +11,7 @@
     <appender name="ROLLING" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
             <!-- rollover daily -->
-            <fileNamePattern>/zzz_view_model/spring_log_%d{yyyy-MM-dd}.%i.log</fileNamePattern>
+            <fileNamePattern>\z-model\main-module-%d{yyyy-MM-dd}-%i.log</fileNamePattern>
             <!-- each file should be at most 100MB, keep 60 days worth of history, but at most 20GB -->
             <maxFileSize>10GB</maxFileSize>
             <maxHistory>60</maxHistory>
@@ -23,7 +23,7 @@
         </encoder>
     </appender>
 
-    <root level="debug">
+    <root level="DUBUG">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="ROLLING" />
     </root>
