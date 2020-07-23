@@ -29,6 +29,7 @@
         <start-class>runapp.RunApp</start-class>
         <jackson-verison>2.10.4</jackson-verison>
         <common-lang3-version>3.9</common-lang3-version>
+        <httpclient-version>4.5.2</httpclient-version>
     </properties>
 
     <dependencyManagement>
@@ -73,6 +74,13 @@
                 <artifactId>commons-lang3</artifactId>
                 <version>${common-lang3-version}</version>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpclient</artifactId>
+                <version>${httpclient-version}</version>
+            </dependency>
+
 
             <dependency>
                 <groupId>com.alibaba</groupId>

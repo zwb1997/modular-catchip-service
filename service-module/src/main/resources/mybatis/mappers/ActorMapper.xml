@@ -19,7 +19,7 @@
         FROM actor
         <where>
           <if test="params != null and params.lastName != null">
-              last_name = #{params.lastName}
+              last_name LIKE CONCAT('%',#{params.lastName},'%')
           </if>
         </where>
     </select>

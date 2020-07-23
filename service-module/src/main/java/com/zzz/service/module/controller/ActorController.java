@@ -19,6 +19,7 @@ import java.util.List;
  * @author ZZZ
  *  Test for controller
  */
+@CrossOrigin
 @Controller
 @RequestMapping("/service/actor")
 public class ActorController {

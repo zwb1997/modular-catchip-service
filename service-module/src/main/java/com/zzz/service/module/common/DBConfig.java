@@ -13,6 +13,7 @@ import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,10 +33,11 @@ public class DBConfig {
     private String user;
     @Value("${druid.jdbc.password}")
     private String password;
+    @Value("${druid.filter}")
+    private String druidLogFilterSlf4j;
 
     @Bean(initMethod = "init", destroyMethod = "close")
-    public DruidDataSource druidDataSource() {
-
+    public DruidDataSource druidDataSource() throws SQLException {
 
         DruidDataSource druidDataSource = new DruidDataSource();
         druidDataSource.setUrl(url);
@@ -60,17 +62,21 @@ public class DBConfig {
 
         List<Filter> filters = new ArrayList<>();
         Slf4jLogFilter slf4jLogFilter = new Slf4jLogFilter();
+        //大量数据 应当关闭
         slf4jLogFilter.setResultSetLogEnabled(false);
-        slf4jLogFilter.setStatementLogEnabled(false);
+        slf4jLogFilter.setStatementLogEnabled(true);
+        slf4jLogFilter.setStatementCreateAfterLogEnabled(false);
         slf4jLogFilter.setStatementExecuteAfterLogEnabled(false);
         slf4jLogFilter.setStatementExecutableSqlLogEnable(true);
         filters.add(slf4jLogFilter);
         druidDataSource.setProxyFilters(filters);
+        druidDataSource.setFilters(druidLogFilterSlf4j);
+        boolean s = slf4jLogFilter.isStatementParameterSetLogEnabled();
         return druidDataSource;
     }
 
     @Bean
-    public SqlSessionFactoryBean sqlSessionFactoryBean() throws IOException {
+    public SqlSessionFactoryBean sqlSessionFactoryBean() throws IOException, SQLException {
 
         SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
         sqlSessionFactoryBean.setDataSource(druidDataSource());

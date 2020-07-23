@@ -3,13 +3,15 @@ package com.zzz.service.module.common;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.ser.std.NumberSerializer;
 import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
-import org.springframework.context.annotation.ComponentScan;
+import com.zzz.service.module.common.interceptor.RefereIncterceptor;
+import com.zzz.service.module.common.interceptor.ValidInterceptor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.text.SimpleDateFormat;
@@ -19,6 +21,10 @@ import java.util.List;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
+    /**
+     * 消息转换
+     * @param converters
+     */
     @Override
     public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
         SimpleModule module = new SimpleModule();
@@ -37,12 +43,26 @@ public class WebConfig implements WebMvcConfigurer {
 //        converters.add(new MappingJackson2XmlHttpMessageConverter(builder.createXmlMapper(true).build()));
     }
 
+    /**
+     * 跨域
+     * @param registry
+     */
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://192.168.1.3:8080/*")
+                .allowedOrigins("*")
                 .allowCredentials(true)
                 .allowedMethods("*")
                 .allowedHeaders("*");
     }
+
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+
+        registry.addInterceptor(new RefereIncterceptor());
+        registry.addInterceptor(new ValidInterceptor());
+    }
+
+
 }
