@@ -24,6 +24,7 @@ public class VideoInfoModelDO {
     private int isPay;
     private int isUnionVideo;
     private int statusCode;
+    private String videoAddress;
 
     public VideoInfoModelDO(String dataID
             , int comment
@@ -40,7 +41,7 @@ public class VideoInfoModelDO {
             , String created
             , String length
             , int videoReview
-            , int aid, String bvid, int hideClick, int isPay, int isUnionVideo, int statusCode) {
+            , int aid, String bvid, int hideClick, int isPay, int isUnionVideo,String videoAddress ,int statusCode) {
         this.dataID = dataID;
         this.comment = comment;
         this.typeId = typeId;
@@ -61,8 +62,10 @@ public class VideoInfoModelDO {
         this.hideClick = hideClick;
         this.isPay = isPay;
         this.isUnionVideo = isUnionVideo;
+        this.videoAddress = videoAddress;
         this.statusCode = statusCode;
     }
+
 
     @Override
     public String toString() {
@@ -88,7 +91,16 @@ public class VideoInfoModelDO {
                 ", isPay=" + isPay +
                 ", isUnionVideo=" + isUnionVideo +
                 ", statusCode=" + statusCode +
+                ", videoAddress='" + videoAddress + '\'' +
                 '}';
+    }
+
+    public String getVideoAddress() {
+        return videoAddress;
+    }
+
+    public void setVideoAddress(String videoAddress) {
+        this.videoAddress = videoAddress;
     }
 
     public String getDataID() {
