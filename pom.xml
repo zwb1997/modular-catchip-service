@@ -29,7 +29,8 @@
         <start-class>runapp.RunApp</start-class>
         <jackson-verison>2.10.4</jackson-verison>
         <common-lang3-version>3.9</common-lang3-version>
-        <httpclient-version>4.5.2</httpclient-version>
+        <httpclient-version>4.5.12</httpclient-version>
+        <jsoup-version>1.13.1</jsoup-version>
     </properties>
 
     <dependencyManagement>
@@ -80,6 +81,13 @@
                 <artifactId>httpclient</artifactId>
                 <version>${httpclient-version}</version>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+            <dependency>
+                <groupId>org.jsoup</groupId>
+                <artifactId>jsoup</artifactId>
+                <version>${jsoup-version}</version>
+            </dependency>
+
 
 
             <dependency>
