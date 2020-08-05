@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.zzz.service.module.mapper.FetchingDataMapper">
+    <resultMap id="bBaseInfoMap" type="com.zzz.entitymodel.servicebase.DO.VideoTypeInfoDO">
+        <id property="dataID" column="dataID"/>
+        <result property="videoTypeCode" column="video_type_code"/>
+        <result property="videoTypeName" column="video_type_name"/>
+        <result property="statusCode" column="statusCode"/>
+    </resultMap>
+    <resultMap id="bVideoInfoMap" type="com.zzz.entitymodel.servicebase.DO.VideoInfoModelDO">
+        <id property="dataID" column="dataID"/>
+        <result property="statusCode" column="statusCode"/>
+        <result property="comment" column="comment_b"/>
+        <result property="typeId" column="typeid_b"/>
+        <result property="play" column="play_b"/>
+        <result property="pic" column="pic_b"/>
+        <result property="subtitle" column="subtitle_b"/>
+        <result property="description" column="description_b"/>
+        <result property="copyright" column="copyright_b"/>
+        <result property="title" column="title_b"/>
+        <result property="review" column="review_b"/>
+        <result property="author" column="author_b"/>
+        <result property="mid" column="mid_b"/>
+        <result property="created" column="created_b"/>
+        <result property="length" column="length_b"/>
+        <result property="videoReview" column="video_review_b"/>
+        <result property="aid" column="aid_b"/>
+        <result property="bvid" column="bvid_b"/>
+        <result property="videoAddress" column="video_address" />
+        <result property="hideClick" column="hide_click_b"/>
+        <result property="isPay" column="is_pay_b"/>
+        <result property="isUnionVideo" column="is_union_video_b"/>
+    </resultMap>
+
+    <select id="queryInfo" resultMap="bBaseInfoMap">
+        SELECT
+        dataID,
+        video_type_code,
+        video_type_name,
+        FROM b_video_type
+        <where>
+            <if test="queryParams.videoTypeName != ''">
+                video_type_name LIKE CONCAT(#{queryParams.videoTypeName},"%")
+            </if>
+            <if test="queryParams.videoTypeCode != ''">
+                AND video_type_code = #{queryParams.videoTypeCode}
+            </if>
+        </where>
+    </select>
+    <insert id="insertBBaseInfo">
+        INSERT INTO b_video_type VALUES
+        <foreach collection="infoList" item="item" separator=",">
+            (0,#{item.videoTypeCode},#{item.videoTypeName},1)
+        </foreach>
+    </insert>
+    <insert id="insertBVideoInfo">
+        INSERT INTO b_video_info VALUES
+        <foreach collection="videoModels" item="item" separator=",">
+            (
+            #{item.dataID},
+            #{item.comment},
+            #{item.typeId},
+            #{item.play},
+            #{item.pic},
+            #{item.subtitle},
+            #{item.description},
+            #{item.copyright},
+            #{item.title},
+            #{item.review},
+            #{item.author},
+            #{item.mid},
+            #{item.created},
+            #{item.length},
+            #{item.videoReview},
+            #{item.aid},
+            #{item.bvid},
+            #{item.videoAddress},
+            #{item.hideClick},
+            #{item.isPay},
+            #{item.isUnionVideo},
+            #{item.statusCode}
+            )
+        </foreach>
+    </insert>
+    <select id="queryVideoTypeInfo" resultMap="bVideoInfoMap">
+        select
+        `dataID`,
+        `comment_b`,
+        `typeid_b`,
+        `play_b`,
+        `pic_b`,
+        `subtitle_b`,
+        `description_b`,
+        `copyright_b`,
+        `title_b`,
+        `review_b`,
+        `author_b`,
+        `mid_b`,
+        `created_b`,
+        `length_b`,
+        `video_review_b`,
+        `aid_b`,
+        `bvid_b`,
+        `video_address`,
+        `hide_click_b`,
+        `is_pay_b`,
+        `is_union_video_b`,
+        `statusCode`
+        FROM b_video_info WHERE statusCode != 0
+        <if test="queryParams.bMid != null and queryParams.bMid != 0">
+            AND mid_b like CONCAT(#{queryParams.bMid},"%")
+        </if>
+        <if test="queryParams.bAuthor != null and queryParams.bAuthor != ''">
+            AND author_b like CONCAT("%",#{queryParams.bAuthor},"%")
+        </if>
+    </select>
+</mapper>
