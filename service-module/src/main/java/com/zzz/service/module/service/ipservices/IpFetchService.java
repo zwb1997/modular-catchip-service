@@ -2,9 +2,12 @@ package com.zzz.service.module.service.ipservices;
 
 import com.zzz.entitymodel.servicebase.DTO.IpLocation;
 import com.zzz.service.module.common.exception.DebugException;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.*;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -46,6 +49,8 @@ public class IpFetchService {
     private static final String RESPONSE_CODE_PREFIX = "2";
 
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36";
+
+    private static final String PAGE_REGIX = "^(\\d){1,6}$";
     @Autowired
     private JdbcTemplate jdbcTemplate;
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -133,6 +138,7 @@ public class IpFetchService {
      * @param ipPrefixLists
      */
     public void fetchIpPages(List<String> ipPrefixLists) {
+
         try {
             for (String targetPrefix : ipPrefixLists) {
                 // get current page than do fetch page nums
@@ -153,73 +159,122 @@ public class IpFetchService {
                 vaildateReponse(response);
 
                 HttpEntity httpEntity = response.getEntity();
-                String currentPage = EntityUtils.toString(httpEntity);
+                String currentPage = vaildateEntity(httpEntity);
                 LOG.info(" current html : {} ", currentPage);
                 TreeMap<Integer, IpLocation> aTags = matchAtages(currentPage, "a[href^=?page]");
 
                 LOG.info(" done ");
                 LOG.info(" start fetching  current pages ");
-                fetchCurrentPages(curUriString, aTags);
+                Set<Map.Entry<Integer, IpLocation>> aTageEntris = aTags.entrySet();
+                Stack<IpLocation> pageNumsList = new Stack<>();
+                addForList(aTageEntris, pageNumsList);
+                checkAndRemoveLocation(pageNumsList,PAGE_REGIX);
+                fetchCurrentPages(curUriString, pageNumsList);
                 break;
-
             }
-        } catch (URISyntaxException e1) {
+        } catch (URISyntaxException | IOException e1) {
             LOG.error(" errors : {} ", e1.getMessage());
-        } catch (IOException e2) {
-            LOG.error(" errors : {} ", e2.getMessage());
         }
     }
 
     /**
-     * @param curUriString
-     * @param aTags
+     *
+     * @param pageNumsList
+     * @param expertSection
+     * if page text not validated , will remove it
      */
-    private void fetchCurrentPages(String curUriString, TreeMap<Integer, IpLocation>  aTags) {
+    private void checkAndRemoveLocation(List<IpLocation> pageNumsList,String expertSection) {
+        Iterator<IpLocation> itr = pageNumsList.listIterator();
+        while(itr.hasNext()){
+            IpLocation ipLocation = itr.next();
+            if(!checkLocationName(ipLocation,expertSection)){
+                itr.remove();
+            }
+        }
+    }
+
+
+    /**
+     * @param curUriString
+     * @param pageNumsStack
+     */
+    private Stack<IpLocation> fetchCurrentPages(String curUriString, Stack<IpLocation> pageNumsStack) {
+        if (CollectionUtils.isEmpty(pageNumsStack)) {
+            LOG.info(" pageNumsStack is null ");
+            return null;
+        }
         LOG.info(" start getting current  <a> tags ");
         boolean flag = true;
-        Stack<Integer> endStack = new Stack<>();
-        List<String> fetchLinks = new ArrayList<>(500);
-        while (flag) {
-            TreeMap<Integer, String> sortPageMap = new TreeMap<>();
-            Set<Map.Entry<Integer, IpLocation>> entries = aTags.entrySet();
-            for (Map.Entry<Integer, IpLocation> e : entries) {
-                IpLocation location = e.getValue();
-                LOG.info(" combine current work pages ,current location : {} ",location);
-                String pageNumber = location.getLocationName();
-                String escapePageNumber = location.getLocationHref();
-                if (pageNumber.matches("^\\d{1,10}$")) {
-                    sortPageMap.put(Integer.valueOf(pageNumber), escapePageNumber);
-                }
-            }
-
-            //sortPageMap.put(Integer.valueOf("7"), "?page=881aaf7b5");
-            LOG.info(" done ");
-            Map.Entry<Integer, String> endEntry = sortPageMap.lastEntry();
-            Integer key = endEntry.getKey();
-            String page = endEntry.getValue();
-            LOG.info(" last key : {} , last value : {} ", key, page);
-
-            String fullEndLink = curUriString + page;
-            LOG.info(" prepare fetching current end link : {} ", fullEndLink);
-            try {
-                URI uri = new URIBuilder(fullEndLink).build();
+        String hasPageRegix = "tbody > tr";
+        String validRegix = "tbody > tr";
+        try{
+            while (flag) {
+                Thread.sleep(2 * 1000);
+                IpLocation topIpLocation = pageNumsStack.peek();
+                String curLocatioHref  = topIpLocation.getLocationHref();
+                String curFullHref = XIAO_HUAN_IP + curLocatioHref;
+                URI uri = new URIBuilder(curFullHref)
+                        .setScheme("https")
+                        .build();
                 HttpGet get = new HttpGet(uri);
-                List<Header> headers = new ArrayList<Header>() {{
-                    add(new BasicHeader("user-agent", USER_AGENT));
-                }};
-                HttpResponse response = exeuteDefaultRequest(get, headers);
+                List<Header> headerList = new ArrayList<>();
+                headerList.add(new BasicHeader("user-agent", USER_AGENT));
+                LOG.info(" detecting current page html : {} "+ curFullHref);
+                HttpResponse response = exeuteDefaultRequest(get, headerList);
                 vaildateReponse(response);
-                String html = vaildateEntity(response.getEntity());
-                if (hasNextPage(html)) {
-                    // have more page will continue
-
+                HttpEntity httpEntity = response.getEntity();
+                String currentPage = vaildateEntity(httpEntity);
+                if(hasNextPage(currentPage,hasPageRegix)){
+                    TreeMap<Integer, IpLocation> curMap = matchAtages(currentPage,validRegix);
+                    Set<Map.Entry<Integer, IpLocation>> curSet = curMap.entrySet();
+                    addForList(curSet,pageNumsStack);
+                    checkAndRemoveLocation(pageNumsStack,PAGE_REGIX);
+                }else{
+                    pageNumsStack.pop();
+                    flag = false;
                 }
-            } catch (Exception e) {
-                LOG.error(" error , current fullLink : {},message : {} ", fullEndLink, e.getMessage());
             }
-
-            flag = false;
+        }catch (Exception e){
+            LOG.error(" error , message : {} ",e.getMessage());
+        }finally {
+            return pageNumsStack;
         }
-
     }
+
+
+    /**
+     * add map values to a list
+     *
+     * @param mapSet
+     * @param res
+     * @param <K>
+     * @param <V>
+     */
+    private <K, V> void addForList(Set<Map.Entry<K, V>> mapSet, List<V> res) {
+        if(res == null){
+            LOG.info(" list is null ");
+            return;
+        }
+        for (Map.Entry<K, V> me : mapSet) {
+            V val = me.getValue();
+                res.add(val);
+        }
+    }
+
+    /**
+     * check location is legal by checkSection
+     *
+     * @param location
+     * @param checkSection
+     * @return
+     */
+    private boolean checkLocationName(IpLocation location, String checkSection) {
+        if (ObjectUtils.isEmpty(location) || StringUtils.isBlank(checkSection)) {
+            LOG.info(" Object location is null or check regix String is null ");
+            return false;
+        }
+        return location.getLocationName().matches(checkSection);
+    }
+
+
 }

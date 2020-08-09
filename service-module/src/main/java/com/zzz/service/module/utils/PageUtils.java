@@ -58,9 +58,9 @@ public class PageUtils {
      * @param curDocmentHtml
      * @return
      */
-    public static boolean hasNextPage(String curDocmentHtml)  {
+    public static boolean hasNextPage(String curDocmentHtml,String exceptSection)  {
         Document doc = Jsoup.parse(curDocmentHtml);
-        Elements bodyEs = doc.select("tbody > tr");
+        Elements bodyEs = doc.select(exceptSection);
         if(bodyEs.isEmpty()){
             return false;
         }
