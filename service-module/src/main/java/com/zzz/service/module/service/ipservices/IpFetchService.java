@@ -1,12 +1,11 @@
 package com.zzz.service.module.service.ipservices;
 
-import com.zzz.basemodels.enummodel.HttpResponseCodes;
+import com.zzz.entitymodel.servicebase.DTO.IpLocation;
 import com.zzz.service.module.common.exception.DebugException;
 import org.apache.http.*;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
@@ -21,13 +20,18 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
+import static com.zzz.service.module.utils.HttpClientUtil.*;
+import static com.zzz.service.module.utils.PageUtils.*;
+
+/**
+ * 记得超时重连
+ */
 @Service
 public class IpFetchService {
 
@@ -38,6 +42,8 @@ public class IpFetchService {
     private static final String A_TAG_PREFIX = "/address";
 
     private List<String> aTagLists = null;
+
+    private static final String RESPONSE_CODE_PREFIX = "2";
 
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36";
     @Autowired
@@ -63,8 +69,6 @@ public class IpFetchService {
     public List<String> getPages() {
         LOG.info(" prepare to get xiaohuan ip pages... ");
         List<String> ress = new ArrayList<>(100);
-        HttpClient client = HttpClientBuilder.create().build();
-        HttpGet httpGet = new HttpGet();
         try {
             String uuid = UUID.randomUUID().toString().replace("-", "");
             List<NameValuePair> requestParams = new ArrayList<>();
@@ -81,50 +85,40 @@ public class IpFetchService {
             //他这个需要将以下两个参数放请求参数中
             requestParams.add(new BasicNameValuePair("origin", "https://ip.ihuan.me"));
             requestParams.add(new BasicNameValuePair("referer", "https://ip.ihuan.me/ti.html"));
+
             URI uri = new URIBuilder(XIAO_HUAN_IP)
                     .setParameters(requestParams)
                     .setScheme("https")
                     .build();
+
+            HttpGet httpGet = new HttpGet();
             httpGet.setURI(uri);
-            httpGet.setHeader("user-agent", USER_AGENT);
-            String requestURI = httpGet.getURI().toString();
-            LOG.info(" request uri : {} ", requestURI);
+
+            List<Header> requestHeaders = new ArrayList<>();
+            requestHeaders.add(new BasicHeader("user-agent", USER_AGENT));
+
+            String requestUri = httpGet.getURI().toString();
+            LOG.info(" request uri : {} ", requestUri);
             LOG.info(" executing request... ");
-            HttpResponse response = client.execute(httpGet);
-            String responseCode = String.valueOf(response.getStatusLine().getStatusCode());
-            LOG.info(" execute done,response code : {} , will print headers ",response.getStatusLine().getStatusCode());
-            Header[] headers = response.getAllHeaders();
-            for(Header h : headers) {
-                HeaderElement[] hes = h.getElements();
-                for(HeaderElement he : hes){
-                    LOG.info(" header : {} value : {} ",he.getName(),he.getValue());
-                }
+
+            HttpResponse response = exeuteDefaultRequest(httpGet, requestHeaders);
+            vaildateReponse(response);
+
+            LOG.info(" analysis <a> tag... ");
+            HttpEntity entity = response.getEntity();
+            String html = vaildateEntity(entity);
+            TreeMap<Integer, IpLocation> resAtags = matchAtages(html, "a[href~=^/address]");
+            LOG.info(" finish lists :");
+            int locationNums = resAtags.size();
+            LOG.info(" ip location nums :{} ", locationNums);
+            Set<Map.Entry<Integer, IpLocation>> entries = resAtags.entrySet();
+            for (Map.Entry<Integer, IpLocation> me : entries) {
+                Integer num = me.getKey();
+                IpLocation ipLocation = me.getValue();
+                LOG.info(" current num : {} ,current ip location : {} ", num, ipLocation);
+                ress.add(ipLocation.getLocationHref());
             }
-            if (responseCode.startsWith("2")) {
-                LOG.info(" response success ");
-                LOG.info(" analysis <a> tag... ");
-                HttpEntity entity = response.getEntity();
-                if(entity == null){
-                    throw new DebugException(" response entity is null ");
-                }
-                String html = EntityUtils.toString(entity);
-                if(StringUtils.isBlank(html)){
-                    throw new DebugException(" response html is empty ");
-                }
-                Document doc = Jsoup.parse(html);
-                Elements ipDocs = doc.select("a[href]");
-                LOG.info(" finish lists :");
-                for (Element e : ipDocs) {
-                    String href = String.valueOf(e.attr("href"));
-                    LOG.info(href);
-                    if (href.startsWith(A_TAG_PREFIX)) {
-                        ress.add(href);
-                    }
-                }
-                LOG.info(" done ");
-            }else{
-                LOG.info(" response not useful, would't do anything... check reponse headers ");
-            }
+            LOG.info(" done ");
         } catch (URISyntaxException | IOException e) {
             LOG.error(" executing request error , messages : {} ", e.getMessage());
         } finally {
@@ -135,31 +129,97 @@ public class IpFetchService {
 
     /**
      * fetch every page info
+     *
+     * @param ipPrefixLists
      */
     public void fetchIpPages(List<String> ipPrefixLists) {
         try {
             for (String targetPrefix : ipPrefixLists) {
                 // get current page than do fetch page nums
-                HttpClient client = HttpClientBuilder.create().build();
+                LOG.info(" begin fetching these pages ");
                 URI uri = new URIBuilder(XIAO_HUAN_IP)
                         .setScheme("https")
                         .setParameters()
                         .setPath(targetPrefix)
                         .build();
+                String curUriString = uri.toString();
                 HttpGet get = new HttpGet(uri);
-                get.setHeader("user-agent", USER_AGENT);
-                HttpResponse response = client.execute(get);
-                String responseCode = String.valueOf(response.getStatusLine().getStatusCode());
-                if (responseCode.startsWith("2")){
-                    HttpEntity httpEntity = response.getEntity();
-                    String currentPage = EntityUtils.toString(httpEntity);
-                    LOG.info(" current html : {} ",currentPage);
-                }
+                List<Header> headerList = new ArrayList<>();
+                headerList.add(new BasicHeader("user-agent", USER_AGENT));
+
+                LOG.info(" do with current type :{} ", curUriString);
+
+                HttpResponse response = exeuteDefaultRequest(get, headerList);
+                vaildateReponse(response);
+
+                HttpEntity httpEntity = response.getEntity();
+                String currentPage = EntityUtils.toString(httpEntity);
+                LOG.info(" current html : {} ", currentPage);
+                TreeMap<Integer, IpLocation> aTags = matchAtages(currentPage, "a[href^=?page]");
+
+                LOG.info(" done ");
+                LOG.info(" start fetching  current pages ");
+                fetchCurrentPages(curUriString, aTags);
+                break;
+
             }
         } catch (URISyntaxException e1) {
             LOG.error(" errors : {} ", e1.getMessage());
         } catch (IOException e2) {
             LOG.error(" errors : {} ", e2.getMessage());
         }
+    }
+
+    /**
+     * @param curUriString
+     * @param aTags
+     */
+    private void fetchCurrentPages(String curUriString, TreeMap<Integer, IpLocation>  aTags) {
+        LOG.info(" start getting current  <a> tags ");
+        boolean flag = true;
+        Stack<Integer> endStack = new Stack<>();
+        List<String> fetchLinks = new ArrayList<>(500);
+        while (flag) {
+            TreeMap<Integer, String> sortPageMap = new TreeMap<>();
+            Set<Map.Entry<Integer, IpLocation>> entries = aTags.entrySet();
+            for (Map.Entry<Integer, IpLocation> e : entries) {
+                IpLocation location = e.getValue();
+                LOG.info(" combine current work pages ,current location : {} ",location);
+                String pageNumber = location.getLocationName();
+                String escapePageNumber = location.getLocationHref();
+                if (pageNumber.matches("^\\d{1,10}$")) {
+                    sortPageMap.put(Integer.valueOf(pageNumber), escapePageNumber);
+                }
+            }
+
+            //sortPageMap.put(Integer.valueOf("7"), "?page=881aaf7b5");
+            LOG.info(" done ");
+            Map.Entry<Integer, String> endEntry = sortPageMap.lastEntry();
+            Integer key = endEntry.getKey();
+            String page = endEntry.getValue();
+            LOG.info(" last key : {} , last value : {} ", key, page);
+
+            String fullEndLink = curUriString + page;
+            LOG.info(" prepare fetching current end link : {} ", fullEndLink);
+            try {
+                URI uri = new URIBuilder(fullEndLink).build();
+                HttpGet get = new HttpGet(uri);
+                List<Header> headers = new ArrayList<Header>() {{
+                    add(new BasicHeader("user-agent", USER_AGENT));
+                }};
+                HttpResponse response = exeuteDefaultRequest(get, headers);
+                vaildateReponse(response);
+                String html = vaildateEntity(response.getEntity());
+                if (hasNextPage(html)) {
+                    // have more page will continue
+
+                }
+            } catch (Exception e) {
+                LOG.error(" error , current fullLink : {},message : {} ", fullEndLink, e.getMessage());
+            }
+
+            flag = false;
+        }
+
     }
 }
