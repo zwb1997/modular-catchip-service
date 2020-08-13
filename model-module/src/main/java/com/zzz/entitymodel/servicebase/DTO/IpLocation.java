@@ -22,4 +22,23 @@ public class IpLocation {
     public String toString() {
         return "[ locationName : "+locationName + " locationHref "+locationHref+" ] ";
     }
+
+    @Override
+    public int hashCode() {
+        int code = 0;
+        char[] chars = locationHref.toCharArray();
+        for(char c : chars){
+            code += c;
+        }
+        return code;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(!(obj instanceof IpLocation)){
+            return false;
+        }else{
+            return this.locationHref.equals(((IpLocation) obj).getLocationHref());
+        }
+    }
 }

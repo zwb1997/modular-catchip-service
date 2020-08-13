@@ -21,4 +21,6 @@ public class FetchServiceConstants {
     public static String HIDE_CLICK = "hide_click";
     public static String IS_PAY = "is_pay";
     public static String IS_UNION_VIDEO = "is_union_video";
+
+    public static int DIVIDE_PART = 6;
 }

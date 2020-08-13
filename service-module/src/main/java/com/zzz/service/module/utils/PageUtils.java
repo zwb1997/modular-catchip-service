@@ -11,7 +11,6 @@ import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +46,7 @@ public class PageUtils {
         for (Element e : es) {
             String tagText = e.text();
             String tagHrefArrt = e.attr("href");
-            res.put(number++, new IpLocation(tagText,tagHrefArrt));
+            res.put(number++, new IpLocation(tagText, tagHrefArrt));
         }
         return res;
     }
@@ -58,23 +57,36 @@ public class PageUtils {
      * @param curDocmentHtml
      * @return
      */
-    public static boolean hasNextPage(String curDocmentHtml,String exceptSection)  {
+    public static boolean hasNextPage(String curDocmentHtml, String exceptSection) {
         Document doc = Jsoup.parse(curDocmentHtml);
         Elements bodyEs = doc.select(exceptSection);
-        if(bodyEs.isEmpty()){
+        if (bodyEs.isEmpty()) {
             return false;
         }
         return true;
     }
 
-    public static String vaildateEntity(HttpEntity entity)  throws IOException, ParseException{
+    public static String vaildateEntity(HttpEntity entity) throws IOException, ParseException {
         if (ObjectUtils.isEmpty(entity)) {
             throw new DebugException(" current http enity is null ");
         }
         String html = EntityUtils.toString(entity);
-        if(StringUtils.isBlank(html)){
+        if (StringUtils.isBlank(html)) {
             throw new DecodingException(" current http entity's html is null ");
         }
         return html;
     }
+
+    /**
+     *  match element by given regix
+     * @param html
+     * @param sectionRegix
+     * @return
+     */
+    public static synchronized Elements fetchElementWithSection(String html, String sectionRegix) {
+        Element element = Jsoup.parse(html);
+        Elements elements = element.select(sectionRegix);
+        return elements;
+    }
+
 }

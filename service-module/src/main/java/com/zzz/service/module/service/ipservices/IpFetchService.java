@@ -1,20 +1,14 @@
 package com.zzz.service.module.service.ipservices;
 
 import com.zzz.entitymodel.servicebase.DTO.IpLocation;
-import com.zzz.service.module.common.exception.DebugException;
+import com.zzz.service.module.common.threadconfig.NamedThreadFactory;
+import com.zzz.service.module.params.IpServiceConstant;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.*;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
-import org.apache.http.util.EntityUtils;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +22,13 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicInteger;
 
+import static com.zzz.entitymodel.servicebase.constants.FetchServiceConstants.DIVIDE_PART;
 import static com.zzz.service.module.utils.HttpClientUtil.*;
 import static com.zzz.service.module.utils.PageUtils.*;
+import static com.zzz.service.module.params.IpServiceConstant.*;
 
 /**
  * 记得超时重连
@@ -39,8 +37,8 @@ import static com.zzz.service.module.utils.PageUtils.*;
 public class IpFetchService {
 
     private static final Logger LOG = LoggerFactory.getLogger(IpFetchService.class);
+    private static final ArrayBlockingQueue ARRAY_BLOCKING_QUEUE = new ArrayBlockingQueue(10);
 
-    private static final String XIAO_HUAN_IP = "//ip.ihuan.me/tqdl.html";
 
     private static final String A_TAG_PREFIX = "/address";
 
@@ -48,9 +46,10 @@ public class IpFetchService {
 
     private static final String RESPONSE_CODE_PREFIX = "2";
 
-    private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36";
 
     private static final String PAGE_REGIX = "^(\\d){1,6}$";
+
+
     @Autowired
     private JdbcTemplate jdbcTemplate;
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
@@ -90,22 +89,18 @@ public class IpFetchService {
             //他这个需要将以下两个参数放请求参数中
             requestParams.add(new BasicNameValuePair("origin", "https://ip.ihuan.me"));
             requestParams.add(new BasicNameValuePair("referer", "https://ip.ihuan.me/ti.html"));
-
-            URI uri = new URIBuilder(XIAO_HUAN_IP)
+            URI uri = new URIBuilder(IpServiceConstant.XIAO_HUAN_IP)
                     .setParameters(requestParams)
                     .setScheme("https")
                     .build();
 
             HttpGet httpGet = new HttpGet();
             httpGet.setURI(uri);
-
             List<Header> requestHeaders = new ArrayList<>();
             requestHeaders.add(new BasicHeader("user-agent", USER_AGENT));
-
             String requestUri = httpGet.getURI().toString();
             LOG.info(" request uri : {} ", requestUri);
             LOG.info(" executing request... ");
-
             HttpResponse response = exeuteDefaultRequest(httpGet, requestHeaders);
             vaildateReponse(response);
 
@@ -131,7 +126,6 @@ public class IpFetchService {
         }
     }
 
-
     /**
      * fetch every page info
      *
@@ -139,60 +133,73 @@ public class IpFetchService {
      */
     public void fetchIpPages(List<String> ipPrefixLists) {
 
-        try {
-            for (String targetPrefix : ipPrefixLists) {
+        for (String targetPrefix : ipPrefixLists) {
+            String curUriString = null;
+            try {
                 // get current page than do fetch page nums
                 LOG.info(" begin fetching these pages ");
                 URI uri = new URIBuilder(XIAO_HUAN_IP)
                         .setScheme("https")
-                        .setParameters()
                         .setPath(targetPrefix)
                         .build();
-                String curUriString = uri.toString();
-                HttpGet get = new HttpGet(uri);
+                curUriString = uri.toString();
                 List<Header> headerList = new ArrayList<>();
                 headerList.add(new BasicHeader("user-agent", USER_AGENT));
-
                 LOG.info(" do with current type :{} ", curUriString);
-
-                HttpResponse response = exeuteDefaultRequest(get, headerList);
-                vaildateReponse(response);
-
-                HttpEntity httpEntity = response.getEntity();
-                String currentPage = vaildateEntity(httpEntity);
+                String currentPage = ipFetchCommonRequest(uri, headerList);
                 LOG.info(" current html : {} ", currentPage);
                 TreeMap<Integer, IpLocation> aTags = matchAtages(currentPage, "a[href^=?page]");
-
                 LOG.info(" done ");
                 LOG.info(" start fetching  current pages ");
                 Set<Map.Entry<Integer, IpLocation>> aTageEntris = aTags.entrySet();
                 Stack<IpLocation> pageNumsList = new Stack<>();
                 addForList(aTageEntris, pageNumsList);
-                checkAndRemoveLocation(pageNumsList,PAGE_REGIX);
+                checkAndRemoveLocation(pageNumsList, PAGE_REGIX);
                 fetchCurrentPages(curUriString, pageNumsList);
-                break;
+            } catch (URISyntaxException | IOException e1) {
+                LOG.error("{0}  page error :  message : {1}", curUriString, e1.getMessage());
             }
-        } catch (URISyntaxException | IOException e1) {
-            LOG.error(" errors : {} ", e1.getMessage());
         }
+    }
+
+    private String ipFetchCommonRequest(URI uri, List<Header> headerList) throws IOException {
+        HttpGet get = new HttpGet(uri);
+        HttpResponse response = exeuteDefaultRequest(get, headerList);
+        vaildateReponse(response);
+        HttpEntity httpEntity = response.getEntity();
+        String currentPage = vaildateEntity(httpEntity);
+        return currentPage;
     }
 
     /**
      *
+     * 分割任务stack
      * @param pageNumsList
-     * @param expertSection
-     * if page text not validated , will remove it
      */
-    private void checkAndRemoveLocation(List<IpLocation> pageNumsList,String expertSection) {
+    private void doWork(Stack<IpLocation> pageNumsList) {
+        ExecutorService executor = new ThreadPoolExecutor(
+                5, 8, 60, TimeUnit.SECONDS, ARRAY_BLOCKING_QUEUE, new NamedThreadFactory()
+        );
+        int topPos = 0;
+        int dividePart = pageNumsList.size() / DIVIDE_PART;
+        for (int i = 0; i < dividePart; i++) {
+            List<IpLocation> curSyncList = pageNumsList.subList(topPos, dividePart);
+            topPos += dividePart;
+        }
+    }
+    /**
+     * @param pageNumsList
+     * @param expertSection if page text not validated , will remove it
+     */
+    private void checkAndRemoveLocation(List<IpLocation> pageNumsList, String expertSection) {
         Iterator<IpLocation> itr = pageNumsList.listIterator();
-        while(itr.hasNext()){
+        while (itr.hasNext()) {
             IpLocation ipLocation = itr.next();
-            if(!checkLocationName(ipLocation,expertSection)){
+            if (!checkLocationName(ipLocation, expertSection)) {
                 itr.remove();
             }
         }
     }
-
 
     /**
      * @param curUriString
@@ -205,65 +212,57 @@ public class IpFetchService {
         }
         LOG.info(" start getting current  <a> tags ");
         boolean flag = true;
-        String hasPageRegix = "tbody > tr";
-        String validRegix = "tbody > tr";
-        try{
+        try {
             while (flag) {
                 Thread.sleep(2 * 1000);
                 IpLocation topIpLocation = pageNumsStack.peek();
-                String curLocatioHref  = topIpLocation.getLocationHref();
-                String curFullHref = XIAO_HUAN_IP + curLocatioHref;
+                String curLocatioHref = topIpLocation.getLocationHref();
+                String curFullHref = curUriString + curLocatioHref;
+                LOG.info(" current page : {} ",curFullHref);
                 URI uri = new URIBuilder(curFullHref)
                         .setScheme("https")
                         .build();
-                HttpGet get = new HttpGet(uri);
                 List<Header> headerList = new ArrayList<>();
                 headerList.add(new BasicHeader("user-agent", USER_AGENT));
-                LOG.info(" detecting current page html : {} "+ curFullHref);
-                HttpResponse response = exeuteDefaultRequest(get, headerList);
-                vaildateReponse(response);
-                HttpEntity httpEntity = response.getEntity();
-                String currentPage = vaildateEntity(httpEntity);
-                if(hasNextPage(currentPage,hasPageRegix)){
-                    TreeMap<Integer, IpLocation> curMap = matchAtages(currentPage,validRegix);
+                String currentPage = ipFetchCommonRequest(uri,headerList);
+                if (hasNextPage(currentPage, HAS_PAGE_REGIX)) {
+                    TreeMap<Integer, IpLocation> curMap = matchAtages(currentPage, PAGE_NUM_COMMON);
                     Set<Map.Entry<Integer, IpLocation>> curSet = curMap.entrySet();
-                    addForList(curSet,pageNumsStack);
-                    checkAndRemoveLocation(pageNumsStack,PAGE_REGIX);
-                }else{
+                    addForList(curSet, pageNumsStack);
+                    checkAndRemoveLocation(pageNumsStack, PAGE_REGIX);
+                } else {
+                    LOG.info(" current page : {} has no matches , will pop ", curFullHref);
                     pageNumsStack.pop();
                     flag = false;
                 }
             }
-        }catch (Exception e){
-            LOG.error(" error , message : {} ",e.getMessage());
-        }finally {
+        } catch (Exception e) {
+            LOG.error(" error , message : {} ", e.getMessage());
+        } finally {
             return pageNumsStack;
         }
     }
 
-
     /**
      * add map values to a list
-     *
      * @param mapSet
      * @param res
      * @param <K>
      * @param <V>
      */
     private <K, V> void addForList(Set<Map.Entry<K, V>> mapSet, List<V> res) {
-        if(res == null){
+        if (res == null) {
             LOG.info(" list is null ");
             return;
         }
         for (Map.Entry<K, V> me : mapSet) {
             V val = me.getValue();
-                res.add(val);
+            res.add(val);
         }
     }
 
     /**
      * check location is legal by checkSection
-     *
      * @param location
      * @param checkSection
      * @return
@@ -275,6 +274,5 @@ public class IpFetchService {
         }
         return location.getLocationName().matches(checkSection);
     }
-
 
 }
