@@ -19,7 +19,7 @@
     </modules>
     <properties>
         <module-version>1.0-SNAPSHOT</module-version>
-        <mysql-version>8.0.15</mysql-version>
+        <mysql-version>8.0.16</mysql-version>
         <druid-springboot-start-version>1.1.10</druid-springboot-start-version>
         <druid-version>1.1.22</druid-version>
         <junit-version>4.12</junit-version>
