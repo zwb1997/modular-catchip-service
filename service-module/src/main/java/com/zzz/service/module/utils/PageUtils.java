@@ -1,7 +1,9 @@
 package com.zzz.service.module.utils;
 
 import com.sun.xml.internal.org.jvnet.mimepull.DecodingException;
+import com.zzz.entitymodel.servicebase.DO.IpPoolMainDO;
 import com.zzz.entitymodel.servicebase.DTO.IpLocation;
+import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.zzz.service.module.common.exception.DebugException;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -78,7 +80,8 @@ public class PageUtils {
     }
 
     /**
-     *  match element by given regix
+     * match element by given regix
+     *
      * @param html
      * @param sectionRegix
      * @return
@@ -89,4 +92,34 @@ public class PageUtils {
         return elements;
     }
 
+    public static synchronized List<IpPoolMainDO> combineXiaoHuanInfo(Elements elements) {
+        if (elements == null || elements.isEmpty()) {
+            LOG.info(" elements is empty,will not work ");
+            return null;
+        }
+        Iterator<Element> iterator = elements.iterator();
+        LinkedList<IpPoolMainDO> res = new LinkedList<>();
+        while (iterator.hasNext()) {
+            Element e = iterator.next();
+            List<String> infos = findTextNode(e);
+            LOG.info(" current infos : {} ",infos);
+            res.add(IpPoolMainDTO.createInstance(infos));
+        }
+        return res;
+    }
+
+    public static List<String> findTextNode(Element cure) {
+        if (cure == null) {
+            LOG.info(" current Element is empty ");
+            return null;
+        }
+        Elements tds = cure.select("td");
+        List<String> resList = new ArrayList<>();
+        for (Element e : tds) {
+             String val = e.text().replace(" ","/");
+            resList.add(val);
+        }
+        LOG.info(" begin extract info ");
+        return resList;
+    }
 }

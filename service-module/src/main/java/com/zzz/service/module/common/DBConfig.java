@@ -24,6 +24,7 @@ import java.util.List;
  */
 @Configuration
 @PropertySources({@PropertySource("classpath:db/dev_db.properties")})
+//@PropertySources({@PropertySource("classpath:db/prod_db.properties")})
 //@ImportResource("classpath:db/dev_db.properties")
 public class DBConfig {
 
@@ -59,7 +60,6 @@ public class DBConfig {
         druidDataSource.setPoolPreparedStatements(true);
         druidDataSource.setMaxOpenPreparedStatements(20);
         druidDataSource.setAsyncInit(true);
-
         List<Filter> filters = new ArrayList<>();
         Slf4jLogFilter slf4jLogFilter = new Slf4jLogFilter();
         //大量数据 应当关闭

@@ -4,6 +4,7 @@ import com.zzz.service.module.common.exception.DebugException;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
+import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -26,6 +27,9 @@ public class HttpClientUtil {
     private static final String RESPONSE_CODE_PREFIX = "2";
     private static final int REQUEST_TIME_OUT = 20;
     private static final int ESTABLISH_TIME_OUT = 30;
+    private static final String PROXY_IP = "104.207.151.166";
+    private static final int PROXY_IP_PORT = 37720;
+    private static final HttpHost HTTP_HOST  = new HttpHost(PROXY_IP,PROXY_IP_PORT);
     /**
      * create a default httpClient
      *
@@ -46,6 +50,7 @@ public class HttpClientUtil {
                 RequestConfig requestConfig = RequestConfig
                                                 .custom()
                                                 .setConnectionRequestTimeout(REQUEST_TIME_OUT)
+                                                .setProxy(HTTP_HOST)
                                                 .build();
                 httpType.setConfig(requestConfig);
             }

@@ -1,6 +1,9 @@
 package com.zzz.service.module.service.ipservices.work;
 
+import com.zzz.entitymodel.servicebase.DO.IpPoolMainDO;
 import com.zzz.entitymodel.servicebase.DTO.IpLocation;
+import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -10,42 +13,50 @@ import org.apache.http.message.BasicHeader;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Service;
 
-import static com.zzz.service.module.params.IpServiceConstant.*;
+import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
 import static com.zzz.service.module.utils.HttpClientUtil.exeuteDefaultRequest;
 import static com.zzz.service.module.utils.HttpClientUtil.vaildateReponse;
 import static com.zzz.service.module.utils.PageUtils.vaildateEntity;
 
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
+import java.util.concurrent.Callable;
 
 
 import static com.zzz.service.module.utils.PageUtils.*;
-public class GetpageInfoTask implements Runnable {
+
+public class GetpageInfoTask implements Callable<List<IpPoolMainDO>> {
     private static final Logger LOG = LoggerFactory.getLogger(GetpageInfoTask.class);
-    private Stack<IpLocation> workStack;
-    public GetpageInfoTask(Stack<IpLocation> workStack){
+    private List<IpLocation> workStack;
+    private String curPrefixUrl;
+    private Random random = new Random();
+
+    public GetpageInfoTask(String curPrefixUrl, List<IpLocation> workStack) {
+        this.curPrefixUrl = curPrefixUrl;
         this.workStack = workStack;
     }
 
 
     @Override
-    public void run() {
-        boolean flag = true;
-        while(flag){
-            String name = Thread.currentThread().getName();
-            LOG.info(" current thread : {} doing job ",name);
-            try{
-                if(workStack.isEmpty()){
-                    flag = false;
-                    continue;
-                }
-                Thread.sleep(3 * 1000);
-                IpLocation target = workStack.pop();
-                String fullUrl = XIAO_HUAN_IP + target.getLocationHref();
-                LOG.info(" begin fetching these pages ");
+    public List<IpPoolMainDO> call() {
+        String threadName = Thread.currentThread().getName();
+        if (workStack == null || workStack.isEmpty()) {
+            LOG.info(" current task : {} workstack is empty, will not work", threadName);
+            return null;
+        }
+        int size = workStack.size();
+        LOG.info(" current thread : {} doing job , list size : {}", threadName, size);
+
+        Iterator<IpLocation> ipLocationIterator = workStack.iterator();
+        List<IpPoolMainDO> ipPoolMainDOs = Collections.synchronizedList(new LinkedList<>());
+        while (ipLocationIterator.hasNext()) {
+            try {
+                IpLocation target = ipLocationIterator.next();
+                Thread.sleep(random.nextInt(4) * 1000);
+                String fullUrl = curPrefixUrl + target.getLocationHref();
+                LOG.info(" begin fetching page info , page : {} ", fullUrl);
                 URI uri = new URIBuilder(fullUrl)
                         .setScheme("https")
                         .build();
@@ -58,14 +69,21 @@ public class GetpageInfoTask implements Runnable {
                 vaildateReponse(response);
                 HttpEntity httpEntity = response.getEntity();
                 String currentPage = vaildateEntity(httpEntity);
-                Elements elements = fetchElementWithSection(currentPage,HAS_PAGE_REGIX);
-
-                flag = false;
-            }catch(Exception e){
-                LOG.error(" error , message : {} ",e.getMessage());
-            }finally {
-                LOG.info(" current thread : {0} rest job counts : {1} ");
+                Elements elements = fetchElementWithSection(currentPage, HAS_PAGE_REGIX);
+                if (ObjectUtils.isNotEmpty(elements)) {
+                    ipPoolMainDOs.addAll(combineXiaoHuanInfo(elements));
+                } else {
+                    LOG.info(" current elements is empty,will not work ,page : {} ", fullUrl);
+                }
+            } catch (Exception e) {
+                LOG.error(" error , message : {} ", e.getMessage());
             }
         }
+        //调用传输接口 暂时没写
+        //现在这里写个插入测测
+        //滞空 等待垃圾回收
+        workStack = null;
+        return ipPoolMainDOs;
     }
 }
+

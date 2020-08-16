@@ -1,8 +1,11 @@
 package com.zzz.service.module.service.ipservices;
 
+import com.zzz.entitymodel.servicebase.DO.IpPoolMainDO;
 import com.zzz.entitymodel.servicebase.DTO.IpLocation;
 import com.zzz.service.module.common.threadconfig.NamedThreadFactory;
-import com.zzz.service.module.params.IpServiceConstant;
+import com.zzz.entitymodel.servicebase.constants.IpServiceConstant;
+import com.zzz.service.module.mapper.IpDataServiceXiaoHuanMapper;
+import com.zzz.service.module.service.ipservices.work.GetpageInfoTask;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.*;
 import org.apache.http.client.methods.HttpGet;
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -23,12 +27,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.zzz.entitymodel.servicebase.constants.FetchServiceConstants.DIVIDE_PART;
 import static com.zzz.service.module.utils.HttpClientUtil.*;
 import static com.zzz.service.module.utils.PageUtils.*;
-import static com.zzz.service.module.params.IpServiceConstant.*;
+import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
 
 /**
  * 记得超时重连
@@ -37,22 +39,23 @@ import static com.zzz.service.module.params.IpServiceConstant.*;
 public class IpFetchService {
 
     private static final Logger LOG = LoggerFactory.getLogger(IpFetchService.class);
-    private static final ArrayBlockingQueue ARRAY_BLOCKING_QUEUE = new ArrayBlockingQueue(10);
-
-
     private static final String A_TAG_PREFIX = "/address";
-
     private List<String> aTagLists = null;
-
     private static final String RESPONSE_CODE_PREFIX = "2";
-
-
     private static final String PAGE_REGIX = "^(\\d){1,6}$";
-
-
+    private static final ArrayBlockingQueue<Runnable> ARRAY_BLOCKING_QUEUE = new ArrayBlockingQueue<>(6);
+    private static final int CORE_POOL_SIZE = 3;
+    private static final int MAX_POOL_SIZE = 5;
+    private static final int KEEP_ALIVE_TIME = 60;
+    private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(
+            CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS, ARRAY_BLOCKING_QUEUE, new NamedThreadFactory()
+    );
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
     private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
+    @Autowired
+    private IpDataServiceXiaoHuanMapper ipDataServiceXiaoHuanMapper;
 
 
     public void run() {
@@ -108,6 +111,8 @@ public class IpFetchService {
             HttpEntity entity = response.getEntity();
             String html = vaildateEntity(entity);
             TreeMap<Integer, IpLocation> resAtags = matchAtages(html, "a[href~=^/address]");
+            // 保留中国、美国
+            removeMutiple(resAtags);
             LOG.info(" finish lists :");
             int locationNums = resAtags.size();
             LOG.info(" ip location nums :{} ", locationNums);
@@ -123,6 +128,24 @@ public class IpFetchService {
             LOG.error(" executing request error , messages : {} ", e.getMessage());
         } finally {
             return ress;
+        }
+    }
+
+    /**
+     * 移除中国重复地址
+     *
+     * @param resAtags
+     */
+    private void removeMutiple(TreeMap<Integer, IpLocation> resAtags) {
+        Set<Map.Entry<Integer, IpLocation>> entrySet = resAtags.entrySet();
+        Iterator<Map.Entry<Integer, IpLocation>> iterator = entrySet.iterator();
+        while (iterator.hasNext()) {
+            Map.Entry<Integer, IpLocation> m = iterator.next();
+            IpLocation tar = m.getValue();
+            if (XIAO_HUAN_POS_CHINA.equals(tar.getLocationName()) || XIAO_HUAN_POS_AMERICA.equals(tar.getLocationName())) {
+                continue;
+            }
+            iterator.remove();
         }
     }
 
@@ -157,8 +180,47 @@ public class IpFetchService {
                 checkAndRemoveLocation(pageNumsList, PAGE_REGIX);
                 fetchCurrentPages(curUriString, pageNumsList);
             } catch (URISyntaxException | IOException e1) {
-                LOG.error("{0}  page error :  message : {1}", curUriString, e1.getMessage());
+                LOG.error("{}  page error :  message : {}", curUriString, e1.getMessage());
             }
+        }
+    }
+    /**
+     * @param curUriString
+     * @param pageNumsStack
+     */
+    private void fetchCurrentPages(String curUriString, Stack<IpLocation> pageNumsStack) {
+        if (CollectionUtils.isEmpty(pageNumsStack)) {
+            LOG.info(" pageNumsStack is null ");
+            return;
+        }
+        LOG.info(" start getting current  <a> tags ");
+        boolean flag = true;
+        try {
+            while (flag) {
+                Thread.sleep(2 * 1000);
+                IpLocation topIpLocation = pageNumsStack.pop();
+                String curLocatioHref = topIpLocation.getLocationHref();
+                String curFullHref = curUriString + curLocatioHref;
+                LOG.info(" current page : {} ", curFullHref);
+                URI uri = new URIBuilder(curFullHref)
+                        .setScheme("https")
+                        .build();
+                List<Header> headerList = new ArrayList<>();
+                headerList.add(new BasicHeader("user-agent", USER_AGENT));
+                String currentPage = ipFetchCommonRequest(uri, headerList);
+                if (hasNextPage(currentPage, HAS_PAGE_REGIX)) {
+                    TreeMap<Integer, IpLocation> curMap = matchAtages(currentPage, PAGE_NUM_COMMON);
+                    Set<Map.Entry<Integer, IpLocation>> curSet = curMap.entrySet();
+                    addForList(curSet, pageNumsStack);
+                    checkAndRemoveLocation(pageNumsStack, PAGE_REGIX);
+                } else {
+                    LOG.info(" current page : {} has no matches , will pop ", curFullHref);
+                    flag = false;
+                }
+            }
+            doWork(curUriString,pageNumsStack);
+        } catch (Exception e) {
+            LOG.error(" error , message : {} ", e.getMessage());
         }
     }
 
@@ -171,22 +233,45 @@ public class IpFetchService {
         return currentPage;
     }
 
-    /**
-     *
+    /** 有问题
      * 分割任务stack
+     * @param curUriString
      * @param pageNumsList
      */
-    private void doWork(Stack<IpLocation> pageNumsList) {
-        ExecutorService executor = new ThreadPoolExecutor(
-                5, 8, 60, TimeUnit.SECONDS, ARRAY_BLOCKING_QUEUE, new NamedThreadFactory()
-        );
-        int topPos = 0;
-        int dividePart = pageNumsList.size() / DIVIDE_PART;
-        for (int i = 0; i < dividePart; i++) {
-            List<IpLocation> curSyncList = pageNumsList.subList(topPos, dividePart);
-            topPos += dividePart;
+    private void doWork(String curUriString,Stack<IpLocation> pageNumsList) {
+        //划分任务
+        //做任务
+        int cur = 0;
+        int curWorkSize = pageNumsList.size();
+        int step = curWorkSize / CORE_POOL_SIZE;
+        List<Future<List<IpPoolMainDO>>> futures = Collections.synchronizedList(new ArrayList<>());
+        while (cur < curWorkSize) {
+            int curEndPos = (cur + step + 1);
+            curEndPos = Math.min(curEndPos, curWorkSize);
+            List<IpLocation> syncWorkList = pageNumsList.subList(cur, curEndPos);
+            cur = curEndPos;
+            Future<List<IpPoolMainDO>> future = EXECUTOR_SERVICE.submit(new GetpageInfoTask(curUriString,syncWorkList));
+            futures.add(future);
+        }
+        uploadData(futures);
+    }
+
+    /**
+     * 获取每个任务的结果
+     * @param futures
+     */
+    private void uploadData(List<Future<List<IpPoolMainDO>>> futures) {
+        LOG.info(" begin stage data ");
+        Assert.notEmpty(futures," future task wouldn't empty ");
+        for(Future<List<IpPoolMainDO>> future : futures){
+            try{
+                ipDataServiceXiaoHuanMapper.insertIpDataXiaoHuan(future.get());
+            }catch (InterruptedException | ExecutionException e){
+                LOG.error(" stage data error , message : {} ",e.getMessage());
+            }
         }
     }
+
     /**
      * @param pageNumsList
      * @param expertSection if page text not validated , will remove it
@@ -201,50 +286,11 @@ public class IpFetchService {
         }
     }
 
-    /**
-     * @param curUriString
-     * @param pageNumsStack
-     */
-    private Stack<IpLocation> fetchCurrentPages(String curUriString, Stack<IpLocation> pageNumsStack) {
-        if (CollectionUtils.isEmpty(pageNumsStack)) {
-            LOG.info(" pageNumsStack is null ");
-            return null;
-        }
-        LOG.info(" start getting current  <a> tags ");
-        boolean flag = true;
-        try {
-            while (flag) {
-                Thread.sleep(2 * 1000);
-                IpLocation topIpLocation = pageNumsStack.peek();
-                String curLocatioHref = topIpLocation.getLocationHref();
-                String curFullHref = curUriString + curLocatioHref;
-                LOG.info(" current page : {} ",curFullHref);
-                URI uri = new URIBuilder(curFullHref)
-                        .setScheme("https")
-                        .build();
-                List<Header> headerList = new ArrayList<>();
-                headerList.add(new BasicHeader("user-agent", USER_AGENT));
-                String currentPage = ipFetchCommonRequest(uri,headerList);
-                if (hasNextPage(currentPage, HAS_PAGE_REGIX)) {
-                    TreeMap<Integer, IpLocation> curMap = matchAtages(currentPage, PAGE_NUM_COMMON);
-                    Set<Map.Entry<Integer, IpLocation>> curSet = curMap.entrySet();
-                    addForList(curSet, pageNumsStack);
-                    checkAndRemoveLocation(pageNumsStack, PAGE_REGIX);
-                } else {
-                    LOG.info(" current page : {} has no matches , will pop ", curFullHref);
-                    pageNumsStack.pop();
-                    flag = false;
-                }
-            }
-        } catch (Exception e) {
-            LOG.error(" error , message : {} ", e.getMessage());
-        } finally {
-            return pageNumsStack;
-        }
-    }
+
 
     /**
      * add map values to a list
+     *
      * @param mapSet
      * @param res
      * @param <K>
@@ -263,6 +309,7 @@ public class IpFetchService {
 
     /**
      * check location is legal by checkSection
+     *
      * @param location
      * @param checkSection
      * @return
