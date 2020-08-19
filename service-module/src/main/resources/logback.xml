@@ -22,9 +22,6 @@
             <charset class="java.nio.charset.Charset">UTF-8</charset>
         </encoder>
     </appender>
-    <logger name="com.alibaba.druid.filter.stat.StatFilter" level="DEBUG">
-        <appender-ref ref="STDOUT" />
-    </logger>
     <root level="INFO">
         <appender-ref ref="STDOUT" />
         <appender-ref ref="ROLLING" />

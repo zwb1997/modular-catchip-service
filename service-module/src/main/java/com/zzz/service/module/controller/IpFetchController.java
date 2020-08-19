@@ -18,6 +18,6 @@ public class IpFetchController {
     @RequestMapping("xh")
     @ResponseBody
     public void doXiaohuanIps(){
-        ipFetchService.run();
+//        ipFetchService.run();
     }
 }

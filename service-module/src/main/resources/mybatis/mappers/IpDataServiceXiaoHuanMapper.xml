@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.zzz.service.module.mapper.IpDataServiceXiaoHuanMapper">
     <insert id="insertIpDataXiaoHuan">
-        INSERT INTO ip_pool_main values
+        INSERT IGNORE INTO ip_pool_main values
         <foreach collection="ipInfos" item="item" separator=",">
             (
             #{item.dataID},

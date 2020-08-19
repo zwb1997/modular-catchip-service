@@ -56,7 +56,7 @@
         </foreach>
     </insert>
     <insert id="insertBVideoInfo">
-        INSERT INTO b_video_info VALUES
+        INSERT IGNORE INTO b_video_info VALUES
         <foreach collection="videoModels" item="item" separator=",">
             (
             #{item.dataID},

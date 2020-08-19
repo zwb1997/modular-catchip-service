@@ -23,8 +23,8 @@ import java.util.List;
  * druid + mybatis config
  */
 @Configuration
-@PropertySources({@PropertySource("classpath:db/dev_db.properties")})
-//@PropertySources({@PropertySource("classpath:db/prod_db.properties")})
+//@PropertySources({@PropertySource("classpath:db/dev_db.properties")})
+@PropertySources({@PropertySource("classpath:db/prod_db.properties")})
 //@ImportResource("classpath:db/dev_db.properties")
 public class DBConfig {
 
@@ -68,6 +68,7 @@ public class DBConfig {
         slf4jLogFilter.setStatementCreateAfterLogEnabled(false);
         slf4jLogFilter.setStatementExecuteAfterLogEnabled(false);
         slf4jLogFilter.setStatementExecutableSqlLogEnable(true);
+        slf4jLogFilter.setStatementLogErrorEnabled(true);
         filters.add(slf4jLogFilter);
         druidDataSource.setProxyFilters(filters);
         druidDataSource.setFilters(druidLogFilterSlf4j);

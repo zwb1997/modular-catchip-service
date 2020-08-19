@@ -1,6 +1,5 @@
 package com.zzz.service.module.utils;
 
-import com.sun.xml.internal.org.jvnet.mimepull.DecodingException;
 import com.zzz.entitymodel.servicebase.DO.IpPoolMainDO;
 import com.zzz.entitymodel.servicebase.DTO.IpLocation;
 import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
@@ -74,7 +73,7 @@ public class PageUtils {
         }
         String html = EntityUtils.toString(entity);
         if (StringUtils.isBlank(html)) {
-            throw new DecodingException(" current http entity's html is null ");
+            throw new DebugException(" current http entity's html is null ");
         }
         return html;
     }

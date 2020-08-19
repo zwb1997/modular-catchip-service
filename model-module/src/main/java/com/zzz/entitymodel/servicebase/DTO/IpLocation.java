@@ -5,6 +5,9 @@ public class IpLocation {
     private String locationName;
     private String locationHref;
 
+    public IpLocation() {
+    }
+
     public IpLocation(String locationName, String locationHref) {
         this.locationName = locationName;
         this.locationHref = locationHref;
@@ -20,7 +23,7 @@ public class IpLocation {
 
     @Override
     public String toString() {
-        return "[ locationName : "+locationName + " locationHref "+locationHref+" ] ";
+        return "[ locationName : "+locationName + " locationHref :"+locationHref+" ] ";
     }
 
     @Override

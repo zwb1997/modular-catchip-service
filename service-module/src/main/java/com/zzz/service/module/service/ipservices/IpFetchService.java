@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
@@ -36,6 +38,7 @@ import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
  * 记得超时重连
  */
 @Service
+@EnableScheduling
 public class IpFetchService {
 
     private static final Logger LOG = LoggerFactory.getLogger(IpFetchService.class);
@@ -57,7 +60,7 @@ public class IpFetchService {
     @Autowired
     private IpDataServiceXiaoHuanMapper ipDataServiceXiaoHuanMapper;
 
-
+    @Scheduled(fixedDelay =  60 * 1000)
     public void run() {
         aTagLists = getPages();
         if (!CollectionUtils.isEmpty(aTagLists)) {
@@ -111,7 +114,7 @@ public class IpFetchService {
             HttpEntity entity = response.getEntity();
             String html = vaildateEntity(entity);
             TreeMap<Integer, IpLocation> resAtags = matchAtages(html, "a[href~=^/address]");
-            // 保留中国、美国
+            // 增加花刺连接
             removeMutiple(resAtags);
             LOG.info(" finish lists :");
             int locationNums = resAtags.size();
@@ -137,16 +140,20 @@ public class IpFetchService {
      * @param resAtags
      */
     private void removeMutiple(TreeMap<Integer, IpLocation> resAtags) {
-        Set<Map.Entry<Integer, IpLocation>> entrySet = resAtags.entrySet();
-        Iterator<Map.Entry<Integer, IpLocation>> iterator = entrySet.iterator();
-        while (iterator.hasNext()) {
-            Map.Entry<Integer, IpLocation> m = iterator.next();
-            IpLocation tar = m.getValue();
-            if (XIAO_HUAN_POS_CHINA.equals(tar.getLocationName()) || XIAO_HUAN_POS_AMERICA.equals(tar.getLocationName())) {
-                continue;
-            }
-            iterator.remove();
-        }
+        LOG.info(" add href : {}  ");
+//        Set<Map.Entry<Integer, IpLocation>> entrySet = resAtags.entrySet();
+//        Iterator<Map.Entry<Integer, IpLocation>> iterator = entrySet.iterator();
+//        while (iterator.hasNext()) {
+//            Map.Entry<Integer, IpLocation> m = iterator.next();
+//            IpLocation tar = m.getValue();
+//            if (XIAO_HUAN_POS_CHINA.equals(tar.getLocationName()) || XIAO_HUAN_POS_AMERICA.equals(tar.getLocationName())) {
+//                continue;
+//            }
+//            iterator.remove();
+//        }
+        resAtags.put(999,new IpLocation("花刺连接","/Proxies.7z"));
+
+
     }
 
     /**
@@ -184,6 +191,7 @@ public class IpFetchService {
             }
         }
     }
+
     /**
      * @param curUriString
      * @param pageNumsStack
@@ -195,8 +203,9 @@ public class IpFetchService {
         }
         LOG.info(" start getting current  <a> tags ");
         boolean flag = true;
-        try {
-            while (flag) {
+
+        while (flag) {
+            try {
                 Thread.sleep(2 * 1000);
                 IpLocation topIpLocation = pageNumsStack.pop();
                 String curLocatioHref = topIpLocation.getLocationHref();
@@ -217,11 +226,11 @@ public class IpFetchService {
                     LOG.info(" current page : {} has no matches , will pop ", curFullHref);
                     flag = false;
                 }
+            } catch (Exception e) {
+                LOG.error(" error , message : {} ", e.getMessage());
             }
-            doWork(curUriString,pageNumsStack);
-        } catch (Exception e) {
-            LOG.error(" error , message : {} ", e.getMessage());
         }
+        doWork(curUriString, pageNumsStack);
     }
 
     private String ipFetchCommonRequest(URI uri, List<Header> headerList) throws IOException {
@@ -233,16 +242,19 @@ public class IpFetchService {
         return currentPage;
     }
 
-    /** 有问题
+    /**
+     * 有问题
      * 分割任务stack
+     *
      * @param curUriString
      * @param pageNumsList
      */
-    private void doWork(String curUriString,Stack<IpLocation> pageNumsList) {
+    private void doWork(String curUriString, Stack<IpLocation> pageNumsList) {
         //划分任务
         //做任务
         int cur = 0;
         int curWorkSize = pageNumsList.size();
+        LOG.info(" current page nums  : {} ,list : {} ",curWorkSize,pageNumsList);
         int step = curWorkSize / CORE_POOL_SIZE;
         List<Future<List<IpPoolMainDO>>> futures = Collections.synchronizedList(new ArrayList<>());
         while (cur < curWorkSize) {
@@ -250,7 +262,7 @@ public class IpFetchService {
             curEndPos = Math.min(curEndPos, curWorkSize);
             List<IpLocation> syncWorkList = pageNumsList.subList(cur, curEndPos);
             cur = curEndPos;
-            Future<List<IpPoolMainDO>> future = EXECUTOR_SERVICE.submit(new GetpageInfoTask(curUriString,syncWorkList));
+            Future<List<IpPoolMainDO>> future = EXECUTOR_SERVICE.submit(new GetpageInfoTask(curUriString, syncWorkList));
             futures.add(future);
         }
         uploadData(futures);
@@ -258,16 +270,17 @@ public class IpFetchService {
 
     /**
      * 获取每个任务的结果
+     *
      * @param futures
      */
     private void uploadData(List<Future<List<IpPoolMainDO>>> futures) {
         LOG.info(" begin stage data ");
-        Assert.notEmpty(futures," future task wouldn't empty ");
-        for(Future<List<IpPoolMainDO>> future : futures){
-            try{
+        Assert.notEmpty(futures, " future task wouldn't empty ");
+        for (Future<List<IpPoolMainDO>> future : futures) {
+            try {
                 ipDataServiceXiaoHuanMapper.insertIpDataXiaoHuan(future.get());
-            }catch (InterruptedException | ExecutionException e){
-                LOG.error(" stage data error , message : {} ",e.getMessage());
+            } catch (InterruptedException | ExecutionException e) {
+                LOG.error(" stage data error , message : {} ", e.getMessage());
             }
         }
     }
@@ -285,7 +298,6 @@ public class IpFetchService {
             }
         }
     }
-
 
 
     /**
