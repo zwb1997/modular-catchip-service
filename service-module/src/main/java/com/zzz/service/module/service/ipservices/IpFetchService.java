@@ -140,7 +140,6 @@ public class IpFetchService {
      * @param resAtags
      */
     private void removeMutiple(TreeMap<Integer, IpLocation> resAtags) {
-        LOG.info(" add href : {}  ");
 //        Set<Map.Entry<Integer, IpLocation>> entrySet = resAtags.entrySet();
 //        Iterator<Map.Entry<Integer, IpLocation>> iterator = entrySet.iterator();
 //        while (iterator.hasNext()) {
@@ -151,7 +150,7 @@ public class IpFetchService {
 //            }
 //            iterator.remove();
 //        }
-        resAtags.put(999,new IpLocation("花刺连接","/Proxies.7z"));
+        resAtags.put(0,new IpLocation("花刺连接","/Proxies.7z"));
 
 
     }
@@ -278,7 +277,12 @@ public class IpFetchService {
         Assert.notEmpty(futures, " future task wouldn't empty ");
         for (Future<List<IpPoolMainDO>> future : futures) {
             try {
-                ipDataServiceXiaoHuanMapper.insertIpDataXiaoHuan(future.get());
+                List<IpPoolMainDO> lists = future.get();
+                if(CollectionUtils.isEmpty(lists)){
+                    LOG.info(" current IpPoolMainDO list is empty , will not do insert ");
+                    continue;
+                }
+                ipDataServiceXiaoHuanMapper.insertIpDataXiaoHuan(lists);
             } catch (InterruptedException | ExecutionException e) {
                 LOG.error(" stage data error , message : {} ", e.getMessage());
             }
@@ -316,6 +320,7 @@ public class IpFetchService {
         for (Map.Entry<K, V> me : mapSet) {
             V val = me.getValue();
             res.add(val);
+            var a = "123";
         }
     }
 
