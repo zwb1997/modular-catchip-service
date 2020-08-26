@@ -3,14 +3,9 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-<!--    <parent>-->
-<!--        <groupId>org.springframework.boot</groupId>-->
-<!--        <artifactId>spring-boot-starter-parent</artifactId>-->
-<!--        <version>2.2.8.RELEASE</version>-->
-<!--    </parent>-->
     <groupId>com.zzz</groupId>
     <artifactId>main-module</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>0.1</version>
     <packaging>pom</packaging>
     <modules>
         <module>service-module</module>
@@ -23,17 +18,16 @@
         <java.version>11</java.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
-        <module-version>1.0-SNAPSHOT</module-version>
+        <module-version>0.1</module-version>
         <mysql-version>8.0.15</mysql-version>
         <druid-springboot-start-version>1.1.10</druid-springboot-start-version>
         <druid-version>1.1.22</druid-version>
         <junit-version>4.12</junit-version>
         <mybatis-spring-verison>1.3.2</mybatis-spring-verison>
         <mybatis_version>3.4.6</mybatis_version>
-        <common-lang3-version>3.10</common-lang3-version>
-        <start-class>runapp.RunApp</start-class>
+        <com.zzz.web.common-lang3-version>3.10</com.zzz.web.common-lang3-version>
         <jackson-verison>2.10.4</jackson-verison>
-        <common-lang3-version>3.9</common-lang3-version>
+        <com.zzz.web.common-lang3-version>3.9</com.zzz.web.common-lang3-version>
         <httpclient-version>4.5.12</httpclient-version>
         <jsoup-version>1.13.1</jsoup-version>
         <logback-version>1.2.3</logback-version>
@@ -44,6 +38,7 @@
         <spring-boot-start-version>2.2.6.RELEASE</spring-boot-start-version>
         <spring-boot-web-version>2.2.6.RELEASE</spring-boot-web-version>
         <javax-version>4.0.1</javax-version>
+        <spring-boot-maven-plug-version>2.3.3.RELEASE</spring-boot-maven-plug-version>
     </properties>
 
     <dependencyManagement>
@@ -132,13 +127,11 @@
                 <version>${module-version}</version>
             </dependency>
 
-
-
             <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>${common-lang3-version}</version>
+                <version>${com.zzz.web.common-lang3-version}</version>
             </dependency>
 
             <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
@@ -213,16 +206,7 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
-                    <configuration>
-                        <mainClass>{start-class}</mainClass>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <goals>
-                                <goal>repackage</goal>
-                            </goals>
-                        </execution>
-                    </executions>
+                    <version>${spring-boot-maven-plug-version}</version>
                 </plugin>
             </plugins>
         </pluginManagement>

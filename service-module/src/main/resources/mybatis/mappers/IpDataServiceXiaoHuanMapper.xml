@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.zzz.service.module.mapper.IpDataServiceXiaoHuanMapper">
+<mapper namespace="com.zzz.mapper.IpDataServiceXiaoHuanMapper">
     <insert id="insertIpDataXiaoHuan">
         INSERT IGNORE INTO ip_pool_main values
         <foreach collection="ipInfos" item="item" separator=",">

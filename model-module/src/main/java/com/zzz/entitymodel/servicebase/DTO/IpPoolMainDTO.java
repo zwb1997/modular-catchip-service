@@ -139,7 +139,7 @@ public class IpPoolMainDTO {
         int supportHttps = IpServiceConstant.SUPPORT_CHINESE.equals(params.get(4)) ? IpServiceConstant.SUPPORT_NUM : IpServiceConstant.NOT_SUPPORT_NUM;
         int supportPost = IpServiceConstant.SUPPORT_CHINESE.equals(params.get(5)) ? IpServiceConstant.SUPPORT_NUM : IpServiceConstant.NOT_SUPPORT_NUM;
         String anonymityDegreeVal = params.get(6) ;
-        int anonymityDegree = 0;
+        int anonymityDegree;
         switch (anonymityDegreeVal){
             case IpServiceConstant.ANONYMITY_HIGH:
                 anonymityDegree = IpServiceConstant.DEGREE_HIGHT_PROXY;
