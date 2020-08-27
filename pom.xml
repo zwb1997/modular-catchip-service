@@ -1,216 +1,113 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <junit-version>4.12</junit-version>
+    <module-version>0.1</module-version>
+    <spring-boot-maven-plugin-version>2.3.3.RELEASE</spring-boot-maven-plugin-version>
+    <spring-boot-start-version>2.2.6.RELEASE</spring-boot-start-version>
+    <spring-boot-autoconfig-version>2.2.2.RELEASE</spring-boot-autoconfig-version>
+    <spring-boot-web-version>2.2.6.RELEASE</spring-boot-web-version>
+    <spring-jdbc-version>5.2.0.RELEASE</spring-jdbc-version>
+    <common-lang3-version>3.10</common-lang3-version>
+    <logback-version>1.2.3</logback-version>
+    <druid-version>1.1.23</druid-version>
+  </properties>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>com.zzz</groupId>
-    <artifactId>main-module</artifactId>
-    <version>0.1</version>
-    <packaging>pom</packaging>
-    <modules>
-        <module>service-module</module>
-        <module>model-module</module>
-        <module>web-module</module>
-    </modules>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.encoding>UTF-8</maven.compiler.encoding>
-        <java.version>11</java.version>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-        <module-version>0.1</module-version>
-        <mysql-version>8.0.15</mysql-version>
-        <druid-springboot-start-version>1.1.10</druid-springboot-start-version>
-        <druid-version>1.1.22</druid-version>
-        <junit-version>4.12</junit-version>
-        <mybatis-spring-verison>1.3.2</mybatis-spring-verison>
-        <mybatis_version>3.4.6</mybatis_version>
-        <com.zzz.web.common-lang3-version>3.10</com.zzz.web.common-lang3-version>
-        <jackson-verison>2.10.4</jackson-verison>
-        <com.zzz.web.common-lang3-version>3.9</com.zzz.web.common-lang3-version>
-        <httpclient-version>4.5.12</httpclient-version>
-        <jsoup-version>1.13.1</jsoup-version>
-        <logback-version>1.2.3</logback-version>
-        <spring-jdbc-version>5.2.7.RELEASE</spring-jdbc-version>
-        <spring-data-jdbc-version>1.1.0.RELEASE</spring-data-jdbc-version>
-        <spring-boot-autoconfig-version>2.2.6.RELEASE</spring-boot-autoconfig-version>
-        <spring-boot-test-version>2.2.6.RELEASE</spring-boot-test-version>
-        <spring-boot-start-version>2.2.6.RELEASE</spring-boot-start-version>
-        <spring-boot-web-version>2.2.6.RELEASE</spring-boot-web-version>
-        <javax-version>4.0.1</javax-version>
-        <spring-boot-maven-plug-version>2.3.3.RELEASE</spring-boot-maven-plug-version>
-    </properties>
+  <groupId>com.datastorage</groupId>
+  <artifactId>main</artifactId>
+  <version>0.1</version>
+  <packaging>pom</packaging>
 
-    <dependencyManagement>
-
-        <dependencies>
-            <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
-            <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>${javax-version}</version>
-                <scope>provided</scope>
-            </dependency>
-
-            <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-web</artifactId>
-                <version>${spring-boot-web-version}</version>
-            </dependency>
-
-            <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter</artifactId>
-                <version>${spring-boot-start-version}</version>
-            </dependency>
-
-            <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-autoconfigure -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-autoconfigure</artifactId>
-                <version>${spring-boot-autoconfig-version}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
-                <version>${spring-boot-test-version}</version>
-                <scope>test</scope>
-            </dependency>
-
-            <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-classic</artifactId>
-                <version>${logback-version}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-core -->
-            <dependency>
-                <groupId>ch.qos.logback</groupId>
-                <artifactId>logback-core</artifactId>
-                <version>${logback-version}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/org.springframework/spring-jdbc -->
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-jdbc</artifactId>
-                <version>${spring-jdbc-version}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-jdbc -->
-            <dependency>
-                <groupId>org.springframework.data</groupId>
-                <artifactId>spring-data-jdbc</artifactId>
-                <version>${spring-data-jdbc-version}</version>
-            </dependency>
-
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>${junit-version}</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>com.zzz</groupId>
-                <artifactId>service-module</artifactId>
-                <version>${module-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.zzz</groupId>
-                <artifactId>model-module</artifactId>
-                <version>${module-version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.zzz</groupId>
-                <artifactId>web-module</artifactId>
-                <version>${module-version}</version>
-            </dependency>
-
-            <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-            <dependency>
-                <groupId>org.apache.commons</groupId>
-                <artifactId>commons-lang3</artifactId>
-                <version>${com.zzz.web.common-lang3-version}</version>
-            </dependency>
-
-            <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
-            <dependency>
-                <groupId>mysql</groupId>
-                <artifactId>mysql-connector-java</artifactId>
-                <version>${mysql-version}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-            <dependency>
-                <groupId>org.apache.httpcomponents</groupId>
-                <artifactId>httpclient</artifactId>
-                <version>${httpclient-version}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
-            <dependency>
-                <groupId>org.jsoup</groupId>
-                <artifactId>jsoup</artifactId>
-                <version>${jsoup-version}</version>
-            </dependency>
+  <modules>
+    <module>models</module>
+    <module>service</module>
+    <module>webservice</module>
+  </modules>
+  <build>
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.springframework.boot</groupId>
+          <artifactId>spring-boot-maven-plugin</artifactId>
+          <version>${spring-boot-maven-plugin-version}</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+  </build>
 
 
+  <dependencyManagement>
+    <dependencies>
+      <!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
+      <dependency>
+        <groupId>com.alibaba</groupId>
+        <artifactId>druid</artifactId>
+        <version>${druid-version}</version>
+      </dependency>
+      <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+      <dependency>
+        <groupId>ch.qos.logback</groupId>
+        <artifactId>logback-classic</artifactId>
+        <version>${logback-version}</version>
+      </dependency>
+      <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+      <dependency>
+        <groupId>org.apache.commons</groupId>
+        <artifactId>commons-lang3</artifactId>
+        <version>${common-lang3-version}</version>
+      </dependency>
+      <!-- https://mvnrepository.com/artifact/org.springframework/spring-jdbc -->
+      <dependency>
+        <groupId>org.springframework</groupId>
+        <artifactId>spring-jdbc</artifactId>
+        <version>${spring-jdbc-version}</version>
+      </dependency>
+      <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-web</artifactId>
+        <version>${spring-boot-web-version}</version>
+      </dependency>
+      <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-autoconfigure -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-autoconfigure</artifactId>
+        <version>${spring-boot-autoconfig-version}</version>
+      </dependency>
+      <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter</artifactId>
+        <version>${spring-boot-start-version}</version>
+      </dependency>
 
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>druid-spring-boot-starter</artifactId>
-                <version>${druid-springboot-start-version}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
-            <dependency>
-                <groupId>com.alibaba</groupId>
-                <artifactId>druid</artifactId>
-                <version>${druid-version}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/org.mybatis/mybatis-spring -->
-            <dependency>
-                <groupId>org.mybatis</groupId>
-                <artifactId>mybatis-spring</artifactId>
-                <version>${mybatis-spring-verison}</version>
-            </dependency>
-
-            <!-- https://mvnrepository.com/artifact/org.mybatis/mybatis -->
-            <dependency>
-                <groupId>org.mybatis</groupId>
-                <artifactId>mybatis</artifactId>
-                <version>${mybatis_version}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-databind</artifactId>
-                <version>${jackson-verison}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-core -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-core</artifactId>
-                <version>${jackson-verison}</version>
-            </dependency>
-            <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-annotations -->
-            <dependency>
-                <groupId>com.fasterxml.jackson.core</groupId>
-                <artifactId>jackson-annotations</artifactId>
-                <version>${jackson-verison}</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-    <build>
-        <finalName>module-main</finalName>
-        <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
-            <plugins>
-                <plugin>
-                    <groupId>org.springframework.boot</groupId>
-                    <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>${spring-boot-maven-plug-version}</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-    </build>
+      <dependency>
+        <groupId>com.datastorage</groupId>
+        <artifactId>models</artifactId>
+        <version>${module-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.datastorage</groupId>
+        <artifactId>service</artifactId>
+        <version>${module-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.datastorage</groupId>
+        <artifactId>webservice</artifactId>
+        <version>${module-version}</version>
+      </dependency>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>${junit-version}</version>
+        <scope>test</scope>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
 
 
 </project>
