@@ -12,12 +12,14 @@
     <spring-boot-autoconfig-version>2.2.2.RELEASE</spring-boot-autoconfig-version>
     <spring-boot-web-version>2.2.6.RELEASE</spring-boot-web-version>
     <spring-jdbc-version>5.2.0.RELEASE</spring-jdbc-version>
+    <spring-boot-test-version>2.3.0.RELEASE</spring-boot-test-version>
     <common-lang3-version>3.10</common-lang3-version>
     <logback-version>1.2.3</logback-version>
     <druid-version>1.1.23</druid-version>
     <mysql-version>8.0.20</mysql-version>
     <mybatis-version>3.5.4</mybatis-version>
     <javax-version>4.0.1</javax-version>
+    <mybatis-spring-version>2.0.5</mybatis-spring-version>
   </properties>
 
   <groupId>com.datastorage</groupId>
@@ -59,7 +61,12 @@
         <artifactId>mybatis</artifactId>
         <version>${mybatis-version}</version>
       </dependency>
-
+      <!-- https://mvnrepository.com/artifact/org.mybatis/mybatis-spring -->
+      <dependency>
+        <groupId>org.mybatis</groupId>
+        <artifactId>mybatis-spring</artifactId>
+        <version>${mybatis-spring-version}</version>
+      </dependency>
       <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
       <dependency>
         <groupId>mysql</groupId>
@@ -107,6 +114,13 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter</artifactId>
         <version>${spring-boot-start-version}</version>
+      </dependency>
+      <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-test -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-test</artifactId>
+        <version>${spring-boot-test-version}</version>
+        <scope>test</scope>
       </dependency>
 
       <dependency>

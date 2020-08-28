@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configuration>
+<configuration debug="true">
 
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
       <!-- encoders are assigned the type
@@ -10,18 +10,35 @@
     </appender>
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
       <!-- Support multiple-JVM writing to the same log file -->
-      <prudent>true</prudent>
+      <prudent>false</prudent>
+      <append>true</append>
       <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
         <fileNamePattern>/storagelogs/storage_log_%d{yyyy-MM-dd}.log</fileNamePattern>
         <maxHistory>60</maxHistory> 
         <totalSizeCap>20GB</totalSizeCap>
       </rollingPolicy>
-  
       <encoder>
-        <pattern>%-4relative [%thread] %-5level %logger{35} - %msg%n</pattern>
+        <pattern>[%d{HH:mm:ss}] %-4relative [%thread] %-5level %logger{50} - %msg %n</pattern>
+      </encoder>
+    </appender>
+    <appender name="SQLFile" class="ch.qos.logback.core.rolling.RollingFileAppender">
+      <!-- Support multiple-JVM writing to the same log file -->
+      <prudent>false</prudent>
+      <append>true</append>
+      <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <fileNamePattern>/storagelogs/sql/storage_sql_%d{yyyy-MM-dd}.log</fileNamePattern>
+        <maxHistory>60</maxHistory> 
+        <totalSizeCap>20GB</totalSizeCap>
+      </rollingPolicy>
+      <encoder>
+        <pattern>[%d{HH:mm:ss}] %-4relative [%thread] %-5level %logger{50} - %msg %n</pattern>
       </encoder>
     </appender> 
-    <root level="DEBUG">
+
+    <logger name="druid.sql.Statement" level="debug">
+      <appender-ref ref="SQLFile" />
+    </logger>
+    <root level="INFO">
       <appender-ref ref="STDOUT" />
       <appender-ref ref="FILE" />
     </root>
