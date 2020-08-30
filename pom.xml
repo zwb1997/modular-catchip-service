@@ -20,6 +20,8 @@
     <mybatis-version>3.5.4</mybatis-version>
     <javax-version>4.0.1</javax-version>
     <mybatis-spring-version>2.0.5</mybatis-spring-version>
+    <jedis-version>3.2.0</jedis-version>
+    <jackson-xml-version>2.10.3</jackson-xml-version>
   </properties>
 
   <groupId>com.datastorage</groupId>
@@ -33,6 +35,7 @@
     <module>webservice</module>
   </modules>
   <build>
+    <finalName>main-module</finalName>
     <pluginManagement>
       <plugins>
         <plugin>
@@ -47,6 +50,21 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-xml -->
+      <dependency>
+        <groupId>com.fasterxml.jackson.dataformat</groupId>
+        <artifactId>jackson-dataformat-xml</artifactId>
+        <version>${jackson-xml-version}</version>
+      </dependency>
+
+
+      <!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
+      <dependency>
+        <groupId>redis.clients</groupId>
+        <artifactId>jedis</artifactId>
+        <version>${jedis-version}</version>
+      </dependency>
+
       <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
       <dependency>
         <groupId>javax.servlet</groupId>
@@ -101,6 +119,12 @@
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-web</artifactId>
+        <exclusions>
+          <exclusion>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId>
+          </exclusion>
+        </exclusions>
         <version>${spring-boot-web-version}</version>
       </dependency>
       <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-autoconfigure -->

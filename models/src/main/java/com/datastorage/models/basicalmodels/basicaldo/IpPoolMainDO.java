@@ -1,4 +1,8 @@
-package com.datastorage.models.basicmodels.basicaldo;
+package com.datastorage.models.basicalmodels.basicaldo;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.Date;
 
@@ -164,5 +168,45 @@ public class IpPoolMainDO {
 
     public void setSupportPost(byte supportPost) {
         this.supportPost = supportPost;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+
+        if (!(o instanceof IpPoolMainDO)) return false;
+
+        IpPoolMainDO that = (IpPoolMainDO) o;
+
+        return new EqualsBuilder()
+                .append(ipNum, that.ipNum)
+                .isEquals();
+    }
+
+    @Override
+    public int hashCode() {
+        return new HashCodeBuilder(17, 37)
+                .append(ipNum)
+                .toHashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "IpPoolMainDO{" +
+                "dataID='" + dataID + '\'' +
+                ", ipNum='" + ipNum + '\'' +
+                ", ipPort=" + ipPort +
+                ", ipLocation='" + ipLocation + '\'' +
+                ", ipVendor='" + ipVendor + '\'' +
+                ", supportHttps=" + supportHttps +
+                ", supportPost=" + supportPost +
+                ", anonymityDegree=" + anonymityDegree +
+                ", accessSpeed='" + accessSpeed + '\'' +
+                ", insertTime='" + insertTime + '\'' +
+                ", lastDetectTime='" + lastDetectTime + '\'' +
+                ", statusCode=" + statusCode +
+                ", dataInsertTime=" + dataInsertTime +
+                ", dataDetectTime=" + dataDetectTime +
+                '}';
     }
 }

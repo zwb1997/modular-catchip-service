@@ -9,24 +9,32 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
+import org.springframework.util.CollectionUtils;
 
 /**
  * Hello world!
  *
  */
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class},scanBasePackages = "com.datastorage")
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 public class WebService extends SpringBootServletInitializer {
     private static final Logger LOG = LoggerFactory.getLogger(WebService.class);
     private static Class<?>[] RUN_CLASSES = new Class[] { ServiceRun.class, WebService.class };
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-        // TODO Auto-generated method stub
-        LOG.info(" loading springboot start reources ,{} ",String.valueOf(RUN_CLASSES));
+        LOG.info(" loading springboot start reources ,{} ", String.valueOf(RUN_CLASSES));
         return super.configure(builder.sources(RUN_CLASSES));
     }
     public static void main(String[] args) {
         LOG.info(" web service start ");
         SpringApplication.run(WebService.class, args);
+    }
+
+    public String getStartUpLoadingClassName(){
+        StringBuffer stringBuffer = new StringBuffer();
+        for(Class c : RUN_CLASSES){
+            stringBuffer.append(c.getName()+",");
+        }
+        return stringBuffer.toString();
     }
 }

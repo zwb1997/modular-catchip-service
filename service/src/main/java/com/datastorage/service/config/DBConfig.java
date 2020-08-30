@@ -1,6 +1,7 @@
 package com.datastorage.service.config;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import javax.sql.DataSource;
@@ -20,6 +21,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 
@@ -47,25 +49,27 @@ public class DBConfig {
         dataSource.setUrl(url);
         dataSource.setUsername(user);
         dataSource.setPassword(password);
-        // dataSource.setFilters(filters);
         dataSource.setMaxActive(20);
         dataSource.setInitialSize(1);
         dataSource.setMaxWait(60000);
         dataSource.setMinIdle(1);
         dataSource.setTimeBetweenEvictionRunsMillis(60000);
         dataSource.setMinEvictableIdleTimeMillis(300000);
-        dataSource.setTestWhileIdle(true);
-        dataSource.setTestOnBorrow(false);
+        dataSource.setTestWhileIdle(false);
         dataSource.setTestOnReturn(false);
+        dataSource.setTestOnBorrow(true);
         dataSource.setPoolPreparedStatements(true);
         dataSource.setMaxOpenPreparedStatements(20);
         dataSource.setAsyncInit(true);
+        dataSource.setValidationQuery("select 1");
+
 
         Slf4jLogFilter logFilter = new Slf4jLogFilter();
         logFilter.setStatementExecutableSqlLogEnable(true);
-        logFilter.setStatementLogEnabled(true);
-        logFilter.setStatementSqlPrettyFormat(true);
-        List<Filter> filterList = Arrays.asList(logFilter);
+        logFilter.setStatementCreateAfterLogEnabled(false);
+        logFilter.setStatementPrepareAfterLogEnabled(false);
+        logFilter.setStatementExecuteAfterLogEnabled(false);
+        List<Filter> filterList = Collections.singletonList(logFilter);
         dataSource.setProxyFilters(filterList);
         return dataSource;
     }
@@ -85,7 +89,7 @@ public class DBConfig {
             sqlSessionFactoryBean.setDataSource(createDataSource());
             sqlSessionFactoryBean.setConfigLocation(new ClassPathResource("mybatis-config.xml"));
             sqlSessionFactoryBean.setFailFast(true);
-            sqlSessionFactoryBean.setMapperLocations(new ClassPathResource(mapperLocation));
+            sqlSessionFactoryBean.setMapperLocations(new PathMatchingResourcePatternResolver().getResources(mapperLocation));
             return sqlSessionFactoryBean.getObject();
         } catch (Exception e) {
             LOG.error(" create sqlSessionFactory error, message :{} ", e.getMessage());
