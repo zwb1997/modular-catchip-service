@@ -20,4 +20,8 @@ public class IpServiceConstant {
     public static final String ORIGIN_NAME = "Origin";
     public static final String CUR_TIME_SPAN = "curSpan";
     public static final String SECRET_SIGN = "secretSign";
+    public static final String SECRET = "";
+    public static final String ORIGIN_VALUE = "";
+    public static final String TIME_PATTERN_END_WITH_SECOND = "yyyy-MM-dd HH:mm:ss";
+    public static final String NUMBER_PATTERN = "^\\d+$";
 }

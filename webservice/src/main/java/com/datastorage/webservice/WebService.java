@@ -20,7 +20,7 @@ public class WebService extends SpringBootServletInitializer {
 
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-        LOG.info(" loading springboot start reources ,{} ", String.valueOf(RUN_CLASSES));
+        LOG.info(" loading springboot start reources ,{} ", getStartUpLoadingClassName());
         return super.configure(builder.sources(RUN_CLASSES));
     }
     public static void main(String[] args) {

@@ -9,7 +9,7 @@
 
   <artifactId>webservice</artifactId>
   <version>${module-version}</version>
-  <!-- <packaging>war</packaging> -->
+   <packaging>war</packaging>
 
 
   <properties></properties>
@@ -70,6 +70,11 @@
       <groupId>com.fasterxml.jackson.dataformat</groupId>
       <artifactId>jackson-dataformat-xml</artifactId>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
   </dependencies>
 
   <build>
@@ -80,7 +85,9 @@
         <plugin>
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
-          <configuration></configuration>
+          <configuration>
+            <sourceDirectory>com.datastorage</sourceDirectory>
+          </configuration>
         </plugin>
       </plugins>
     </pluginManagement>

@@ -8,7 +8,7 @@ import java.util.Date;
 public class IpPoolMainDO {
     private String dataID;
     private String ipNum;
-    private short ipPort;
+    private int ipPort;
     private String ipLocation;
     private String ipVendor;
     private byte supportHttps;
@@ -28,7 +28,7 @@ public class IpPoolMainDO {
     public IpPoolMainDO(
         String dataID,
         String ipNum,
-        short ipPort,
+        int ipPort,
         String ipLocation,
         String ipVendor,
         byte supportHttps,
@@ -89,12 +89,20 @@ public class IpPoolMainDO {
         return ipNum;
     }
 
-    public short getIpPort() {
+    public int getIpPort() {
         return ipPort;
+    }
+
+    public void setIpPort(int ipPort) {
+        this.ipPort = ipPort;
     }
 
     public String getIpVendor() {
         return ipVendor;
+    }
+
+    public void setIpVendor(String ipVendor) {
+        this.ipVendor = ipVendor;
     }
 
     public String getLastDetectTime() {
@@ -147,10 +155,6 @@ public class IpPoolMainDO {
 
     public void setIpPort(short ipPort) {
         this.ipPort = ipPort;
-    }
-
-    public void setIpVendor(String ipVendor) {
-        this.ipVendor = ipVendor;
     }
 
     public void setLastDetectTime(String lastDetectTime) {

@@ -18,7 +18,7 @@ public class IpPoolMainDTO {
     @JsonProperty("in")
     private String ipNum;
     @JsonProperty("ip")
-    private short ipPort;
+    private int ipPort;
     @JsonProperty("il")
     private String ipLocation;
     @JsonProperty("iv")
@@ -36,9 +36,6 @@ public class IpPoolMainDTO {
     @JsonProperty("ldt")
     private String lastDetectTime;
 
-    public static Logger getLOG() {
-        return LOG;
-    }
 
     public String getLocationFirstLevel() {
         return locationFirstLevel;
@@ -72,11 +69,11 @@ public class IpPoolMainDTO {
         this.ipNum = ipNum;
     }
 
-    public short getIpPort() {
+    public int getIpPort() {
         return ipPort;
     }
 
-    public void setIpPort(short ipPort) {
+    public void setIpPort(int ipPort) {
         this.ipPort = ipPort;
     }
 
