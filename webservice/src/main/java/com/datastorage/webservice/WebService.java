@@ -9,13 +9,11 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.util.CollectionUtils;
 
 /**
- * Hello world!
- *
+ * start at webservice
  */
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
+@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class},scanBasePackages = {"com.datastorage"})
 public class WebService extends SpringBootServletInitializer {
     private static final Logger LOG = LoggerFactory.getLogger(WebService.class);
     private static Class<?>[] RUN_CLASSES = new Class[] { ServiceRun.class, WebService.class };

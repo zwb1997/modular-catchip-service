@@ -20,6 +20,11 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
+     <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+     <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+    </dependency>
     <!-- https://mvnrepository.com/artifact/com.alibaba/druid -->
     <dependency>
       <groupId>com.alibaba</groupId>

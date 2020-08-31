@@ -105,7 +105,7 @@ public class DBConfig {
     public static MapperScannerConfigurer createScannerConfigurer(){
         MapperScannerConfigurer scannerConfigurer = new MapperScannerConfigurer();
         scannerConfigurer.setBasePackage("com.datastorage.service.mapper");
-        scannerConfigurer.setSqlSessionFactoryBeanName("sqlSessionFactory1");
+        // scannerConfigurer.setSqlSessionFactoryBeanName("sqlSessionFactory1");
         scannerConfigurer.setSqlSessionTemplateBeanName("createSqlSessionTemplate");
         return scannerConfigurer;
     }

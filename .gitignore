@@ -1,8 +1,11 @@
-/.idea
-/target
+.idea
+/target/
 *.iml
-/out
-*.vscode
+out
+.vscode
 .project
-*.settings
+.settings
 .classpath
+*.jar
+*.war
+*.class

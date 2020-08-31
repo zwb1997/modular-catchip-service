@@ -1,7 +1,5 @@
 package com.datastorage.models.basicalmodels.basicaldto.responsedto;
 
-import com.datastorage.models.basicalmodels.basicalconstants.IpServiceConstant;
-import com.datastorage.models.basicalmodels.basicaldo.IpPoolMainDO;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,7 +14,6 @@ public class IpPoolMainDTO {
     private String locationFirstLevel;
     private String locationSecondLevel;
     private String locationThirdLevel;
-    private static final Random RANDOM = new Random();
 
     @JsonProperty("in")
     private String ipNum;

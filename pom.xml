@@ -14,6 +14,8 @@
     <spring-jdbc-version>5.2.0.RELEASE</spring-jdbc-version>
     <spring-boot-test-version>2.3.0.RELEASE</spring-boot-test-version>
     <common-lang3-version>3.10</common-lang3-version>
+    <spring-boot-dev-tool-version>2.3.3.RELEASE</spring-boot-dev-tool-version>
+    <spring-boot-security-version>2.3.1.RELEASE</spring-boot-security-version>
     <logback-version>1.2.3</logback-version>
     <druid-version>1.1.23</druid-version>
     <mysql-version>8.0.20</mysql-version>
@@ -22,6 +24,8 @@
     <mybatis-spring-version>2.0.5</mybatis-spring-version>
     <jedis-version>3.2.0</jedis-version>
     <jackson-xml-version>2.10.3</jackson-xml-version>
+    <guava-verison>29.0-jre</guava-verison>
+    <commons-codec-version>1.11</commons-codec-version>
   </properties>
 
   <groupId>com.datastorage</groupId>
@@ -50,14 +54,30 @@
 
   <dependencyManagement>
     <dependencies>
+      <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+      <dependency>
+        <groupId>com.google.guava</groupId>
+        <artifactId>guava</artifactId>
+        <version>${guava-verison}</version>
+      </dependency>
       <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.dataformat/jackson-dataformat-xml -->
       <dependency>
         <groupId>com.fasterxml.jackson.dataformat</groupId>
         <artifactId>jackson-dataformat-xml</artifactId>
         <version>${jackson-xml-version}</version>
       </dependency>
-
-
+      <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-devtools -->
+      <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-devtools</artifactId>
+        <version>${spring-boot-dev-tool-version}</version>
+      </dependency>
+      <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-security -->
+      <!-- <dependency>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-security</artifactId>
+        <version>${spring-boot-security-version}</version>
+      </dependency> -->
       <!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
       <dependency>
         <groupId>redis.clients</groupId>
@@ -109,6 +129,13 @@
         <artifactId>commons-lang3</artifactId>
         <version>${common-lang3-version}</version>
       </dependency>
+      <!-- https://mvnrepository.com/artifact/commons-codec/commons-codec -->
+      <dependency>
+        <groupId>commons-codec</groupId>
+        <artifactId>commons-codec</artifactId>
+        <version>${commons-codec-version}</version>
+      </dependency>
+
       <!-- https://mvnrepository.com/artifact/org.springframework/spring-jdbc -->
       <dependency>
         <groupId>org.springframework</groupId>
@@ -121,8 +148,8 @@
         <artifactId>spring-boot-starter-web</artifactId>
         <exclusions>
           <exclusion>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-tomcat</artifactId>
+            <!-- <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-tomcat</artifactId> -->
           </exclusion>
         </exclusions>
         <version>${spring-boot-web-version}</version>

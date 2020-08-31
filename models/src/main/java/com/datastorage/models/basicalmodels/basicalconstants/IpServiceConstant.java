@@ -17,4 +17,7 @@ public class IpServiceConstant {
     public static final byte DEGREE_TRANSPARENT_PROXY = 1;
     public static final byte DEGREE_HIGHT_PROXY = 2;
     public static final byte DEGREE_MIX = 3;
+    public static final String ORIGIN_NAME = "Origin";
+    public static final String CUR_TIME_SPAN = "curSpan";
+    public static final String SECRET_SIGN = "secretSign";
 }
