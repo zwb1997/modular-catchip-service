@@ -2,6 +2,7 @@ package com.zzz.service.ipservices.work;
 
 import com.zzz.entitymodel.servicebase.DO.IpPoolMainDO;
 import com.zzz.entitymodel.servicebase.DTO.IpLocation;
+import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -25,7 +26,7 @@ import java.util.concurrent.Callable;
 
 import static com.zzz.utils.PageUtils.*;
 
-public class XHGetpageInfoTask implements Callable<List<IpPoolMainDO>> {
+public class XHGetpageInfoTask implements Callable<List<IpPoolMainDTO>> {
     private static final Logger LOG = LoggerFactory.getLogger(XHGetpageInfoTask.class);
     private List<IpLocation> workStack;
     private String curPrefixUrl;
@@ -38,7 +39,7 @@ public class XHGetpageInfoTask implements Callable<List<IpPoolMainDO>> {
 
 
     @Override
-    public List<IpPoolMainDO> call() {
+    public List<IpPoolMainDTO> call() {
         String threadName = Thread.currentThread().getName();
         if (workStack == null || workStack.isEmpty()) {
             LOG.info(" current task : {} workstack is empty, will not work", threadName);
@@ -48,7 +49,7 @@ public class XHGetpageInfoTask implements Callable<List<IpPoolMainDO>> {
         LOG.info(" current thread : {} doing job , list size : {}", threadName, size);
 
         Iterator<IpLocation> ipLocationIterator = workStack.iterator();
-        List<IpPoolMainDO> ipPoolMainDOs = Collections.synchronizedList(new LinkedList<>());
+        List<IpPoolMainDTO> ipPoolMainDOs = Collections.synchronizedList(new LinkedList<>());
         while (ipLocationIterator.hasNext()) {
             try {
                 IpLocation target = ipLocationIterator.next();
@@ -69,7 +70,7 @@ public class XHGetpageInfoTask implements Callable<List<IpPoolMainDO>> {
                 String currentPage = vaildateEntity(httpEntity);
                 Elements elements = fetchElementWithSection(currentPage, HAS_PAGE_REGIX);
                 if (ObjectUtils.isNotEmpty(elements)) {
-                    ipPoolMainDOs.addAll(combineXiaoHuanInfo(elements));
+                    ipPoolMainDOs.addAll(Objects.requireNonNull(combineXiaoHuanInfo(elements)));
                 } else {
                     LOG.info(" current elements is empty,will not work ,page : {} ", fullUrl);
                 }

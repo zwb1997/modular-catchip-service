@@ -13,6 +13,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.ObjectUtils;
 
@@ -25,9 +26,10 @@ public class HttpClientUtil {
     private static final String RESPONSE_CODE_PREFIX = "2";
     private static final int REQUEST_TIME_OUT = 20;
     private static final int ESTABLISH_TIME_OUT = 30;
-    private static final String PROXY_IP = "104.207.151.166";
-    private static final int PROXY_IP_PORT = 37720;
-    private static final HttpHost HTTP_HOST  = new HttpHost(PROXY_IP,PROXY_IP_PORT);
+    private static final String PROXY_IP = "";
+    private static final int PROXY_IP_PORT = 1;
+    private static final HttpHost HTTP_HOST = new HttpHost(PROXY_IP, PROXY_IP_PORT);
+
     /**
      * create a default httpClient
      *
@@ -58,37 +60,33 @@ public class HttpClientUtil {
         } finally {
             return response;
         }
-
     }
 
+
     /**
-     * @param response
-     *  vaildate response is success by code is 200 and print response headers
+     * @param response vaildate response is success by code is 200 and print response headers
      */
     public static void vaildateReponse(HttpResponse response) {
-        if (ObjectUtils.isEmpty(response) && ObjectUtils.isEmpty(response.getStatusLine())) {
-            LOG.error(" response is invalid or response cannot get status line ");
-            throw new DebugException(" response is invalid or response cannot get status line ");
+
+        Assert.notNull(response, " respnse could't empty ");
+        Assert.notNull(response.getStatusLine(), " respnse could't empty ");
+        String responseCodeString = String.valueOf(response.getStatusLine().getStatusCode());
+        if (responseCodeString.startsWith(RESPONSE_CODE_PREFIX)) {
+            LOG.info(" response success, will show headers ");
         } else {
-            String responseCodeString = String.valueOf(response.getStatusLine().getStatusCode());
-            if (responseCodeString.startsWith(RESPONSE_CODE_PREFIX)) {
-                LOG.info(" response success, will show headers ");
-                LOG.info(" execute done,response code : {} , will print headers ", responseCodeString);
-                Header[] headers = response.getAllHeaders();
-                printResponseHeaders(headers);
-            }
+            LOG.info(" response failed, will show headers ");
         }
+        LOG.info(" execute done,response code : {} , will print headers ", responseCodeString);
+        Header[] headers = response.getAllHeaders();
+        printResponseHeaders(headers);
     }
 
     /**
      * print headers
-     *
      * @param headers
      */
     public static void printResponseHeaders(Header[] headers) {
-        if (ArrayUtils.isEmpty(headers)) {
-            throw new DebugException(" error , response header is null,messages");
-        }
+        Assert.notEmpty(headers," error , response header is null,messages");
         for (Header h : headers) {
             HeaderElement[] hes = h.getElements();
             for (HeaderElement he : hes) {
@@ -96,6 +94,4 @@ public class HttpClientUtil {
             }
         }
     }
-
-
 }

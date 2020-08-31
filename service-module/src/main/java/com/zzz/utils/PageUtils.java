@@ -16,16 +16,21 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+import org.springframework.util.CollectionUtils;
 
 
 import java.io.IOException;
 import java.util.*;
 
+import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
+
 @Service
 public class PageUtils {
 
     private static final Logger LOG = LoggerFactory.getLogger(PageUtils.class);
-
+    private static final String[] EMPTY_ARR = new String[]{"", "", "", "", "", "", "", "", "", ""};
+    private static final int COMBINE_ARRAY_REQUIRE_LENGTH = 10;
 
     /**
      * @param html
@@ -68,12 +73,10 @@ public class PageUtils {
     }
 
     public static String vaildateEntity(HttpEntity entity) throws IOException, ParseException {
-        if (ObjectUtils.isEmpty(entity)) {
-            throw new DebugException(" current http enity is null ");
-        }
+        Assert.notNull(entity," current http enity is null ");
         String html = EntityUtils.toString(entity);
-        if (StringUtils.isBlank(html)) {
-            throw new DebugException(" current http entity's html is null ");
+        if(StringUtils.isBlank(html)){
+            LOG.error(" erro , current http entity's html is null");
         }
         return html;
     }
@@ -91,32 +94,82 @@ public class PageUtils {
         return elements;
     }
 
-    public static synchronized List<IpPoolMainDO> combineXiaoHuanInfo(Elements elements) {
+    public static synchronized List<IpPoolMainDTO> combineXiaoHuanInfo(Elements elements) {
         if (elements == null || elements.isEmpty()) {
             LOG.info(" elements is empty,will not work ");
             return null;
         }
         Iterator<Element> iterator = elements.iterator();
-        LinkedList<IpPoolMainDO> res = new LinkedList<>();
+        LinkedList<IpPoolMainDTO> res = new LinkedList<>();
         while (iterator.hasNext()) {
-            Element e = iterator.next();
-            List<String> infos = findTextNode(e);
-            LOG.info(" current infos : {} ",infos);
-            res.add(IpPoolMainDTO.createInstance(infos));
+            try {
+                Element e = iterator.next();
+                List<String> infos = findTextNode(e);
+                LOG.info(" current infos : {} ", infos);
+                res.add(createInstance(infos));
+            } catch (Exception e) {
+                LOG.error(" error , message :{} ", e.getMessage());
+            }
         }
         return res;
     }
 
+    private static IpPoolMainDTO createInstance(List<String> infos) {
+        if (CollectionUtils.isEmpty(infos) || infos.size() < COMBINE_ARRAY_REQUIRE_LENGTH || infos.size() > COMBINE_ARRAY_REQUIRE_LENGTH) {
+            LOG.error(" error instance size must be 10 ");
+            return null;
+        }
+        byte anonymityDegree = 0;
+        switch (infos.get(6)) {
+            case ANONYMITY_NORMAL:
+                anonymityDegree = DEGREE_TRANSPARENT_PROXY;
+                break;
+            case ANONYMITY_HIGH:
+                anonymityDegree = DEGREE_HIGHT_PROXY;
+                break;
+            default:
+                anonymityDegree = DEGREE_UNKNOW_PROXY;
+        }
+        IpPoolMainDTO model = null;
+        try {
+            model = new IpPoolMainDTO(
+                    String.valueOf(infos.get(0))
+                    , Integer.parseInt(infos.get(1))
+                    , infos.get(2)
+                    , infos.get(3)
+                    , NOT_SUPPORT_CHINESE.equals(infos.get(4)) ? SUPPORT_NUM : NOT_SUPPORT_NUM
+                    , NOT_SUPPORT_CHINESE.equals(infos.get(5)) ? SUPPORT_NUM : NOT_SUPPORT_NUM
+                    , anonymityDegree
+                    , infos.get(7)
+                    , infos.get(8)
+                    , infos.get(9)
+            );
+        } catch (Exception e) {
+            LOG.error(" combine error,messgae : {} ", e.getMessage());
+        }
+        return model;
+    }
+
+    /**
+     * 替代所有空格 为 斜杠
+     *
+     * @param cure
+     * @return
+     */
     public static List<String> findTextNode(Element cure) {
         if (cure == null) {
             LOG.info(" current Element is empty ");
             return null;
         }
         Elements tds = cure.select("td");
-        List<String> resList = new ArrayList<>();
+        List<String> resList = Arrays.asList(EMPTY_ARR);
+        int i = 0;
         for (Element e : tds) {
-             String val = e.text().replace(" ","/");
-            resList.add(val);
+            if (i >= 10) {
+                throw new DebugException(" parameters size is overflow ");
+            }
+            String val = e.text().replace(" ", "/");
+            resList.set(i++, val);
         }
         return resList;
     }

@@ -1,22 +1,26 @@
 package com.zzz.service.ipservices;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zzz.entitymodel.servicebase.DO.IpPoolMainDO;
 import com.zzz.entitymodel.servicebase.DTO.IpLocation;
 import com.zzz.common.threadconfig.NamedThreadFactory;
+import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.zzz.entitymodel.servicebase.constants.IpServiceConstant;
-import com.zzz.mapper.IpDataServiceXiaoHuanMapper;
 import com.zzz.service.ipservices.work.XHGetpageInfoTask;
+import com.zzz.utils.SignUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.*;
+import org.apache.http.client.entity.EntityBuilder;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
@@ -25,12 +29,16 @@ import org.springframework.util.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.*;
 
 import static com.zzz.utils.HttpClientUtil.*;
+import static com.zzz.utils.HttpClientUtil.vaildateReponse;
 import static com.zzz.utils.PageUtils.*;
 import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
 
@@ -53,14 +61,8 @@ public class XiaoHuanIpFetchService {
     private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(
             CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME, TimeUnit.SECONDS, ARRAY_BLOCKING_QUEUE, new NamedThreadFactory()
     );
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-    @Autowired
-    private NamedParameterJdbcTemplate namedParameterJdbcTemplate;
-    @Autowired
-    private IpDataServiceXiaoHuanMapper ipDataServiceXiaoHuanMapper;
 
-    @Scheduled(fixedDelay =  60 * 1000)
+    @Scheduled(fixedDelay = 60 * 1000)
     public void run() {
         aTagLists = getPages();
         if (!CollectionUtils.isEmpty(aTagLists)) {
@@ -150,7 +152,7 @@ public class XiaoHuanIpFetchService {
 //            }
 //            iterator.remove();
 //        }
-        resAtags.put(0,new IpLocation(IpServiceConstant.HC_LINK_NAME,IpServiceConstant.HC_LINK));
+        resAtags.put(0, new IpLocation(IpServiceConstant.HC_LINK_NAME, IpServiceConstant.HC_LINK));
 
 
     }
@@ -253,15 +255,15 @@ public class XiaoHuanIpFetchService {
         //做任务
         int cur = 0;
         int curWorkSize = pageNumsList.size();
-        LOG.info(" current page nums  : {} ,list : {} ",curWorkSize,pageNumsList);
+        LOG.info(" current page nums  : {} ,list : {} ", curWorkSize, pageNumsList);
         int step = curWorkSize / CORE_POOL_SIZE;
-        List<Future<List<IpPoolMainDO>>> futures = Collections.synchronizedList(new ArrayList<>());
+        List<Future<List<IpPoolMainDTO>>> futures = Collections.synchronizedList(new ArrayList<>());
         while (cur < curWorkSize) {
             int curEndPos = (cur + step + 1);
             curEndPos = Math.min(curEndPos, curWorkSize);
             List<IpLocation> syncWorkList = pageNumsList.subList(cur, curEndPos);
             cur = curEndPos;
-            Future<List<IpPoolMainDO>> future = EXECUTOR_SERVICE.submit(new XHGetpageInfoTask(curUriString, syncWorkList));
+            Future<List<IpPoolMainDTO>> future = EXECUTOR_SERVICE.submit(new XHGetpageInfoTask(curUriString, syncWorkList));
             futures.add(future);
         }
         uploadData(futures);
@@ -272,22 +274,46 @@ public class XiaoHuanIpFetchService {
      *
      * @param futures
      */
-    private void uploadData(List<Future<List<IpPoolMainDO>>> futures) {
+    private void uploadData(List<Future<List<IpPoolMainDTO>>> futures) {
         LOG.info(" begin stage data ");
         Assert.notEmpty(futures, " future task wouldn't empty ");
-        for (Future<List<IpPoolMainDO>> future : futures) {
+        for (Future<List<IpPoolMainDTO>> future : futures) {
             try {
-                List<IpPoolMainDO> lists = future.get();
-                if(CollectionUtils.isEmpty(lists)){
+                List<IpPoolMainDTO> lists = future.get();
+                if (CollectionUtils.isEmpty(lists)) {
                     LOG.info(" current IpPoolMainDO list is empty , will not do insert ");
                     continue;
                 }
-                ipDataServiceXiaoHuanMapper.insertIpDataXiaoHuan(lists);
-            } catch (InterruptedException | ExecutionException e) {
-                LOG.error(" stage data error , message : {} ", e.getMessage());
+//                ipDataServiceXiaoHuanMapper.insertIpDataXiaoHuan(lists);
+                //change to send data to storage service
+                URI uri = new URIBuilder(STORAGE_SERVICE_LOCATION)
+                        .setScheme("http")
+                        .setCharset(StandardCharsets.UTF_8)
+                        .setPort(STORAGE_SERVICE_LOCATION_PORT)
+                        .setPath(IpServiceConstant.STORAGE_SERVICE_PATH)
+                        .build();
+                HttpPost httpPost = new HttpPost(uri);
+                ObjectMapper objectMapper = new ObjectMapper();
+                String curData = objectMapper.writeValueAsString(lists);
+                httpPost.setEntity(new StringEntity(curData));
+                List<Header> headerList = new ArrayList<>();
+                headerList.add(new BasicHeader("user-agent", USER_AGENT));
+                headerList.add(new BasicHeader(ORIGIN_NAME, STORAGE_SERVICE_LOCATION));
+                headerList.add(new BasicHeader(CUR_TIME_SPAN, String.valueOf(System.currentTimeMillis())));
+                headerList.add(new BasicHeader(SECRET_SIGN, SignUtil.createSign(CUR_TIME_SPAN, SECRET)));
+                HttpResponse response = exeuteDefaultRequest(httpPost, headerList);
+                vaildateReponse(response);
+                HttpEntity entity = response.getEntity();
+                String responseText = vaildateEntity(entity);
+                LOG.info(" sent storage data success , response text : {} ", responseText);
+            } catch (InterruptedException | ExecutionException | URISyntaxException | UnsupportedEncodingException | JsonProcessingException e) {
+                LOG.error(" send stage data error , message : {} ", e.getMessage());
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }
+
 
     /**
      * @param pageNumsList
