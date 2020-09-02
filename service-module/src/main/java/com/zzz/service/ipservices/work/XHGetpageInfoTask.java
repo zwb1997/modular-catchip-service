@@ -64,7 +64,7 @@ public class XHGetpageInfoTask implements Callable<List<IpPoolMainDTO>> {
                 List<Header> headerList = new ArrayList<>();
                 headerList.add(new BasicHeader("user-agent", USER_AGENT));
                 LOG.info(" do with current type :{} ", curUriString);
-                HttpResponse response = exeuteDefaultRequest(get, headerList);
+                HttpResponse response = exeuteDefaultRequest(get, headerList,true);
                 vaildateReponse(response);
                 HttpEntity httpEntity = response.getEntity();
                 String currentPage = vaildateEntity(httpEntity);

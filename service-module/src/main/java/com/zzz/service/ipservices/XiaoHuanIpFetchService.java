@@ -8,6 +8,7 @@ import com.zzz.common.threadconfig.NamedThreadFactory;
 import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.zzz.entitymodel.servicebase.constants.IpServiceConstant;
 import com.zzz.service.ipservices.work.XHGetpageInfoTask;
+import com.zzz.utils.HttpClientUtil;
 import com.zzz.utils.SignUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.*;
@@ -16,6 +17,7 @@ import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
@@ -109,7 +111,7 @@ public class XiaoHuanIpFetchService {
             String requestUri = httpGet.getURI().toString();
             LOG.info(" request uri : {} ", requestUri);
             LOG.info(" executing request... ");
-            HttpResponse response = exeuteDefaultRequest(httpGet, requestHeaders);
+            HttpResponse response = exeuteDefaultRequest(httpGet, requestHeaders, true);
             vaildateReponse(response);
 
             LOG.info(" analysis <a> tag... ");
@@ -150,11 +152,12 @@ public class XiaoHuanIpFetchService {
 //            if (XIAO_HUAN_POS_CHINA.equals(tar.getLocationName()) || XIAO_HUAN_POS_AMERICA.equals(tar.getLocationName())) {
 //                continue;
 //            }
+//            if (XIAO_HUAN_POS_AMERICA.equals(tar.getLocationName())) {
+//                continue;
+//            }
 //            iterator.remove();
 //        }
         resAtags.put(0, new IpLocation(IpServiceConstant.HC_LINK_NAME, IpServiceConstant.HC_LINK));
-
-
     }
 
     /**
@@ -236,7 +239,7 @@ public class XiaoHuanIpFetchService {
 
     private String ipFetchCommonRequest(URI uri, List<Header> headerList) throws IOException {
         HttpGet get = new HttpGet(uri);
-        HttpResponse response = exeuteDefaultRequest(get, headerList);
+        HttpResponse response = exeuteDefaultRequest(get, headerList, true);
         vaildateReponse(response);
         HttpEntity httpEntity = response.getEntity();
         String currentPage = vaildateEntity(httpEntity);
@@ -284,7 +287,6 @@ public class XiaoHuanIpFetchService {
                     LOG.info(" current IpPoolMainDO list is empty , will not do insert ");
                     continue;
                 }
-//                ipDataServiceXiaoHuanMapper.insertIpDataXiaoHuan(lists);
                 //change to send data to storage service
                 URI uri = new URIBuilder(STORAGE_SERVICE_LOCATION)
                         .setScheme("http")
@@ -295,13 +297,15 @@ public class XiaoHuanIpFetchService {
                 HttpPost httpPost = new HttpPost(uri);
                 ObjectMapper objectMapper = new ObjectMapper();
                 String curData = objectMapper.writeValueAsString(lists);
-                httpPost.setEntity(new StringEntity(curData));
+                httpPost.setEntity(new StringEntity(curData, Consts.UTF_8));
                 List<Header> headerList = new ArrayList<>();
+                String curTimeMillions = String.valueOf(System.currentTimeMillis());
                 headerList.add(new BasicHeader("user-agent", USER_AGENT));
                 headerList.add(new BasicHeader(ORIGIN_NAME, STORAGE_SERVICE_LOCATION));
-                headerList.add(new BasicHeader(CUR_TIME_SPAN, String.valueOf(System.currentTimeMillis())));
-                headerList.add(new BasicHeader(SECRET_SIGN, SignUtil.createSign(CUR_TIME_SPAN, SECRET)));
-                HttpResponse response = exeuteDefaultRequest(httpPost, headerList);
+                headerList.add(new BasicHeader(CUR_TIME_SPAN, curTimeMillions));
+                headerList.add(new BasicHeader(SECRET_SIGN, SignUtil.createSign(curTimeMillions, SECRET)));
+                headerList.add(new BasicHeader("Content-Type", HTTP_CONTENT_TYPE_JSON));
+                HttpResponse response = exeuteDefaultRequest(httpPost, headerList, false);
                 vaildateReponse(response);
                 HttpEntity entity = response.getEntity();
                 String responseText = vaildateEntity(entity);
@@ -328,7 +332,6 @@ public class XiaoHuanIpFetchService {
             }
         }
     }
-
 
     /**
      * add map values to a list

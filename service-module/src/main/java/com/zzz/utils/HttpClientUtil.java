@@ -27,7 +27,7 @@ public class HttpClientUtil {
     private static final int REQUEST_TIME_OUT = 20;
     private static final int ESTABLISH_TIME_OUT = 30;
     private static final String PROXY_IP = "";
-    private static final int PROXY_IP_PORT = 1;
+    private static final int PROXY_IP_PORT = 0;
     private static final HttpHost HTTP_HOST = new HttpHost(PROXY_IP, PROXY_IP_PORT);
 
     /**
@@ -37,29 +37,30 @@ public class HttpClientUtil {
      * @param headers
      * @return
      */
-    public static HttpResponse exeuteDefaultRequest(HttpRequestBase httpType, List<Header> headers) {
+    public static HttpResponse exeuteDefaultRequest(HttpRequestBase httpType,
+                                                    List<Header> headers,
+                                                    boolean useProxy) {
         LOG.info(" begin send a request ");
         HttpResponse response = null;
         try {
             HttpClient client = HttpClientBuilder.create().build();
-            if (CollectionUtils.isEmpty(headers)) {
-                LOG.info(" request header is null ");
-            } else {
-                int headerSize = headers.size();
-                httpType.setHeaders(headers.toArray(new Header[headerSize]));
-                RequestConfig requestConfig = RequestConfig
-                                                .custom()
-                                                .setConnectionRequestTimeout(REQUEST_TIME_OUT)
-                                                .setProxy(HTTP_HOST)
-                                                .build();
-                httpType.setConfig(requestConfig);
-            }
+            Assert.notNull(headers, " request header is null ");
+            int headerSize = headers.size();
+            httpType.setHeaders(headers.toArray(new Header[headerSize]));
+            RequestConfig requestConfig = useProxy ? RequestConfig
+                    .custom()
+                    .setConnectionRequestTimeout(REQUEST_TIME_OUT)
+                    .setProxy(HTTP_HOST)
+                    .build() : RequestConfig
+                    .custom()
+                    .setConnectionRequestTimeout(REQUEST_TIME_OUT)
+                    .build();
+            httpType.setConfig(requestConfig);
             response = client.execute(httpType);
         } catch (IOException e) {
             LOG.error(" execute request error : messages {} ", e.getMessage());
-        } finally {
-            return response;
         }
+        return response;
     }
 
 
@@ -69,7 +70,7 @@ public class HttpClientUtil {
     public static void vaildateReponse(HttpResponse response) {
 
         Assert.notNull(response, " respnse could't empty ");
-        Assert.notNull(response.getStatusLine(), " respnse could't empty ");
+        Assert.notNull(response.getStatusLine(), " respnse.getStatusLine could't empty ");
         String responseCodeString = String.valueOf(response.getStatusLine().getStatusCode());
         if (responseCodeString.startsWith(RESPONSE_CODE_PREFIX)) {
             LOG.info(" response success, will show headers ");
@@ -83,10 +84,11 @@ public class HttpClientUtil {
 
     /**
      * print headers
+     *
      * @param headers
      */
     public static void printResponseHeaders(Header[] headers) {
-        Assert.notEmpty(headers," error , response header is null,messages");
+        Assert.notEmpty(headers, " error , response header is null,messages");
         for (Header h : headers) {
             HeaderElement[] hes = h.getElements();
             for (HeaderElement he : hes) {

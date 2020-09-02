@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 public class NiMaIpFetchService {
     private static final Logger LOG = LoggerFactory.getLogger(NiMaIpFetchService.class);
 
-    @Scheduled(fixedDelay = 3000)
+//    @Scheduled(fixedDelay = 3000)
     public void run(){
         LOG.info(" nima ip works begin ");
         // 页码检测

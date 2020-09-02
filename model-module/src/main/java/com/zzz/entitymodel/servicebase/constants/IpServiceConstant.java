@@ -21,14 +21,16 @@ public class IpServiceConstant {
     public static final byte DEGREE_MIX = 3;
     public static final String ORIGIN_NAME = "Origin";
     public static final String SECRET = "";
-    public static final String STORAGE_SERVICE_PATH = "datastorage/)Pt&Bw+Vk/=Js)Ns+My";
-    public static final String CUR_TIME_SPAN = "curSpan";
-    public static final String SECRET_SIGN = "secretSign";
+    public static final String STORAGE_SERVICE_PATH = "";
+//    public static final String STORAGE_SERVICE_PATH = "";
+    public static final String CUR_TIME_SPAN = "";
+    public static final String SECRET_SIGN = "";
+    public static final String HTTP_CONTENT_TYPE_JSON = "application/json";
 
         public static final String STORAGE_SERVICE_LOCATION="";
 //    public static final String STORAGE_SERVICE_LOCATION = "http://127.0.0.1";
-    public static final int STORAGE_SERVICE_LOCATION_PORT = 0;
-//    public static final int STORAGE_SERVICE_LOCATION_PORT= 8010;
+//    public static final int STORAGE_SERVICE_LOCATION_PORT = 8010;
+    public static final int STORAGE_SERVICE_LOCATION_PORT= 0;
 
     //XIAO_HUAN
     public static final String XIAO_HUAN_IP = "//ip.ihuan.me/tqdl.html";

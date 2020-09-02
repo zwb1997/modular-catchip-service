@@ -12,13 +12,15 @@ public class SignUtil {
 
     /**
      * create sign by timeSpan + localSecret
+     *
      * @param timeSpan
      * @param localSecret
      * @return
      */
-    public static String createSign(String timeSpan,String localSecret){
+    public static String createSign(String timeSpan, String localSecret) {
         String fullMessage = timeSpan + localSecret;
         String md5Hex = DigestUtils.md5Hex(fullMessage).toLowerCase();
+        LOG.info("local md5 : {}", md5Hex);
         return md5Hex;
     }
 }
