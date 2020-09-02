@@ -60,6 +60,7 @@ public class CommonInterceptor implements HandlerInterceptor {
     private boolean validateReuquestSign(HttpServletRequest request) {
         String curSecret = request.getHeader(IpServiceConstant.SECRET_SIGN);
         String curTimeSpan = request.getHeader(IpServiceConstant.CUR_TIME_SPAN);
+        LOG.info(" curSecret : {} ,  curTimeSpan :{}",curSecret,curTimeSpan);
         if (StringUtils.isBlank(curSecret) || StringUtils.isBlank(curTimeSpan) || !curTimeSpan.matches(IpServiceConstant.NUMBER_PATTERN)) {
             LOG.error(" header lost or format not match ");
             return false;
@@ -67,6 +68,7 @@ public class CommonInterceptor implements HandlerInterceptor {
         String requestTime = DateFormatUtils.format(Long.parseLong(curTimeSpan), IpServiceConstant.TIME_PATTERN_END_WITH_SECOND);
         LOG.info(" current request time : {} ", requestTime);
         String localSecret = DigestUtils.md5Hex(curTimeSpan + IpServiceConstant.SECRET).toLowerCase();
+        LOG.info(" local md5 : {} ",localSecret);
         if (!localSecret.equals(curSecret)) {
             return false;
         }
@@ -75,6 +77,7 @@ public class CommonInterceptor implements HandlerInterceptor {
 
     private boolean validateRequestOrigin(HttpServletRequest request) {
         String originHeader = request.getHeader(IpServiceConstant.ORIGIN_NAME);
+        LOG.info(" origin header : {} ",originHeader);
         if (StringUtils.isBlank(originHeader) || !IpServiceConstant.ORIGIN_VALUE.equals(originHeader)) {
             LOG.error(" request origin is not right ");
             return false;
