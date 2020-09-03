@@ -78,8 +78,6 @@ public class XHGetpageInfoTask implements Callable<List<IpPoolMainDTO>> {
                 LOG.error(" error , message : {} ", e.getMessage());
             }
         }
-        //调用传输接口 暂时没写
-        //现在这里写个插入测测
         //滞空 等待垃圾回收
         workStack = null;
         return ipPoolMainDOs;
