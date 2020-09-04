@@ -1,10 +1,9 @@
 package com.zzz.utils;
 
-import com.zzz.entitymodel.servicebase.DO.IpPoolMainDO;
+
 import com.zzz.entitymodel.servicebase.DTO.IpLocation;
 import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.zzz.exceptions.DebugException;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.ParseException;
@@ -95,7 +94,7 @@ public class PageUtils {
     }
 
     public static synchronized List<IpPoolMainDTO> combineXiaoHuanInfo(Elements elements) {
-        if (elements == null || elements.isEmpty()) {
+        if (CollectionUtils.isEmpty(elements)) {
             LOG.info(" elements is empty,will not work ");
             return null;
         }

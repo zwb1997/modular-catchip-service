@@ -1,6 +1,5 @@
 package com.zzz.service.ipservices.work;
 
-import com.zzz.entitymodel.servicebase.DO.IpPoolMainDO;
 import com.zzz.entitymodel.servicebase.DTO.IpLocation;
 import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import org.apache.commons.lang3.ObjectUtils;
@@ -13,6 +12,7 @@ import org.apache.http.message.BasicHeader;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.util.CollectionUtils;
 
 import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
 import static com.zzz.utils.HttpClientUtil.exeuteDefaultRequest;
@@ -22,7 +22,6 @@ import static com.zzz.utils.PageUtils.vaildateEntity;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.Callable;
-
 
 import static com.zzz.utils.PageUtils.*;
 
@@ -35,13 +34,13 @@ public class XHGetpageInfoTask implements Callable<List<IpPoolMainDTO>> {
     public XHGetpageInfoTask(String curPrefixUrl, List<IpLocation> workStack) {
         this.curPrefixUrl = curPrefixUrl;
         this.workStack = workStack;
+        LOG.info(" extract url : {}, lists : {}", curPrefixUrl, workStack);
     }
-
 
     @Override
     public List<IpPoolMainDTO> call() {
         String threadName = Thread.currentThread().getName();
-        if (workStack == null || workStack.isEmpty()) {
+        if (CollectionUtils.isEmpty(workStack)) {
             LOG.info(" current task : {} workstack is empty, will not work", threadName);
             return null;
         }
@@ -50,21 +49,22 @@ public class XHGetpageInfoTask implements Callable<List<IpPoolMainDTO>> {
 
         Iterator<IpLocation> ipLocationIterator = workStack.iterator();
         List<IpPoolMainDTO> ipPoolMainDOs = Collections.synchronizedList(new LinkedList<>());
+        List<Header> headerList = new ArrayList<>();
+        headerList.add(new BasicHeader("user-agent", USER_AGENT));
         while (ipLocationIterator.hasNext()) {
             try {
-                IpLocation target = ipLocationIterator.next();
                 Thread.sleep(random.nextInt(4) * 1000);
+
+                IpLocation target = ipLocationIterator.next();
                 String fullUrl = curPrefixUrl + target.getLocationHref();
                 LOG.info(" begin fetching page info , page : {} ", fullUrl);
-                URI uri = new URIBuilder(fullUrl)
-                        .setScheme("https")
-                        .build();
+
+                URI uri = new URIBuilder(fullUrl).setScheme("https").build();
                 String curUriString = uri.toString();
                 HttpGet get = new HttpGet(uri);
-                List<Header> headerList = new ArrayList<>();
-                headerList.add(new BasicHeader("user-agent", USER_AGENT));
-                LOG.info(" do with current type :{} ", curUriString);
-                HttpResponse response = exeuteDefaultRequest(get, headerList,true);
+                LOG.info(" do with current url :{} ", curUriString);
+                
+                HttpResponse response = exeuteDefaultRequest(get, headerList, true);
                 vaildateReponse(response);
                 HttpEntity httpEntity = response.getEntity();
                 String currentPage = vaildateEntity(httpEntity);
@@ -78,9 +78,8 @@ public class XHGetpageInfoTask implements Callable<List<IpPoolMainDTO>> {
                 LOG.error(" error , message : {} ", e.getMessage());
             }
         }
-        //滞空 等待垃圾回收
+        headerList = null;
         workStack = null;
         return ipPoolMainDOs;
     }
 }
-

@@ -52,9 +52,6 @@ import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
 public class XiaoHuanIpFetchService {
 
     private static final Logger LOG = LoggerFactory.getLogger(XiaoHuanIpFetchService.class);
-    private static final String A_TAG_PREFIX = "/address";
-    private List<String> aTagLists = null;
-    private static final String RESPONSE_CODE_PREFIX = "2";
     private static final String PAGE_REGIX = "^(\\d){1,6}$";
     private static final ArrayBlockingQueue<Runnable> ARRAY_BLOCKING_QUEUE = new ArrayBlockingQueue<>(6);
     private static final int CORE_POOL_SIZE = 3;
@@ -66,7 +63,8 @@ public class XiaoHuanIpFetchService {
 
     @Scheduled(fixedDelay = 60 * 1000)
     public void run() {
-        aTagLists = getPages();
+        List<String> aTagLists = getXHlist();
+        System.gc();
         if (!CollectionUtils.isEmpty(aTagLists)) {
             int size = aTagLists.size();
             LOG.info(" ip prefix nums : {} ", size);
@@ -79,8 +77,9 @@ public class XiaoHuanIpFetchService {
 
     /**
      * download first page
+     * get ip area list
      */
-    public List<String> getPages() {
+    public List<String> getXHlist() {
         LOG.info(" prepare to get xiaohuan ip pages... ");
         List<String> ress = new ArrayList<>(100);
         try {
@@ -97,9 +96,9 @@ public class XiaoHuanIpFetchService {
             requestParams.add(new BasicNameValuePair("sort", ""));
             requestParams.add(new BasicNameValuePair("key", uuid));
             //他这个需要将以下两个参数放请求参数中
-            requestParams.add(new BasicNameValuePair("origin", "https://ip.ihuan.me"));
-            requestParams.add(new BasicNameValuePair("referer", "https://ip.ihuan.me/ti.html"));
-            URI uri = new URIBuilder(IpServiceConstant.XIAO_HUAN_IP)
+            requestParams.add(new BasicNameValuePair("origin", IpServiceConstant.XIAO_HUAN_ME));
+            requestParams.add(new BasicNameValuePair("referer", IpServiceConstant.XIAO_HUAN_TI));
+            URI uri = new URIBuilder(IpServiceConstant.XIAO_HUAN_TQDL)
                     .setParameters(requestParams)
                     .setScheme("https")
                     .build();
@@ -117,7 +116,7 @@ public class XiaoHuanIpFetchService {
             LOG.info(" analysis <a> tag... ");
             HttpEntity entity = response.getEntity();
             String html = vaildateEntity(entity);
-            TreeMap<Integer, IpLocation> resAtags = matchAtages(html, "a[href~=^/address]");
+            TreeMap<Integer, IpLocation> resAtags = matchAtages(html, IpServiceConstant.PAGE_AREA_LIST_REGIX);
             // 增加花刺连接
             removeMutiple(resAtags);
             LOG.info(" finish lists :");
@@ -133,9 +132,8 @@ public class XiaoHuanIpFetchService {
             LOG.info(" done ");
         } catch (URISyntaxException | IOException e) {
             LOG.error(" executing request error , messages : {} ", e.getMessage());
-        } finally {
-            return ress;
         }
+        return ress;
     }
 
     /**
@@ -172,7 +170,7 @@ public class XiaoHuanIpFetchService {
             try {
                 // get current page than do fetch page nums
                 LOG.info(" begin fetching these pages ");
-                URI uri = new URIBuilder(XIAO_HUAN_IP)
+                URI uri = new URIBuilder(XIAO_HUAN_TQDL)
                         .setScheme("https")
                         .setPath(targetPrefix)
                         .build();
@@ -182,7 +180,7 @@ public class XiaoHuanIpFetchService {
                 LOG.info(" do with current type :{} ", curUriString);
                 String currentPage = ipFetchCommonRequest(uri, headerList);
                 LOG.info(" current html : {} ", currentPage);
-                TreeMap<Integer, IpLocation> aTags = matchAtages(currentPage, "a[href^=?page]");
+                TreeMap<Integer, IpLocation> aTags = matchAtages(currentPage, IpServiceConstant.PAGE_AREA_LIST_REGIX);
                 LOG.info(" done ");
                 LOG.info(" start fetching  current pages ");
                 Set<Map.Entry<Integer, IpLocation>> aTageEntris = aTags.entrySet();
@@ -222,7 +220,7 @@ public class XiaoHuanIpFetchService {
                 headerList.add(new BasicHeader("user-agent", USER_AGENT));
                 String currentPage = ipFetchCommonRequest(uri, headerList);
                 if (hasNextPage(currentPage, HAS_PAGE_REGIX)) {
-                    TreeMap<Integer, IpLocation> curMap = matchAtages(currentPage, PAGE_NUM_COMMON);
+                    TreeMap<Integer, IpLocation> curMap = matchAtages(currentPage, PAGE_NUM_REGIS);
                     Set<Map.Entry<Integer, IpLocation>> curSet = curMap.entrySet();
                     addForList(curSet, pageNumsStack);
                     checkAndRemoveLocation(pageNumsStack, PAGE_REGIX);
@@ -349,7 +347,6 @@ public class XiaoHuanIpFetchService {
         for (Map.Entry<K, V> me : mapSet) {
             V val = me.getValue();
             res.add(val);
-            var a = "123";
         }
     }
 

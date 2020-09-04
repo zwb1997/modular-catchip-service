@@ -1,7 +1,6 @@
 package com.zzz.utils;
 
-import com.zzz.exceptions.DebugException;
-import org.apache.commons.lang3.ArrayUtils;
+
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpHost;
@@ -14,8 +13,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
-import org.springframework.util.ObjectUtils;
 
 import java.io.IOException;
 import java.util.List;
@@ -26,8 +23,8 @@ public class HttpClientUtil {
     private static final String RESPONSE_CODE_PREFIX = "2";
     private static final int REQUEST_TIME_OUT = 20;
     private static final int ESTABLISH_TIME_OUT = 30;
-    private static final String PROXY_IP = "1";
-    private static final int PROXY_IP_PORT = 30;
+    private static final String PROXY_IP = "";
+    private static final int PROXY_IP_PORT = 0;
     private static final HttpHost HTTP_HOST = new HttpHost(PROXY_IP, PROXY_IP_PORT);
 
     /**

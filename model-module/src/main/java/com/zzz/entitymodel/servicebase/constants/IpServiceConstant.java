@@ -26,19 +26,23 @@ public class IpServiceConstant {
     public static final String CUR_TIME_SPAN = "";
     public static final String SECRET_SIGN = "";
     public static final String HTTP_CONTENT_TYPE_JSON = "application/json";
+    public static final String COMMON_DATE_FORMAT_REGIX = "yyyy-MM-dd HH:mm:ss";
 
-        public static final String STORAGE_SERVICE_LOCATION="";
+    public static final String STORAGE_SERVICE_LOCATION="";
 //    public static final String STORAGE_SERVICE_LOCATION = "http://127.0.0.1";
 //    public static final int STORAGE_SERVICE_LOCATION_PORT = 8010;
     public static final int STORAGE_SERVICE_LOCATION_PORT= 0;
 
     //XIAO_HUAN
-    public static final String XIAO_HUAN_IP = "//ip.ihuan.me/tqdl.html";
+    public static final String XIAO_HUAN_TQDL = "//ip.ihuan.me/tqdl.html";
+    public static final String XIAO_HUAN_ME = "https://ip.ihuan.me";
+    public static final String XIAO_HUAN_TI = "https://ip.ihuan.me/ti.html";
     public static String HAS_PAGE_REGIX = "tbody > tr";
-    public static String PAGE_NUM_COMMON = "a[href^=?page]";
+    public static String PAGE_NUM_REGIS = "a[href^=?page]";
+    public static String PAGE_AREA_LIST_REGIX = "a[href~=^/address]";
     public static final String HC_LINK = "/Proxies.7z";
     public static final String HC_LINK_NAME = "花刺连接";
-
+    public static final String XH_THREAD_NAME_PREFIEX = "HXTask";
 
     //nima
     public static final String NI_MA_IP = "http://www.nimadaili.com/";
