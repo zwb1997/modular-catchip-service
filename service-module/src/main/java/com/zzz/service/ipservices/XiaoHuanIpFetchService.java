@@ -8,8 +8,6 @@ import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.zzz.entitymodel.servicebase.constants.IpServiceConstant;
 import com.zzz.service.ipservices.work.XHGetpageInfoTask;
 import com.zzz.utils.SignUtil;
-
-import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.*;
@@ -148,8 +146,8 @@ public class XiaoHuanIpFetchService {
                 Set<Map.Entry<Integer, IpLocation>> aTageEntris = aTags.entrySet();
                 Stack<IpLocation> pageNumsList = new Stack<>();
                 addMapValueForList(aTageEntris, pageNumsList);
-                if(pageNumsList.isEmpty()){
-                    LOG.info(" current ip page have no more infos , will continue. page : {} ",curUriString);
+                if (pageNumsList.isEmpty()) {
+                    LOG.info(" current ip page have no more infos , will continue. page : {} ", curUriString);
                     continue;
                 }
                 // 移除'>>'
@@ -265,11 +263,11 @@ public class XiaoHuanIpFetchService {
             }
         }
         endTime = System.currentTimeMillis();
-        long useTiime = endTime - startTime;
+        long useTime = endTime - startTime;
         LOG.info(" === SERVICE END === ");
         LOG.info(" === time : {} === ", DateFormatUtils.format(endTime, IpServiceConstant.COMMON_DATE_FORMAT_REGIX));
-        LOG.info(" data fetch use minutes : {},second :{},millionSecond :{} ", useTiime / 1000 / 60, useTiime / 1000,
-                useTiime);
+        LOG.info(" data fetch use minutes : {},second :{},millionSecond :{} ", useTime / 1000 / 60, useTime / 1000,
+                useTime);
         startTime = 0;
         endTime = 0;
     }
