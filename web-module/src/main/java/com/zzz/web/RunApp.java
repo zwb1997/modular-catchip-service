@@ -22,6 +22,6 @@ public class RunApp  {
         LOG.info(" fetching data service web module start ");
         SpringApplication application = new SpringApplication(RunApp.class);
         application.setBanner(new ServiceBanner());
-        application.run(START_RESOURCES,args);
+        SpringApplication.run(START_RESOURCES,args);
     }
 }

@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.zzz</groupId>
     <artifactId>main-module</artifactId>
@@ -19,7 +18,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <module-version>0.1</module-version>
-        <mysql-version>8.0.15</mysql-version>
+        <mysql-version>8.0.16</mysql-version>
         <druid-springboot-start-version>1.1.10</druid-springboot-start-version>
         <druid-version>1.1.22</druid-version>
         <junit-version>4.12</junit-version>
@@ -41,6 +40,7 @@
         <spring-boot-maven-plug-version>2.3.3.RELEASE</spring-boot-maven-plug-version>
         <jedis-version>3.2.0</jedis-version>
         <jackson-version>2.10.4</jackson-version>
+        <guava-version>29.0-jre</guava-version>
     </properties>
 
     <dependencyManagement>
@@ -100,18 +100,6 @@
                 <artifactId>logback-core</artifactId>
                 <version>${logback-version}</version>
             </dependency>
-<!--            &lt;!&ndash; https://mvnrepository.com/artifact/org.springframework/spring-jdbc &ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>org.springframework</groupId>-->
-<!--                <artifactId>spring-jdbc</artifactId>-->
-<!--                <version>${spring-jdbc-version}</version>-->
-<!--            </dependency>-->
-            <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-jdbc -->
-<!--            <dependency>-->
-<!--                <groupId>org.springframework.data</groupId>-->
-<!--                <artifactId>spring-data-jdbc</artifactId>-->
-<!--                <version>${spring-data-jdbc-version}</version>-->
-<!--            </dependency>-->
 
             <dependency>
                 <groupId>junit</groupId>
@@ -142,12 +130,6 @@
                 <version>${com.zzz.web.common-lang3-version}</version>
             </dependency>
 
-<!--            &lt;!&ndash; https://mvnrepository.com/artifact/mysql/mysql-connector-java &ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>mysql</groupId>-->
-<!--                <artifactId>mysql-connector-java</artifactId>-->
-<!--                <version>${mysql-version}</version>-->
-<!--            </dependency>-->
             <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
@@ -179,32 +161,6 @@
                 <artifactId>jackson-annotations</artifactId>
                 <version>${jackson-version}</version>
             </dependency>
-
-
-<!--            <dependency>-->
-<!--                <groupId>com.alibaba</groupId>-->
-<!--                <artifactId>druid-spring-boot-starter</artifactId>-->
-<!--                <version>${druid-springboot-start-version}</version>-->
-<!--            </dependency>-->
-<!--            &lt;!&ndash; https://mvnrepository.com/artifact/com.alibaba/druid &ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>com.alibaba</groupId>-->
-<!--                <artifactId>druid</artifactId>-->
-<!--                <version>${druid-version}</version>-->
-<!--            </dependency>-->
-<!--            &lt;!&ndash; https://mvnrepository.com/artifact/org.mybatis/mybatis-spring &ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>org.mybatis</groupId>-->
-<!--                <artifactId>mybatis-spring</artifactId>-->
-<!--                <version>${mybatis-spring-verison}</version>-->
-<!--            </dependency>-->
-
-<!--            &lt;!&ndash; https://mvnrepository.com/artifact/org.mybatis/mybatis &ndash;&gt;-->
-<!--            <dependency>-->
-<!--                <groupId>org.mybatis</groupId>-->
-<!--                <artifactId>mybatis</artifactId>-->
-<!--                <version>${mybatis_version}</version>-->
-<!--            </dependency>-->
             <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -223,11 +179,18 @@
                 <artifactId>jackson-annotations</artifactId>
                 <version>${jackson-verison}</version>
             </dependency>
+            <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava-version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
     <build>
         <finalName>module-main</finalName>
-        <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+        <pluginManagement>
+            <!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
             <plugins>
                 <plugin>
                     <groupId>org.springframework.boot</groupId>

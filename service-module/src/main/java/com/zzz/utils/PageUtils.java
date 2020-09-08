@@ -4,6 +4,8 @@ package com.zzz.utils;
 import com.zzz.entitymodel.servicebase.DTO.IpLocation;
 import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.zzz.exceptions.DebugException;
+
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.ParseException;
@@ -17,8 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-
-
 import java.io.IOException;
 import java.util.*;
 
@@ -38,20 +38,20 @@ public class PageUtils {
      * <p>
      * get page a tags text value and href value
      */
-    public static TreeMap<Integer, IpLocation> matchAtages(String html, String selectParmas) {
+    public static TreeMap<Integer, IpLocation> matchAtages(int num,String html, String selectParmas) {
         TreeMap<Integer, IpLocation> res = new TreeMap<>();
         if (StringUtils.isBlank(html)) {
             LOG.info(" current html is null ");
             return res;
         }
-
+        int curNum = num;
         Document doc = Jsoup.parse(html);
         Elements es = StringUtils.isBlank(selectParmas) ? doc.select("a[href]") : doc.select(selectParmas);
-        int number = 1;
         for (Element e : es) {
             String tagText = e.text();
+            curNum = tagText.matches("^\\d+$") ? Integer.valueOf(tagText) : ++curNum;
             String tagHrefArrt = e.attr("href");
-            res.put(number++, new IpLocation(tagText, tagHrefArrt));
+            res.put(curNum, new IpLocation(tagText, tagHrefArrt));
         }
         return res;
     }
@@ -72,11 +72,11 @@ public class PageUtils {
     }
 
     public static String vaildateEntity(HttpEntity entity) throws IOException, ParseException {
-        Assert.notNull(entity," current http enity is null ");
-        String html = EntityUtils.toString(entity);
-        if(StringUtils.isBlank(html)){
-            LOG.error(" erro , current http entity's html is null");
+        if(ObjectUtils.isEmpty(entity)){
+            LOG.info(" current response entity is empty ");
+            return "";
         }
+        String html = EntityUtils.toString(entity,"utf-8");
         return html;
     }
 
@@ -171,5 +171,10 @@ public class PageUtils {
             resList.set(i++, val);
         }
         return resList;
+    }
+
+    public static boolean checkPageNumberLegal(Object num,String section){
+        Assert.notNull(section, " section could not null ");
+        return String.valueOf(num).matches(section);
     }
 }
