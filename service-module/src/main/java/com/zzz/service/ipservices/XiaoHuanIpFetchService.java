@@ -77,7 +77,7 @@ public class XiaoHuanIpFetchService {
      * download first page get ip area list
      */
     public List<String> getXHlist() {
-        LOG.info(" prepare to get xiaohuan ip pages... ");
+        LOG.info(" === prepare to get xiaohuan ip pages === ");
         List<String> ress = new ArrayList<>(100);
         try {
             String uuid = UUID.randomUUID().toString().replace("-", "");
@@ -113,7 +113,7 @@ public class XiaoHuanIpFetchService {
                 LOG.info(" current num : {} ,current ip location : {} ", num, ipLocation);
                 ress.add(ipLocation.getLocationHref());
             }
-            LOG.info(" done ");
+            LOG.info(" === done === ");
         } catch (URISyntaxException | IOException e) {
             LOG.error(" executing request error , messages : {} ", e.getMessage());
         }
@@ -131,7 +131,7 @@ public class XiaoHuanIpFetchService {
             int pageNum = 1;
             try {
                 // get current page than do fetch page nums
-                LOG.info(" begin fetching these pages ");
+                LOG.info(" === begin fetching these pages === ");
                 URI uri = new URIBuilder(XIAO_HUAN_TQDL).setScheme("https").setPath(targetPrefix).build();
                 curUriString = uri.toString();
                 List<Header> headerList = new ArrayList<>();
@@ -168,7 +168,7 @@ public class XiaoHuanIpFetchService {
             LOG.info(" pageNumsStack is null ");
             return;
         }
-        LOG.info(" start getting current  <a> tags ");
+        LOG.info(" === start getting current  <a> tags === ");
         boolean flag = true;
         while (flag) {
             try {
@@ -206,7 +206,7 @@ public class XiaoHuanIpFetchService {
         // 做任务
         int cur = 0;
         int curWorkSize = pageNumsList.size();
-        LOG.info(" current page nums  : {} ,list : {} ", curWorkSize, pageNumsList);
+        LOG.info(" === current page nums  : {} ,list : {} === ", curWorkSize, pageNumsList);
         int step = curWorkSize / CORE_POOL_SIZE;
         List<Future<List<IpPoolMainDTO>>> futures = Collections.synchronizedList(new ArrayList<>());
         while (cur < curWorkSize) {
@@ -214,9 +214,13 @@ public class XiaoHuanIpFetchService {
             curEndPos = Math.min(curEndPos, curWorkSize);
             List<IpLocation> syncWorkList = pageNumsList.subList(cur, curEndPos);
             cur = curEndPos;
-            Future<List<IpPoolMainDTO>> future = EXECUTOR_SERVICE
-                    .submit(new XHGetpageInfoTask(curUriString, syncWorkList));
-            futures.add(future);
+            try {
+                Future<List<IpPoolMainDTO>> future = EXECUTOR_SERVICE
+                        .submit(new XHGetpageInfoTask(curUriString, syncWorkList));
+                futures.add(future);
+            } catch (Exception e) {
+                LOG.error(" submit task error , message :{} ", e);
+            }
         }
         uploadData(futures);
     }
@@ -227,11 +231,11 @@ public class XiaoHuanIpFetchService {
      * @param futures
      */
     private void uploadData(List<Future<List<IpPoolMainDTO>>> futures) {
-        LOG.info(" begin stage data ");
+        LOG.info(" === begin stage data === ");
         Assert.notEmpty(futures, " future task wouldn't empty ");
         for (Future<List<IpPoolMainDTO>> future : futures) {
             try {
-                List<IpPoolMainDTO> lists = future.get();
+                List<IpPoolMainDTO> lists = future.get(3, TimeUnit.MINUTES);
                 if (CollectionUtils.isEmpty(lists)) {
                     LOG.info(" current IpPoolMainDO list is empty , will not do insert ");
                     continue;
@@ -256,7 +260,7 @@ public class XiaoHuanIpFetchService {
                 String responseText = vaildateEntity(entity);
                 LOG.info(" sent storage data success , response text : {} ", responseText);
             } catch (InterruptedException | ExecutionException | URISyntaxException | UnsupportedEncodingException
-                    | JsonProcessingException e) {
+                    | JsonProcessingException | TimeoutException e) {
                 LOG.error(" send stage data error , message : {} ", e.getMessage());
             } catch (IOException e) {
                 e.printStackTrace();
@@ -308,7 +312,7 @@ public class XiaoHuanIpFetchService {
             var flag = false;
             var target = v.getValue();
             if (ObjectUtils.isNotEmpty(target)) {
-                if (checkPageNumberLegal(target.getLocationName(), PAGE_REGIX)) {
+                if (checkPageLegal(target.getLocationName(), PAGE_REGIX)) {
                     flag = true;
                 }
             }
@@ -329,25 +333,11 @@ public class XiaoHuanIpFetchService {
     }
 
     /**
-     * 移除中国重复地址
-     *
+     * 增加指定的页面
+     * 
      * @param resAtags
      */
     private void removeMutiple(TreeMap<Integer, IpLocation> resAtags) {
-        // Set<Map.Entry<Integer, IpLocation>> entrySet = resAtags.entrySet();
-        // Iterator<Map.Entry<Integer, IpLocation>> iterator = entrySet.iterator();
-        // while (iterator.hasNext()) {
-        // Map.Entry<Integer, IpLocation> m = iterator.next();
-        // IpLocation tar = m.getValue();
-        // if (XIAO_HUAN_POS_CHINA.equals(tar.getLocationName()) ||
-        // XIAO_HUAN_POS_AMERICA.equals(tar.getLocationName())) {
-        // continue;
-        // }
-        // if (XIAO_HUAN_POS_AMERICA.equals(tar.getLocationName())) {
-        // continue;
-        // }
-        // iterator.remove();
-        // }
         resAtags.put(0, new IpLocation(IpServiceConstant.HC_LINK_NAME, IpServiceConstant.HC_LINK));
     }
 }

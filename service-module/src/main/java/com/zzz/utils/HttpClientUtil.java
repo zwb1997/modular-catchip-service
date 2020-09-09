@@ -20,7 +20,7 @@ import java.util.List;
 @Service
 public class HttpClientUtil {
     private static final Logger LOG = LoggerFactory.getLogger(HttpClientUtil.class);
-    private static final String RESPONSE_CODE_PREFIX = "2";
+    private static final int RESPONSE_CODE_PREFIX = 200;
     private static final int REQUEST_TIME_OUT = 20;
     private static final int ESTABLISH_TIME_OUT = 30;
     private static final String PROXY_IP = "104.207.151.166";
@@ -68,11 +68,11 @@ public class HttpClientUtil {
 
         Assert.notNull(response, " respnse could't empty ");
         Assert.notNull(response.getStatusLine(), " respnse.getStatusLine could't empty ");
-        String responseCodeString = String.valueOf(response.getStatusLine().getStatusCode());
-        if (responseCodeString.startsWith(RESPONSE_CODE_PREFIX)) {
+        int responseCodeString = response.getStatusLine().getStatusCode();
+        if (responseCodeString == RESPONSE_CODE_PREFIX) {
             LOG.info(" response success, will show headers ");
         } else {
-            LOG.info(" response failed, will show headers ");
+            LOG.info(" response code is not '200', will show headers ");
         }
         LOG.info(" execute done,response code : {} , will print headers ", responseCodeString);
         Header[] headers = response.getAllHeaders();

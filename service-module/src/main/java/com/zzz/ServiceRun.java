@@ -10,7 +10,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 public class ServiceRun {
     private static final Logger LOG = LoggerFactory.getLogger(ServiceRun.class);
     public static void main(String[] args) {
-        LOG.info(" fetching data service service module start ");
+        LOG.info(" fetching data service module start ");
         SpringApplication.run(ServiceRun.class,args);
     }
 }

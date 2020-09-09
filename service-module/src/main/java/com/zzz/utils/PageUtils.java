@@ -113,6 +113,22 @@ public class PageUtils {
         return res;
     }
 
+    /**
+     * list must be 10 elements
+     * 固定格式的集合
+     * 0 -> ip
+     * 1 -> port
+     * 2 -> ip地址
+     * 3 -> ip供应商
+     * 4 -> 是否支持https
+     * 5 -> 是否支持post请求
+     * 6 -> 匿名程度
+     * 7 -> 速度
+     * 8 -> 网站检测 ip入库时间
+     * 9 -> 网站检测 ip最后有效时间
+     * @param infos
+     * @return
+     */
     private static IpPoolMainDTO createInstance(List<String> infos) {
         if (CollectionUtils.isEmpty(infos) || infos.size() < COMBINE_ARRAY_REQUIRE_LENGTH || infos.size() > COMBINE_ARRAY_REQUIRE_LENGTH) {
             LOG.error(" error instance size must be 10 ");
@@ -172,8 +188,13 @@ public class PageUtils {
         }
         return resList;
     }
-
-    public static boolean checkPageNumberLegal(Object num,String section){
+    /**
+     * check page name is match the section
+     * @param num
+     * @param section
+     * @return could match the section
+     */
+    public static boolean checkPageLegal(Object num,String section){
         Assert.notNull(section, " section could not null ");
         return String.valueOf(num).matches(section);
     }
