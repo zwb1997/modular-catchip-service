@@ -1,4 +1,6 @@
 package com.zzz.web;
+import java.util.Arrays;
+
 import com.zzz.ServiceRun;
 import com.zzz.web.common.banner.ServiceBanner;
 
@@ -22,6 +24,7 @@ public class RunApp  {
         LOG.info(" fetching data service web module start ");
         SpringApplication application = new SpringApplication(RunApp.class);
         application.setBanner(new ServiceBanner());
-        SpringApplication.run(START_RESOURCES,args);
+        application.addPrimarySources(Arrays.asList(START_RESOURCES));
+        application.run(args);
     }
 }
