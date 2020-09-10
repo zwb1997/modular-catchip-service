@@ -12,12 +12,6 @@
     <properties></properties>
 
     <dependencies>
-        <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
-        <dependency>
-            <groupId>javax.servlet</groupId>
-            <artifactId>javax.servlet-api</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>com.zzz</groupId>
             <artifactId>service-module</artifactId>
@@ -51,10 +45,16 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
+          <!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+          <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
-        <finalName>ipfetchservice</finalName>
+        <finalName>${project.artifactId}.${module-version}</finalName>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>

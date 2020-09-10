@@ -17,6 +17,9 @@
         <java.version>11</java.version>
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
+        <!-- <service-module-version>0.2</service-module-version>
+        <model-module-version>0.1</model-module-version>
+        <web-module-version>0.2</web-module-version> -->
         <module-version>0.1</module-version>
         <mysql-version>8.0.16</mysql-version>
         <druid-springboot-start-version>1.1.10</druid-springboot-start-version>
@@ -28,6 +31,7 @@
         <jackson-verison>2.10.4</jackson-verison>
         <com.zzz.web.common-lang3-version>3.9</com.zzz.web.common-lang3-version>
         <httpclient-version>4.5.12</httpclient-version>
+        <httpclient-async-version>4.1.4</httpclient-async-version>
         <jsoup-version>1.13.1</jsoup-version>
         <logback-version>1.2.3</logback-version>
         <spring-jdbc-version>5.2.7.RELEASE</spring-jdbc-version>
@@ -59,21 +63,18 @@
                 <version>${javax-version}</version>
                 <scope>provided</scope>
             </dependency>
-
             <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-web -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-web</artifactId>
                 <version>${spring-boot-web-version}</version>
             </dependency>
-
             <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter</artifactId>
                 <version>${spring-boot-start-version}</version>
             </dependency>
-
             <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-autoconfigure -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -87,7 +88,6 @@
                 <version>${spring-boot-test-version}</version>
                 <scope>test</scope>
             </dependency>
-
             <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
             <dependency>
                 <groupId>ch.qos.logback</groupId>
@@ -100,7 +100,6 @@
                 <artifactId>logback-core</artifactId>
                 <version>${logback-version}</version>
             </dependency>
-
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
@@ -122,19 +121,23 @@
                 <artifactId>web-module</artifactId>
                 <version>${module-version}</version>
             </dependency>
-
             <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
                 <version>${com.zzz.web.common-lang3-version}</version>
             </dependency>
-
             <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient</artifactId>
                 <version>${httpclient-version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpasyncclient -->
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpasyncclient</artifactId>
+                <version>${httpclient-async-version}</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
             <dependency>
@@ -142,7 +145,6 @@
                 <artifactId>jsoup</artifactId>
                 <version>${jsoup-version}</version>
             </dependency>
-
             <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
