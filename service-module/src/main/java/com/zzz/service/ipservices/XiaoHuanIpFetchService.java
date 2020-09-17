@@ -259,11 +259,8 @@ public class XiaoHuanIpFetchService {
                 HttpEntity entity = response.getEntity();
                 String responseText = vaildateEntity(entity);
                 LOG.info(" sent storage data success , response text : {} ", responseText);
-            } catch (InterruptedException | ExecutionException | URISyntaxException | UnsupportedEncodingException
-                    | JsonProcessingException | TimeoutException e) {
+            } catch (Exception e) {
                 LOG.error(" send stage data error , message : {} ", e.getMessage());
-            } catch (IOException e) {
-                e.printStackTrace();
             }
         }
         endTime = System.currentTimeMillis();
