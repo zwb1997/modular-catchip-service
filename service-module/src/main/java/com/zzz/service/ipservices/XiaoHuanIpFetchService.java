@@ -1,12 +1,12 @@
 package com.zzz.service.ipservices;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.zzz.entitymodel.servicebase.DTO.IpLocation;
-import com.zzz.common.threadconfig.NamedThreadFactory;
+import com.zzz.common.provider.TaskThreadPoolProvider;
 import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.zzz.entitymodel.servicebase.constants.IpServiceConstant;
-import com.zzz.service.ipservices.work.XHGetpageInfoTask;
+import com.zzz.service.ipservices.abstractservice.AbsrtactFetchIpService;
+import com.zzz.service.ipservices.task.XHGetpageInfoTask;
 import com.zzz.utils.SignUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -19,13 +19,10 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.scheduling.annotation.EnableScheduling;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -34,43 +31,41 @@ import java.util.Map.Entry;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-import static com.zzz.utils.HttpClientUtil.*;
-import static com.zzz.utils.HttpClientUtil.vaildateReponse;
-import static com.zzz.utils.PageUtils.*;
 import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
 
 /**
  * 记得超时重连
  */
 @Service
-@EnableScheduling
-public class XiaoHuanIpFetchService {
+public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(XiaoHuanIpFetchService.class);
+    private static final ExecutorService EXECUTOR_SERVICE = TaskThreadPoolProvider.getInstance();
 
-    private static final ArrayBlockingQueue<Runnable> ARRAY_BLOCKING_QUEUE = new ArrayBlockingQueue<>(6);
-    private static final int CORE_POOL_SIZE = 3;
-    private static final int MAX_POOL_SIZE = 5;
-    private static final int KEEP_ALIVE_TIME = 60;
-    private static final ExecutorService EXECUTOR_SERVICE = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE,
-            KEEP_ALIVE_TIME, TimeUnit.SECONDS, ARRAY_BLOCKING_QUEUE, new NamedThreadFactory());
-    private static long startTime = 0L;
-    private static long endTime = 0L;
+    @Override
+    protected void serviceEntry() {
+        START_TIME = System.currentTimeMillis();
+        LOG.info(" === {} SERVICE START === ", X_H_SERVICE_TAG);
+        LOG.info(" start time : {} ", DateFormatUtils.format(new Date(), COMMON_DATE_FORMAT_REGIX));
+        run();
+        END_TIME = System.currentTimeMillis();
+        var useTime = END_TIME - START_TIME;
+        LOG.info(" === {} SERVICE END === ", X_H_SERVICE_TAG);
+        LOG.info(" end time : {} ", DateFormatUtils.format(new Date(), COMMON_DATE_FORMAT_REGIX));
+        LOG.info(" using time : miniutes :{} ,seconds :{} ", useTime / 1000 / 60, useTime / 1000);
+    }
 
-    @Scheduled(fixedDelay = 60 * 1000)
-    public void run() {
-        LOG.info(" === SERVICE START === ");
-        startTime = System.currentTimeMillis();
-        LOG.info(" === time : {} === ", DateFormatUtils.format(startTime, IpServiceConstant.COMMON_DATE_FORMAT_REGIX));
+    public List<String> run() {
+        List<String> aTagList = new LinkedList<>();
         List<String> aTagLists = getXHlist();
-        if (!CollectionUtils.isEmpty(aTagLists)) {
-            int size = aTagLists.size();
-            LOG.info(" ip prefix nums : {} ", size);
-            LOG.info(" prepare to fetch full page nums ");
-            fetchIpPages(aTagLists);
-        } else {
+        if (CollectionUtils.isEmpty(aTagLists)) {
             LOG.info(" ip prefix nums is 0 , will not fetch full page nums.... ");
+            return aTagList;
         }
+        int size = aTagLists.size();
+        LOG.info(" ip prefix nums : {} ", size);
+        LOG.info(" prepare to fetch full page nums ");
+        return aTagLists;
     }
 
     /**
@@ -78,8 +73,9 @@ public class XiaoHuanIpFetchService {
      */
     public List<String> getXHlist() {
         LOG.info(" === prepare to get xiaohuan ip pages === ");
-        List<String> ress = new ArrayList<>(100);
+        List<String> ress = new LinkedList<>();
         try {
+            // 小幻的参数 暂时用uuid代替 能正常请求
             String uuid = UUID.randomUUID().toString().replace("-", "");
             List<NameValuePair> requestParams = new ArrayList<>();
             requestParams.add(new BasicNameValuePair("num", "100"));
@@ -100,7 +96,8 @@ public class XiaoHuanIpFetchService {
             List<Header> requestHeaders = new ArrayList<>();
             requestHeaders.add(new BasicHeader("user-agent", USER_AGENT));
             String html = ipFetchGetRequest(uri, requestHeaders);
-            TreeMap<Integer, IpLocation> resAtags = matchAtages(1, html, IpServiceConstant.PAGE_AREA_LIST_REGIX);
+            TreeMap<Integer, IpLocation> resAtags = pageUtil.matchAtages(1, html,
+                    IpServiceConstant.PAGE_AREA_LIST_REGIX);
             // 增加花刺连接
             removeMutiple(resAtags);
             LOG.info(" finish lists :");
@@ -114,7 +111,7 @@ public class XiaoHuanIpFetchService {
                 ress.add(ipLocation.getLocationHref());
             }
             LOG.info(" === done === ");
-        } catch (URISyntaxException | IOException e) {
+        } catch (Exception e) {
             LOG.error(" executing request error , messages : {} ", e.getMessage());
         }
         return ress;
@@ -122,7 +119,7 @@ public class XiaoHuanIpFetchService {
 
     /**
      * fetch every page info
-     *
+     * 
      * @param ipPrefixLists
      */
     public void fetchIpPages(List<String> ipPrefixLists) {
@@ -139,7 +136,7 @@ public class XiaoHuanIpFetchService {
                 LOG.info(" do with current type :{} ", curUriString);
                 String currentPage = ipFetchGetRequest(uri, headerList);
                 LOG.info(" current html : {} ", currentPage);
-                TreeMap<Integer, IpLocation> aTags = matchAtages(pageNum, currentPage,
+                TreeMap<Integer, IpLocation> aTags = pageUtil.matchAtages(pageNum, currentPage,
                         IpServiceConstant.PAGE_NUM_REGIS);
                 LOG.info(" done ");
                 LOG.info(" start fetching  current pages ");
@@ -181,8 +178,8 @@ public class XiaoHuanIpFetchService {
                 List<Header> headerList = new ArrayList<>();
                 headerList.add(new BasicHeader("user-agent", USER_AGENT));
                 String currentPage = ipFetchGetRequest(uri, headerList);
-                if (hasNextPage(currentPage, HAS_PAGE_REGIX)) {
-                    TreeMap<Integer, IpLocation> curMap = matchAtages(0, currentPage, PAGE_NUM_REGIS);
+                if (pageUtil.hasNextPage(currentPage, HAS_PAGE_REGIX)) {
+                    TreeMap<Integer, IpLocation> curMap = pageUtil.matchAtages(0, currentPage, PAGE_NUM_REGIS);
                     sortAndAdd(curMap, pageNumsStack);
                 } else {
                     LOG.info(" current page : {} has no matches , will pop ", curFullHref);
@@ -196,8 +193,6 @@ public class XiaoHuanIpFetchService {
     }
 
     /**
-     * 有问题 分割任务stack
-     *
      * @param curUriString
      * @param pageNumsList
      */
@@ -207,8 +202,10 @@ public class XiaoHuanIpFetchService {
         int cur = 0;
         int curWorkSize = pageNumsList.size();
         LOG.info(" === current page nums  : {} ,list : {} === ", curWorkSize, pageNumsList);
-        int step = curWorkSize / CORE_POOL_SIZE;
-        List<Future<List<IpPoolMainDTO>>> futures = Collections.synchronizedList(new ArrayList<>());
+        int step = curWorkSize / TaskThreadPoolProvider.getCorePoolSize();
+        // List<Future<List<IpPoolMainDTO>>> futures = Collections.synchronizedList(new
+        // ArrayList<>());
+        List<Future<List<IpPoolMainDTO>>> futures = new LinkedList<>();
         while (cur < curWorkSize) {
             int curEndPos = (cur + step + 1);
             curEndPos = Math.min(curEndPos, curWorkSize);
@@ -227,7 +224,7 @@ public class XiaoHuanIpFetchService {
 
     /**
      * 获取每个任务的结果
-     *
+     * 
      * @param futures
      */
     private void uploadData(List<Future<List<IpPoolMainDTO>>> futures) {
@@ -235,17 +232,16 @@ public class XiaoHuanIpFetchService {
         Assert.notEmpty(futures, " future task wouldn't empty ");
         for (Future<List<IpPoolMainDTO>> future : futures) {
             try {
-                List<IpPoolMainDTO> lists = future.get(3, TimeUnit.MINUTES);
+                List<IpPoolMainDTO> lists = future.get(10,TimeUnit.MINUTES);
                 if (CollectionUtils.isEmpty(lists)) {
                     LOG.info(" current IpPoolMainDO list is empty , will not do insert ");
                     continue;
                 }
-                // change to send data to storage service
+                ObjectMapper objectMapper = new ObjectMapper();
+                String curData = objectMapper.writeValueAsString(lists);
                 URI uri = new URIBuilder(STORAGE_SERVICE_LOCATION).setScheme("http").setCharset(StandardCharsets.UTF_8)
                         .setPort(STORAGE_SERVICE_LOCATION_PORT).setPath(IpServiceConstant.STORAGE_SERVICE_PATH).build();
                 HttpPost httpPost = new HttpPost(uri);
-                ObjectMapper objectMapper = new ObjectMapper();
-                String curData = objectMapper.writeValueAsString(lists);
                 httpPost.setEntity(new StringEntity(curData, Consts.UTF_8));
                 List<Header> headerList = new ArrayList<>();
                 String curTimeMillions = String.valueOf(System.currentTimeMillis());
@@ -254,23 +250,15 @@ public class XiaoHuanIpFetchService {
                 headerList.add(new BasicHeader(CUR_TIME_SPAN, curTimeMillions));
                 headerList.add(new BasicHeader(SECRET_SIGN, SignUtil.createSign(curTimeMillions, SECRET)));
                 headerList.add(new BasicHeader("Content-Type", HTTP_CONTENT_TYPE_JSON));
-                HttpResponse response = exeuteDefaultRequest(httpPost, headerList, false);
-                vaildateReponse(response);
+                HttpResponse response = clientUtil.exeuteDefaultRequest(httpPost, headerList, false);
+                clientUtil.vaildateReponse(response);
                 HttpEntity entity = response.getEntity();
-                String responseText = vaildateEntity(entity);
+                String responseText = pageUtil.vaildateEntity(entity);
                 LOG.info(" sent storage data success , response text : {} ", responseText);
             } catch (Exception e) {
                 LOG.error(" send stage data error , message : {} ", e.getMessage());
             }
         }
-        endTime = System.currentTimeMillis();
-        long useTime = endTime - startTime;
-        LOG.info(" === SERVICE END === ");
-        LOG.info(" === time : {} === ", DateFormatUtils.format(endTime, IpServiceConstant.COMMON_DATE_FORMAT_REGIX));
-        LOG.info(" data fetch use minutes : {},second :{},millionSecond :{} ", useTime / 1000 / 60, useTime / 1000,
-                useTime);
-        startTime = 0;
-        endTime = 0;
     }
 
     /**
@@ -292,6 +280,11 @@ public class XiaoHuanIpFetchService {
         }
     }
 
+    /**
+     * 保证顺序加入link
+     * @param curMap
+     * @param pageNumsStack
+     */
     private void sortAndAdd(TreeMap<Integer, IpLocation> curMap, Stack<IpLocation> pageNumsStack) {
         Set<Map.Entry<Integer, IpLocation>> curSet = curMap.entrySet();
         // remove name is not numeral
@@ -303,13 +296,18 @@ public class XiaoHuanIpFetchService {
         });
     }
 
+    /**
+     * 移除重复link
+     * @param curSet
+     * @return
+     */
     private Set<Entry<Integer, IpLocation>> checkAndRemoveXHPageNumber(Set<Entry<Integer, IpLocation>> curSet) {
         Assert.notEmpty(curSet, " could not check empty set ");
         var resSet = curSet.stream().filter(v -> {
             var flag = false;
             var target = v.getValue();
             if (ObjectUtils.isNotEmpty(target)) {
-                if (checkPageLegal(target.getLocationName(), PAGE_REGIX)) {
+                if (pageUtil.checkPageLegal(target.getLocationName(), PAGE_REGIX)) {
                     flag = true;
                 }
             }
@@ -318,20 +316,26 @@ public class XiaoHuanIpFetchService {
         return resSet;
     }
 
+    /**
+     * 本类通用get请求
+     * @param uri
+     * @param headerList
+     * @return
+     * @throws IOException
+     */
     private String ipFetchGetRequest(URI uri, List<Header> headerList) throws IOException {
         LOG.info(" prepare to send a request ");
         LOG.info(" URI : {} ", uri);
         HttpGet get = new HttpGet(uri);
-        HttpResponse response = exeuteDefaultRequest(get, headerList, true);
-        vaildateReponse(response);
+        HttpResponse response = clientUtil.exeuteDefaultRequest(get, headerList, true);
+        clientUtil.vaildateReponse(response);
         HttpEntity httpEntity = response.getEntity();
-        String currentPage = vaildateEntity(httpEntity);
+        String currentPage = pageUtil.vaildateEntity(httpEntity);
         return currentPage;
     }
 
     /**
      * 增加指定的页面
-     * 
      * @param resAtags
      */
     private void removeMutiple(TreeMap<Integer, IpLocation> resAtags) {

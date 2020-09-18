@@ -10,8 +10,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.zzz.entitymodel.servicebase.constants.IpServiceConstant;
 
-public class NamedThreadFactory implements ThreadFactory {
-    private static final Logger LOG = LoggerFactory.getLogger(NamedThreadFactory.class);
+public class MarkThreadFactory implements ThreadFactory {
+    private static final Logger LOG = LoggerFactory.getLogger(MarkThreadFactory.class);
     private final AtomicInteger workId = new AtomicInteger(0);
     private String workName = IpServiceConstant.XH_THREAD_NAME_PREFIEX;
 

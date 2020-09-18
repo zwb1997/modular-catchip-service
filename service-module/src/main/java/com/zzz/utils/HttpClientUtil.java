@@ -1,6 +1,5 @@
 package com.zzz.utils;
 
-
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpHost;
@@ -16,6 +15,7 @@ import org.springframework.util.Assert;
 
 import java.io.IOException;
 import java.util.List;
+import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
 
 @Service
 public class HttpClientUtil {
@@ -23,8 +23,7 @@ public class HttpClientUtil {
     private static final int RESPONSE_CODE_PREFIX = 200;
     private static final int REQUEST_TIME_OUT = 20;
     private static final int ESTABLISH_TIME_OUT = 30;
-    private static final String PROXY_IP = "104.207.151.166";
-    private static final int PROXY_IP_PORT = 37720;
+
     private static final HttpHost HTTP_HOST = new HttpHost(PROXY_IP, PROXY_IP_PORT);
 
     /**
@@ -34,9 +33,7 @@ public class HttpClientUtil {
      * @param headers
      * @return
      */
-    public static HttpResponse exeuteDefaultRequest(HttpRequestBase httpType,
-                                                    List<Header> headers,
-                                                    boolean useProxy) {
+    public HttpResponse exeuteDefaultRequest(HttpRequestBase httpType, List<Header> headers, boolean useProxy) {
         LOG.info(" begin send a request ");
         HttpResponse response = null;
         try {
@@ -44,15 +41,11 @@ public class HttpClientUtil {
             Assert.notNull(headers, " request header is null ");
             int headerSize = headers.size();
             httpType.setHeaders(headers.toArray(new Header[headerSize]));
-            RequestConfig requestConfig = useProxy ? RequestConfig
-                    .custom()
-                    .setConnectionRequestTimeout(REQUEST_TIME_OUT)
-                    .setProxy(HTTP_HOST)
-                    .build() : RequestConfig
-                    .custom()
-                    .setConnectionRequestTimeout(REQUEST_TIME_OUT)
-                    .build();
+            RequestConfig requestConfig = useProxy
+                    ? RequestConfig.custom().setConnectionRequestTimeout(REQUEST_TIME_OUT).setProxy(HTTP_HOST).build()
+                    : RequestConfig.custom().setConnectionRequestTimeout(REQUEST_TIME_OUT).build();
             httpType.setConfig(requestConfig);
+            printHeaders(httpType.getAllHeaders());
             response = client.execute(httpType);
         } catch (IOException e) {
             LOG.error(" execute request error : messages {} ", e.getMessage());
@@ -60,14 +53,17 @@ public class HttpClientUtil {
         return response;
     }
 
-
     /**
-     * @param response vaildate response is success by code is 200 and print response headers
+     * @param response vaildate response is success by code is 200 and print
+     *                 response headers
      */
-    public static void vaildateReponse(HttpResponse response) {
+    public void vaildateReponse(HttpResponse response) {
 
         Assert.notNull(response, " respnse could't empty ");
-        Assert.notNull(response.getStatusLine(), " respnse.getStatusLine could't empty ");
+        if (response.getStatusLine() == null) {
+            LOG.info(" response statusline is null , will not validate");
+            return;
+        }
         int responseCodeString = response.getStatusLine().getStatusCode();
         if (responseCodeString == RESPONSE_CODE_PREFIX) {
             LOG.info(" response success, will show headers ");
@@ -76,7 +72,7 @@ public class HttpClientUtil {
         }
         LOG.info(" execute done,response code : {} , will print headers ", responseCodeString);
         Header[] headers = response.getAllHeaders();
-        printResponseHeaders(headers);
+        printHeaders(headers);
     }
 
     /**
@@ -84,13 +80,15 @@ public class HttpClientUtil {
      *
      * @param headers
      */
-    public static void printResponseHeaders(Header[] headers) {
+    public void printHeaders(Header[] headers) {
         Assert.notEmpty(headers, " error , response header is null,messages");
+        LOG.info(" === request/response headers === ");
         for (Header h : headers) {
             HeaderElement[] hes = h.getElements();
             for (HeaderElement he : hes) {
                 LOG.info(" header : {} value : {} ", he.getName(), he.getValue());
             }
         }
+        LOG.info(" === request/response headers === ");
     }
 }

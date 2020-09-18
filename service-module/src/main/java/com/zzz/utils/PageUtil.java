@@ -25,9 +25,9 @@ import java.util.*;
 import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
 
 @Service
-public class PageUtils {
+public class PageUtil {
 
-    private static final Logger LOG = LoggerFactory.getLogger(PageUtils.class);
+    private static final Logger LOG = LoggerFactory.getLogger(PageUtil.class);
     private static final String[] EMPTY_ARR = new String[]{"", "", "", "", "", "", "", "", "", ""};
     private static final int COMBINE_ARRAY_REQUIRE_LENGTH = 10;
 
@@ -38,7 +38,7 @@ public class PageUtils {
      * <p>
      * get page a tags text value and href value
      */
-    public static TreeMap<Integer, IpLocation> matchAtages(int num,String html, String selectParmas) {
+    public TreeMap<Integer, IpLocation> matchAtages(int num,String html, String selectParmas) {
         TreeMap<Integer, IpLocation> res = new TreeMap<>();
         if (StringUtils.isBlank(html)) {
             LOG.info(" current html is null ");
@@ -56,13 +56,13 @@ public class PageUtils {
         return res;
     }
 
-    /**
-     * detect page if has next page
-     *
-     * @param curDocmentHtml
-     * @return
-     */
-    public static boolean hasNextPage(String curDocmentHtml, String exceptSection) {
+  /**
+   * 
+   * @param curDocmentHtml
+   * @param exceptSection
+   * @return
+   */
+    public boolean hasNextPage(String curDocmentHtml, String exceptSection) {
         Document doc = Jsoup.parse(curDocmentHtml);
         Elements bodyEs = doc.select(exceptSection);
         if (bodyEs.isEmpty()) {
@@ -71,7 +71,7 @@ public class PageUtils {
         return true;
     }
 
-    public static String vaildateEntity(HttpEntity entity) throws IOException, ParseException {
+    public String vaildateEntity(HttpEntity entity) throws IOException, ParseException {
         if(ObjectUtils.isEmpty(entity)){
             LOG.info(" current response entity is empty ");
             return "";
@@ -87,13 +87,13 @@ public class PageUtils {
      * @param sectionRegix
      * @return
      */
-    public static synchronized Elements fetchElementWithSection(String html, String sectionRegix) {
+    public synchronized Elements fetchElementWithSection(String html, String sectionRegix) {
         Element element = Jsoup.parse(html);
         Elements elements = element.select(sectionRegix);
         return elements;
     }
 
-    public static synchronized List<IpPoolMainDTO> combineXiaoHuanInfo(Elements elements) {
+    public synchronized List<IpPoolMainDTO> combineXiaoHuanInfo(Elements elements) {
         if (CollectionUtils.isEmpty(elements)) {
             LOG.info(" elements is empty,will not work ");
             return null;
@@ -129,7 +129,7 @@ public class PageUtils {
      * @param infos
      * @return
      */
-    private static IpPoolMainDTO createInstance(List<String> infos) {
+    private IpPoolMainDTO createInstance(List<String> infos) {
         if (CollectionUtils.isEmpty(infos) || infos.size() < COMBINE_ARRAY_REQUIRE_LENGTH || infos.size() > COMBINE_ARRAY_REQUIRE_LENGTH) {
             LOG.error(" error instance size must be 10 ");
             return null;
@@ -171,7 +171,7 @@ public class PageUtils {
      * @param cure
      * @return
      */
-    public static List<String> findTextNode(Element cure) {
+    public List<String> findTextNode(Element cure) {
         if (cure == null) {
             LOG.info(" current Element is empty ");
             return null;
@@ -194,7 +194,7 @@ public class PageUtils {
      * @param section
      * @return could match the section
      */
-    public static boolean checkPageLegal(Object num,String section){
+    public boolean checkPageLegal(Object num,String section){
         Assert.notNull(section, " section could not null ");
         return String.valueOf(num).matches(section);
     }

@@ -1,16 +1,10 @@
 package com.zzz.entitymodel.servicebase.DTO;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.zzz.entitymodel.servicebase.DO.IpPoolMainDO;
-import com.zzz.entitymodel.servicebase.constants.IpServiceConstant;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
-import org.springframework.util.CollectionUtils;
 
-import java.math.BigDecimal;
 import java.util.*;
-
-import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
 
 public class IpPoolMainDTO {
     @JsonProperty("in")

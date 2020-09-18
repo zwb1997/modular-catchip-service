@@ -1,7 +1,10 @@
-package com.zzz.service.ipservices.work;
+package com.zzz.service.ipservices.task;
 
 import com.zzz.entitymodel.servicebase.DTO.IpLocation;
 import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
+import com.zzz.utils.HttpClientUtil;
+import com.zzz.utils.PageUtil;
+import com.zzz.utils.SignUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -13,20 +16,16 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-
 import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
-import static com.zzz.utils.HttpClientUtil.exeuteDefaultRequest;
-import static com.zzz.utils.HttpClientUtil.vaildateReponse;
-import static com.zzz.utils.PageUtils.vaildateEntity;
-
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.Callable;
 
-import static com.zzz.utils.PageUtils.*;
-
 public class XHGetpageInfoTask implements Callable<List<IpPoolMainDTO>> {
     private static final Logger LOG = LoggerFactory.getLogger(XHGetpageInfoTask.class);
+    private static final HttpClientUtil CLIENT_UTIL = new HttpClientUtil();
+    private static final PageUtil PAGE_UTIL = new PageUtil();
+    private static final SignUtil SIGN_UTIL = new SignUtil();
     private List<IpLocation> workStack;
     private String curPrefixUrl;
     private Random random = new Random();
@@ -64,13 +63,13 @@ public class XHGetpageInfoTask implements Callable<List<IpPoolMainDTO>> {
                 HttpGet get = new HttpGet(uri);
                 LOG.info(" do with current url :{} ", curUriString);
                 
-                HttpResponse response = exeuteDefaultRequest(get, headerList, true);
-                vaildateReponse(response);
+                HttpResponse response = CLIENT_UTIL.exeuteDefaultRequest(get, headerList, true);
+                CLIENT_UTIL.vaildateReponse(response);
                 HttpEntity httpEntity = response.getEntity();
-                String currentPage = vaildateEntity(httpEntity);
-                Elements elements = fetchElementWithSection(currentPage, HAS_PAGE_REGIX);
+                String currentPage = PAGE_UTIL.vaildateEntity(httpEntity);
+                Elements elements = PAGE_UTIL.fetchElementWithSection(currentPage, HAS_PAGE_REGIX);
                 if (ObjectUtils.isNotEmpty(elements)) {
-                    ipPoolMainDOs.addAll(Objects.requireNonNull(combineXiaoHuanInfo(elements)));
+                    ipPoolMainDOs.addAll(Objects.requireNonNull(PAGE_UTIL.combineXiaoHuanInfo(elements)));
                 } else {
                     LOG.info(" current elements is empty,will not work ,page : {} ", fullUrl);
                 }

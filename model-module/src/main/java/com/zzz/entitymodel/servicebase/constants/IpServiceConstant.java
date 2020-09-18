@@ -27,6 +27,8 @@ public class IpServiceConstant {
     public static final String SECRET_SIGN = "secretsign";
     public static final String HTTP_CONTENT_TYPE_JSON = "application/json";
     public static final String COMMON_DATE_FORMAT_REGIX = "yyyy-MM-dd HH:mm:ss";
+    public static final String PROXY_IP = "104.207.151.166";
+    public static final int PROXY_IP_PORT = 37720;
 
     public static final String STORAGE_SERVICE_LOCATION="http://39.105.41.230";
 //    public static final String STORAGE_SERVICE_LOCATION = "http://127.0.0.1";
@@ -34,6 +36,7 @@ public class IpServiceConstant {
     public static final int STORAGE_SERVICE_LOCATION_PORT= 37240;
 
     //XIAO_HUAN
+    public static final String X_H_SERVICE_TAG = "XIAOHUAN";
     public static final String XIAO_HUAN_TQDL = "//ip.ihuan.me/tqdl.html";
     public static final String XIAO_HUAN_ME = "https://ip.ihuan.me";
     public static final String XIAO_HUAN_TI = "https://ip.ihuan.me/ti.html";
