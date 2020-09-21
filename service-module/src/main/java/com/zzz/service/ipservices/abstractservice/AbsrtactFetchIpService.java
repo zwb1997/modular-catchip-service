@@ -10,7 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * 试试责任链 让多个服务穿成一串 ip爬取通用服务模板 1.httpclient 请求 2.page 页码检测 3.page 信息提取 4.存储数据
+ *  抽象ip爬取服务
  */
 public abstract class AbsrtactFetchIpService {
     private static final Logger LOG = LoggerFactory.getLogger(AbsrtactFetchIpService.class);
@@ -39,7 +39,7 @@ public abstract class AbsrtactFetchIpService {
 
     protected abstract void serviceEntry();
 
-    protected void runTask() {
+    public void runTask() {
         serviceEntry();
     }
 

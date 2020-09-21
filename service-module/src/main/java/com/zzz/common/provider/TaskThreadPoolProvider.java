@@ -1,6 +1,9 @@
 package com.zzz.common.provider;
 
+import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -8,20 +11,29 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class TaskThreadPoolProvider {
     private static final Logger LOG = LoggerFactory.getLogger(TaskThreadPoolProvider.class);
     // the executorService instance
-    private static volatile ExecutorService EXECUTOR_SERVICE;
-    private static final LinkedBlockingQueue<Runnable> BLOCKING_QUEUE = new LinkedBlockingQueue<>(12);
-    private static final int CORE_POOL_SIZE = 4;
+    private static volatile ThreadPoolExecutor EXECUTOR_SERVICE;
+    private static final int BLOCKING_QUEUE_SIZE = 12;
+    private static final LinkedBlockingQueue<Runnable> BLOCKING_QUEUE = new LinkedBlockingQueue<>(BLOCKING_QUEUE_SIZE);
+    private static final int CORE_POOL_SIZE = 3;
     private static final int MAX_POOL_SIZE = 6;
     private static final int KEEP_ALIVE_TIME = 60;
+    private static final int MAX_TASK_SIZE = MAX_POOL_SIZE + BLOCKING_QUEUE_SIZE;
     private static final TimeUnit ALIVE_TIME_UNIT = TimeUnit.SECONDS;
     public static final Lock LOCK = new ReentrantLock();
 
+    /**
+     * instance will lazy loading
+     * 
+     * @return
+     */
     public static ExecutorService getInstance() {
         try {
             if (EXECUTOR_SERVICE == null) {
@@ -47,12 +59,45 @@ public class TaskThreadPoolProvider {
         return EXECUTOR_SERVICE;
     }
 
+    /**
+     * 判断任务队列是否满、判断当前最大线程数是否满
+     * 
+     * @param task
+     * @return
+     */
+    public static Future<List<IpPoolMainDTO>> submitTaskWork(Callable<List<IpPoolMainDTO>> task) {
+        Future<List<IpPoolMainDTO>> resFuture = null;
+        try {
+            var largestPoolSize = EXECUTOR_SERVICE.getLargestPoolSize();
+            LOG.info(" thread pool appear larget size :{} ", largestPoolSize);
+            boolean flag = true;
+            while (flag) {
+                LOG.info(String.format(" thread pool core size :%5d\tmax core size : %5d\ton queue size :%5d",
+                        CORE_POOL_SIZE, MAX_POOL_SIZE, BLOCKING_QUEUE.size()));
+                if (EXECUTOR_SERVICE.getPoolSize() + BLOCKING_QUEUE.size() == MAX_TASK_SIZE) {
+                    LOG.info(" over capacity, thread : {} will waiting 1 mininutes to continue detect ",
+                            Thread.currentThread().getName());
+                    Thread.sleep(1 * 60 * 1000);
+                } else {
+                    LOG.info(" Thread : {} ,submit work ", Thread.currentThread().getName());
+                    resFuture = EXECUTOR_SERVICE.submit(task);
+                    flag = false;
+                }
+            }
+        } catch (Exception e) {
+            LOG.error(" submit work error ", e.getMessage());
+        }
+        return resFuture;
+    }
+
     public static int getKeepAliveTime() {
         return KEEP_ALIVE_TIME;
     }
+
     public static int getCorePoolSize() {
         return CORE_POOL_SIZE;
     }
+
     public static int getMaxPoolSize() {
         return MAX_POOL_SIZE;
     }

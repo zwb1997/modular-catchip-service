@@ -28,12 +28,6 @@ public class IpPoolMainDTO {
     @JsonProperty("ldt")
     private String lastDetectTime;
 
-    private String locationFirstLevel;
-    private String locationSecondLevel;
-    private String locationThirdLevel;
-
-    private static final Random RANDOM = new Random();
-
     public IpPoolMainDTO() {
     }
 

@@ -40,14 +40,13 @@ import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
 public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
 
     private static final Logger LOG = LoggerFactory.getLogger(XiaoHuanIpFetchService.class);
-    private static final ExecutorService EXECUTOR_SERVICE = TaskThreadPoolProvider.getInstance();
 
     @Override
     protected void serviceEntry() {
         START_TIME = System.currentTimeMillis();
         LOG.info(" === {} SERVICE START === ", X_H_SERVICE_TAG);
         LOG.info(" start time : {} ", DateFormatUtils.format(new Date(), COMMON_DATE_FORMAT_REGIX));
-        run();
+        fetchIpPages(run());
         END_TIME = System.currentTimeMillis();
         var useTime = END_TIME - START_TIME;
         LOG.info(" === {} SERVICE END === ", X_H_SERVICE_TAG);
@@ -209,11 +208,11 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
         while (cur < curWorkSize) {
             int curEndPos = (cur + step + 1);
             curEndPos = Math.min(curEndPos, curWorkSize);
-            List<IpLocation> syncWorkList = pageNumsList.subList(cur, curEndPos);
+            List<IpLocation> workList = pageNumsList.subList(cur, curEndPos);
             cur = curEndPos;
             try {
-                Future<List<IpPoolMainDTO>> future = EXECUTOR_SERVICE
-                        .submit(new XHGetpageInfoTask(curUriString, syncWorkList));
+                Future<List<IpPoolMainDTO>> future = TaskThreadPoolProvider
+                        .submitTaskWork(new XHGetpageInfoTask(curUriString, workList));
                 futures.add(future);
             } catch (Exception e) {
                 LOG.error(" submit task error , message :{} ", e);

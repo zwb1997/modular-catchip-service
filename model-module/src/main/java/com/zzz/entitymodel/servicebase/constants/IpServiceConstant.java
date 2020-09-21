@@ -3,6 +3,8 @@ package com.zzz.entitymodel.servicebase.constants;
 public class IpServiceConstant {
     //general
     public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36";
+    public static final String IP_HTTP = "http";
+    public static final String IP_HTTPS = "https";
     public static final String XIAO_HUAN_POS_CHINA = "中国";
     public static final String XIAO_HUAN_POS_AMERICA = "美国";
     public static final String NOT_SUPPORT_CHINESE = "不支持";
@@ -49,9 +51,10 @@ public class IpServiceConstant {
     public static final String PAGE_REGIX = "^(\\d){1,6}$";
 
     //nima
-    public static final String NI_MA_IP = "http://www.nimadaili.com/";
+    public static final String NI_MA_IP = "www.nimadaili.com";
     public static final String NI_MA_IP_NROMAL = "putong";
     public static final String NI_MA_IP_HIGH = "gaoni";
     public static final String NI_MA_IP_HTTP = "http";
     public static final String NI_MA_IP_HTTPS = "https";
+
 }
