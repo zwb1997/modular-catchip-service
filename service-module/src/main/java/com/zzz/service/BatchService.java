@@ -30,7 +30,7 @@ public class BatchService {
     public void tasksRunEntry() {
         LOG.info(" tasks entry ");
         taskscheduler.scheduleWithFixedDelay(xhFetchIpService, new Date(), TASK_DELAY_INTERVAL);
-        taskscheduler.scheduleWithFixedDelay(nimaFetchIpService, new Date(), TASK_DELAY_INTERVAL);
+        // taskscheduler.scheduleWithFixedDelay(nimaFetchIpService, new Date(), TASK_DELAY_INTERVAL);
     }
 
 }

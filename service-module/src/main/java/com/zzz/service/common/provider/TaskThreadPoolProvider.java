@@ -35,7 +35,7 @@ public class TaskThreadPoolProvider {
     private static boolean getInstance() {
         try {
             if (EXECUTOR_SERVICE == null) {
-                LOCK.lock();
+                LOCK.tryLock();
                 if (EXECUTOR_SERVICE == null) {
                     EXECUTOR_SERVICE = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME,
                             ALIVE_TIME_UNIT, BLOCKING_QUEUE, (Runnable r, ThreadPoolExecutor executor) -> {
@@ -48,7 +48,11 @@ public class TaskThreadPoolProvider {
             LOG.error(" get executorService error , message :{} ", e.getMessage());
             return false;
         } finally {
-            LOCK.unlock();
+            try {
+                LOCK.unlock();
+            } catch (Exception e) {
+                LOG.info(" here is no lock ");
+            }
         }
         return true;
     }

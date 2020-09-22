@@ -66,7 +66,7 @@ public class XHGetpageInfoTask implements Callable<List<IpPoolMainDTO>> {
                 HttpResponse response = CLIENT_UTIL.exeuteDefaultRequest(get, headerList, true);
                 CLIENT_UTIL.vaildateReponse(response);
                 HttpEntity httpEntity = response.getEntity();
-                String currentPage = PAGE_UTIL.vaildateEntity(httpEntity);
+                String currentPage = PAGE_UTIL.validateEntity(httpEntity);
                 Elements elements = PAGE_UTIL.fetchElementWithSection(currentPage, HAS_PAGE_REGIX);
                 if (ObjectUtils.isNotEmpty(elements)) {
                     ipPoolMainDOs.addAll(Objects.requireNonNull(PAGE_UTIL.combineXiaoHuanInfo(elements)));

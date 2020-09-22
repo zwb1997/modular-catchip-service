@@ -13,6 +13,7 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
@@ -30,8 +31,7 @@ public class HttpClientUtil {
 
     private static final HttpHost HTTP_HOST = new HttpHost(PROXY_IP, PROXY_IP_PORT);
 
-    @Autowired
-    private PageUtil pageUtil;
+    private static final PageUtil PAGE_UTIL = new PageUtil();
 
     /**
      * create a default httpClient
@@ -56,6 +56,7 @@ public class HttpClientUtil {
             httpType.setConfig(requestConfig);
             printHeaders(httpType.getAllHeaders());
             response = client.execute(httpType);
+            LOG.info(" response send back ");
             printHeaders(response.getAllHeaders());
         } catch (IOException e) {
             LOG.error(" execute request error : messages {} ", e.getMessage());
@@ -67,11 +68,11 @@ public class HttpClientUtil {
      * @param response vaildate response is success by code is 200 and print
      *                 response headers
      */
-    public String vaildateReponse(HttpResponse response) {
+    public void vaildateReponse(HttpResponse response) {
         Assert.notNull(response, " respnse could't empty ");
         if (response.getStatusLine() == null) {
             LOG.info(" response statusline is null , will not validate");
-            return null;
+            return;
         }
         int responseCodeString = response.getStatusLine().getStatusCode();
         if (responseCodeString == RESPONSE_CODE_PREFIX) {
@@ -82,13 +83,6 @@ public class HttpClientUtil {
         LOG.info(" execute done,response code : {} , will print headers ", responseCodeString);
         Header[] headers = response.getAllHeaders();
         printHeaders(headers);
-        String resultEntityString = null;
-        try {
-            resultEntityString = pageUtil.vaildateEntity(response.getEntity());
-        } catch (Exception e) {
-            LOG.error(" pageUtils validateEntity error,message :{} ", e.getMessage());
-        }
-        return resultEntityString;
     }
 
     /**
@@ -100,10 +94,7 @@ public class HttpClientUtil {
         Assert.notEmpty(headers, " error , response header is null,messages");
         LOG.info(" === request/response headers === ");
         for (Header h : headers) {
-            HeaderElement[] hes = h.getElements();
-            for (HeaderElement he : hes) {
-                LOG.info(" header : {} value : {} ", he.getName(), he.getValue());
-            }
+            LOG.info(" header : {} value : {} ", h.getName(), h.getValue());
         }
         LOG.info(" === request/response headers === ");
     }
@@ -123,8 +114,7 @@ public class HttpClientUtil {
         HttpGet get = new HttpGet(uri);
         HttpResponse response = exeuteDefaultRequest(get, headerList, useProxy);
         vaildateReponse(response);
-        HttpEntity httpEntity = response.getEntity();
-        String currentPage = pageUtil.vaildateEntity(httpEntity);
+        String currentPage = PAGE_UTIL.validateEntity(response.getEntity());
         return currentPage;
     }
 }

@@ -1,5 +1,7 @@
 package com.zzz.service.common.serviceconfuration;
 
+import com.zzz.service.utils.PageUtil;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;

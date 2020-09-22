@@ -7,7 +7,6 @@ import com.zzz.model.entitymodel.servicebase.constants.IpServiceConstant;
 import com.zzz.service.common.provider.TaskThreadPoolProvider;
 import com.zzz.service.ipservices.abstractservice.AbsrtactFetchIpService;
 import com.zzz.service.ipservices.task.XHGetpageInfoTask;
-import com.zzz.service.utils.SignUtil;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
@@ -48,14 +47,13 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
     @Override
     protected void serviceEntry() {
         START_TIME = System.currentTimeMillis();
-        LOG.info(" === {} SERVICE START === ", XH_TASK_NAME);
-        LOG.info(" start time : {} ", DateFormatUtils.format(new Date(), COMMON_DATE_FORMAT_REGIX));
+        LOG.info(" === {} SERVICE START || start time : {} === ", XH_TASK_NAME,
+                DateFormatUtils.format(new Date(), COMMON_DATE_FORMAT_REGIX));
         fetchIpPages(runService());
         END_TIME = System.currentTimeMillis();
         var useTime = END_TIME - START_TIME;
-        LOG.info(" === {} SERVICE END === ", XH_TASK_NAME);
-        LOG.info(" end time : {} ", DateFormatUtils.format(new Date(), COMMON_DATE_FORMAT_REGIX));
-        LOG.info(" using time : miniutes :{} ,seconds :{} ", useTime / 1000 / 60, useTime / 1000);
+        LOG.info(" === {} SERVICE END  || end time : {} === \n using time : miniutes :{} ,seconds :{} ", XH_TASK_NAME,
+                DateFormatUtils.format(new Date(), COMMON_DATE_FORMAT_REGIX),useTime / 1000 / 60,useTime / 1000);
     }
 
     public List<String> runService() {
@@ -259,7 +257,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
                 HttpResponse response = clientUtil.exeuteDefaultRequest(httpPost, headerList, false);
                 clientUtil.vaildateReponse(response);
                 HttpEntity entity = response.getEntity();
-                String responseText = pageUtil.vaildateEntity(entity);
+                String responseText = pageUtil.validateEntity(entity);
                 LOG.info(" sent storage data success , response text : {} ", responseText);
             } catch (Exception e) {
                 LOG.error(" send stage data error , message : {} ", e.getMessage());

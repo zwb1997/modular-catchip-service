@@ -12,6 +12,7 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import java.io.IOException;
@@ -23,7 +24,7 @@ import com.zzz.model.exceptions.DebugException;
 
 import static com.zzz.model.entitymodel.servicebase.constants.IpServiceConstant.*;
 
-@Component
+@Service
 public class PageUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(PageUtil.class);
@@ -78,10 +79,9 @@ public class PageUtil {
      * @throws IOException
      * @throws ParseException
      */
-    public String vaildateEntity(HttpEntity entity) throws IOException, ParseException {
+    public String validateEntity(HttpEntity entity) throws IOException, ParseException {
         if (ObjectUtils.isEmpty(entity)) {
             LOG.info(" current response entity is empty ");
-            return "";
         }
         String responseEntityString = EntityUtils.toString(entity, "utf-8");
         if (StringUtils.isBlank(responseEntityString)) {
