@@ -27,6 +27,10 @@ public class TaskThreadPoolProvider {
     private static final TimeUnit ALIVE_TIME_UNIT = TimeUnit.SECONDS;
     public static final Lock LOCK = new ReentrantLock();
 
+
+    private TaskThreadPoolProvider(){
+        getInstance();
+    }
     /**
      * instance will lazy loading
      * 
@@ -65,7 +69,6 @@ public class TaskThreadPoolProvider {
      * @throws Exception
      */
     public static Future<List<IpPoolMainDTO>> submitTaskWork(Callable<List<IpPoolMainDTO>> task) throws Exception {
-        getInstance();
         Future<List<IpPoolMainDTO>> resFuture = null;
         try {
             var largestPoolSize = EXECUTOR_SERVICE.getLargestPoolSize();
