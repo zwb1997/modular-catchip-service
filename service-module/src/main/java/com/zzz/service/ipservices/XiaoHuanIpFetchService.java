@@ -156,6 +156,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
     }
 
     /**
+     * fetch every page links
      * @param curUriString
      * @param pageNumsStack
      */
@@ -192,6 +193,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
     }
 
     /**
+     * assigned works to threads
      * @param curUriString
      * @param pageNumsList
      */
@@ -202,8 +204,6 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
         int curWorkSize = pageNumsList.size();
         LOG.info(" === current page nums  : {} ,list : {} === ", curWorkSize, pageNumsList);
         int step = curWorkSize / TaskThreadPoolProvider.getCorePoolSize();
-        // List<Future<List<IpPoolMainDTO>>> futures = Collections.synchronizedList(new
-        // ArrayList<>());
         List<Future<List<IpPoolMainDTO>>> futures = new LinkedList<>();
         while (cur < curWorkSize) {
             int curEndPos = (cur + step + 1);
@@ -231,6 +231,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
         Assert.notEmpty(futures, " future task wouldn't empty ");
         for (Future<List<IpPoolMainDTO>> future : futures) {
             try {
+                LOG.info(" \\\\waiting to get future result...\\\\ ");
                 List<IpPoolMainDTO> lists = future.get(10,TimeUnit.MINUTES);
                 if (CollectionUtils.isEmpty(lists)) {
                     LOG.info(" current IpPoolMainDO list is empty , will not do insert ");

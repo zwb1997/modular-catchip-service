@@ -2,22 +2,26 @@ package com.zzz.utils;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
 
-@Service
+@Component
 public class HttpClientUtil {
     private static final Logger LOG = LoggerFactory.getLogger(HttpClientUtil.class);
     private static final int RESPONSE_CODE_PREFIX = 200;
@@ -26,12 +30,15 @@ public class HttpClientUtil {
 
     private static final HttpHost HTTP_HOST = new HttpHost(PROXY_IP, PROXY_IP_PORT);
 
+
+    @Autowired
+    private PageUtil pageUtil;
     /**
      * create a default httpClient
      *
      * @param httpType
      * @param headers
-     * @return
+     * @return HttpResponse
      */
     public HttpResponse exeuteDefaultRequest(HttpRequestBase httpType, List<Header> headers, boolean useProxy) {
         LOG.info(" begin send a request ");
@@ -90,5 +97,24 @@ public class HttpClientUtil {
             }
         }
         LOG.info(" === request/response headers === ");
+    }
+
+    /**
+     * 通用get请求
+     * 
+     * @param uri
+     * @param headerList
+     * @return String -> the response entity string
+     * @throws IOException
+     */
+    public String ipFetchGetRequest(URI uri, List<Header> headerList) throws IOException {
+        LOG.info(" prepare to send a request ");
+        LOG.info(" URI : {} ", uri);
+        HttpGet get = new HttpGet(uri);
+        HttpResponse response = exeuteDefaultRequest(get, headerList, true);
+        vaildateReponse(response);
+        HttpEntity httpEntity = response.getEntity();
+        String currentPage = pageUtil.vaildateEntity(httpEntity);
+        return currentPage;
     }
 }

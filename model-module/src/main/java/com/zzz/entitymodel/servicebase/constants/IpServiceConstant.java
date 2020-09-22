@@ -57,4 +57,6 @@ public class IpServiceConstant {
     public static final String NI_MA_IP_HTTP = "http";
     public static final String NI_MA_IP_HTTPS = "https";
 
+    public static final String NIMA_REFERER = "http://www.nimadaili.com/";
+
 }

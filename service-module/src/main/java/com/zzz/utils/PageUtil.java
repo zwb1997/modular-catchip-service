@@ -1,6 +1,5 @@
 package com.zzz.utils;
 
-
 import com.zzz.entitymodel.servicebase.DTO.IpLocation;
 import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.zzz.exceptions.DebugException;
@@ -16,7 +15,7 @@ import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import java.io.IOException;
@@ -24,21 +23,20 @@ import java.util.*;
 
 import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
 
-@Service
+@Component
 public class PageUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(PageUtil.class);
-    private static final String[] EMPTY_ARR = new String[]{"", "", "", "", "", "", "", "", "", ""};
+    private static final Object[] EMPTY_ARR = new Object[] { "", 0, "", "", 0, 0, 0, "", "", "" };
     private static final int COMBINE_ARRAY_REQUIRE_LENGTH = 10;
 
     /**
      * @param html
      * @param selectParmas
-     * @return TreeMap<Integer, Map < String, String>>
-     * <p>
-     * get page a tags text value and href value
+     * @return TreeMap<Integer, Map < String, String>> get page a tags text value
+     *         and href value
      */
-    public TreeMap<Integer, IpLocation> matchAtages(int num,String html, String selectParmas) {
+    public TreeMap<Integer, IpLocation> matchAtages(int num, String html, String selectParmas) {
         TreeMap<Integer, IpLocation> res = new TreeMap<>();
         if (StringUtils.isBlank(html)) {
             LOG.info(" current html is null ");
@@ -56,12 +54,13 @@ public class PageUtil {
         return res;
     }
 
-  /**
-   * 
-   * @param curDocmentHtml
-   * @param exceptSection
-   * @return
-   */
+    /**
+     * detect if page has value by section
+     * 
+     * @param curDocmentHtml
+     * @param exceptSection
+     * @return boolean
+     */
     public boolean hasNextPage(String curDocmentHtml, String exceptSection) {
         Document doc = Jsoup.parse(curDocmentHtml);
         Elements bodyEs = doc.select(exceptSection);
@@ -71,13 +70,24 @@ public class PageUtil {
         return true;
     }
 
+    /**
+     * validate httpEntity is empty
+     * 
+     * @param entity
+     * @return
+     * @throws IOException
+     * @throws ParseException
+     */
     public String vaildateEntity(HttpEntity entity) throws IOException, ParseException {
-        if(ObjectUtils.isEmpty(entity)){
+        if (ObjectUtils.isEmpty(entity)) {
             LOG.info(" current response entity is empty ");
             return "";
         }
-        String html = EntityUtils.toString(entity,"utf-8");
-        return html;
+        String responseEntityString = EntityUtils.toString(entity, "utf-8");
+        if (StringUtils.isBlank(responseEntityString)) {
+            LOG.info(" current response entity is empty ");
+        }
+        return responseEntityString;
     }
 
     /**
@@ -114,23 +124,16 @@ public class PageUtil {
     }
 
     /**
-     * list must be 10 elements
-     * 固定格式的集合
-     * 0 -> ip
-     * 1 -> port
-     * 2 -> ip地址
-     * 3 -> ip供应商
-     * 4 -> 是否支持https
-     * 5 -> 是否支持post请求
-     * 6 -> 匿名程度
-     * 7 -> 速度
-     * 8 -> 网站检测 ip入库时间
-     * 9 -> 网站检测 ip最后有效时间
+     * list must be 10 elements 固定格式的集合 0 -> ip 1 -> port 2 -> ip地址 3 -> ip供应商 4 ->
+     * 是否支持https 5 -> 是否支持post请求 6 -> 匿名程度 7 -> 速度 8 -> 网站检测 ip入库时间 9 -> 网站检测
+     * ip最后有效时间
+     * 
      * @param infos
      * @return
      */
     private IpPoolMainDTO createInstance(List<String> infos) {
-        if (CollectionUtils.isEmpty(infos) || infos.size() < COMBINE_ARRAY_REQUIRE_LENGTH || infos.size() > COMBINE_ARRAY_REQUIRE_LENGTH) {
+        if (CollectionUtils.isEmpty(infos) || infos.size() < COMBINE_ARRAY_REQUIRE_LENGTH
+                || infos.size() > COMBINE_ARRAY_REQUIRE_LENGTH) {
             LOG.error(" error instance size must be 10 ");
             return null;
         }
@@ -147,18 +150,10 @@ public class PageUtil {
         }
         IpPoolMainDTO model = null;
         try {
-            model = new IpPoolMainDTO(
-                    String.valueOf(infos.get(0))
-                    , Integer.parseInt(infos.get(1))
-                    , infos.get(2)
-                    , infos.get(3)
-                    , NOT_SUPPORT_CHINESE.equals(infos.get(4)) ? SUPPORT_NUM : NOT_SUPPORT_NUM
-                    , NOT_SUPPORT_CHINESE.equals(infos.get(5)) ? SUPPORT_NUM : NOT_SUPPORT_NUM
-                    , anonymityDegree
-                    , infos.get(7)
-                    , infos.get(8)
-                    , infos.get(9)
-            );
+            model = new IpPoolMainDTO(String.valueOf(infos.get(0)), Integer.parseInt(infos.get(1)), infos.get(2),
+                    infos.get(3), NOT_SUPPORT_CHINESE.equals(infos.get(4)) ? SUPPORT_NUM : NOT_SUPPORT_NUM,
+                    NOT_SUPPORT_CHINESE.equals(infos.get(5)) ? SUPPORT_NUM : NOT_SUPPORT_NUM, anonymityDegree,
+                    infos.get(7), infos.get(8), infos.get(9));
         } catch (Exception e) {
             LOG.error(" combine error,messgae : {} ", e.getMessage());
         }
@@ -169,7 +164,7 @@ public class PageUtil {
      * 替代所有空格 为 斜杠
      *
      * @param cure
-     * @return
+     * @return List<String>
      */
     public List<String> findTextNode(Element cure) {
         if (cure == null) {
@@ -188,13 +183,15 @@ public class PageUtil {
         }
         return resList;
     }
+
     /**
      * check page name is match the section
+     * 
      * @param num
      * @param section
      * @return could match the section
      */
-    public boolean checkPageLegal(Object num,String section){
+    public boolean checkPageLegal(Object num, String section) {
         Assert.notNull(section, " section could not null ");
         return String.valueOf(num).matches(section);
     }
