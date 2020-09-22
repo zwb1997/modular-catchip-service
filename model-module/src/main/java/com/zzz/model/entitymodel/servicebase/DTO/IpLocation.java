@@ -1,4 +1,4 @@
-package com.zzz.entitymodel.servicebase.DTO;
+package com.zzz.model.entitymodel.servicebase.DTO;
 
 public class IpLocation {
 

@@ -1,6 +1,6 @@
-package com.zzz.basemodels;
+package com.zzz.model.basemodels;
 
-import com.zzz.basemodels.enummodel.ResponseCode;
+import com.zzz.model.basemodels.enummodel.ResponseCode;
 
 public class ResultModel<T> {
     private T data;

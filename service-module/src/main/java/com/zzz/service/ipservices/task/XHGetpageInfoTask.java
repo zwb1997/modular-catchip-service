@@ -1,10 +1,10 @@
 package com.zzz.service.ipservices.task;
 
-import com.zzz.entitymodel.servicebase.DTO.IpLocation;
-import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
-import com.zzz.utils.HttpClientUtil;
-import com.zzz.utils.PageUtil;
-import com.zzz.utils.SignUtil;
+import com.zzz.model.entitymodel.servicebase.DTO.IpLocation;
+import com.zzz.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
+import com.zzz.service.utils.HttpClientUtil;
+import com.zzz.service.utils.PageUtil;
+import com.zzz.service.utils.SignUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
@@ -16,10 +16,10 @@ import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.util.CollectionUtils;
-import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
 import java.net.URI;
 import java.util.*;
 import java.util.concurrent.Callable;
+import static com.zzz.model.entitymodel.servicebase.constants.IpServiceConstant.*;
 
 public class XHGetpageInfoTask implements Callable<List<IpPoolMainDTO>> {
     private static final Logger LOG = LoggerFactory.getLogger(XHGetpageInfoTask.class);

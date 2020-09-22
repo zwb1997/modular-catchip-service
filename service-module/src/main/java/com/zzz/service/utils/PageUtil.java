@@ -1,8 +1,4 @@
-package com.zzz.utils;
-
-import com.zzz.entitymodel.servicebase.DTO.IpLocation;
-import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
-import com.zzz.exceptions.DebugException;
+package com.zzz.service.utils;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,13 +17,17 @@ import org.springframework.util.CollectionUtils;
 import java.io.IOException;
 import java.util.*;
 
-import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
+import com.zzz.model.entitymodel.servicebase.DTO.IpLocation;
+import com.zzz.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
+import com.zzz.model.exceptions.DebugException;
+
+import static com.zzz.model.entitymodel.servicebase.constants.IpServiceConstant.*;
 
 @Component
 public class PageUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(PageUtil.class);
-    private static final Object[] EMPTY_ARR = new Object[] { "", 0, "", "", 0, 0, 0, "", "", "" };
+    private static final String[] EMPTY_ARR = new String[] { "", "", "", "", "", "", "", "", "", "" };
     private static final int COMBINE_ARRAY_REQUIRE_LENGTH = 10;
 
     /**
@@ -124,12 +124,20 @@ public class PageUtil {
     }
 
     /**
-     * list must be 10 elements 固定格式的集合 0 -> ip 1 -> port 2 -> ip地址 3 -> ip供应商 4 ->
-     * 是否支持https 5 -> 是否支持post请求 6 -> 匿名程度 7 -> 速度 8 -> 网站检测 ip入库时间 9 -> 网站检测
-     * ip最后有效时间
-     * 
+     * list must be 10 elements; 
+     * 固定格式的集合;
+     * 0 -> ip ;
+     * 1 -> port ;
+     * 2 -> ip地址 ;
+     * 3 -> ip供应商 ;
+     * 4 -> 是否支持https ;
+     * 5 -> 是否支持post请求 ;
+     * 6 -> 匿名程度 ;
+     * 7 -> 速度; 
+     * 8 -> 网站检测 ip入库时间 ;
+     * 9 -> 网站检测 ip最后有效时间;
      * @param infos
-     * @return
+     * @return IpPoolMainDTO
      */
     private IpPoolMainDTO createInstance(List<String> infos) {
         if (CollectionUtils.isEmpty(infos) || infos.size() < COMBINE_ARRAY_REQUIRE_LENGTH

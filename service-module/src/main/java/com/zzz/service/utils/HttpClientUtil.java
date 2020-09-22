@@ -1,4 +1,4 @@
-package com.zzz.utils;
+package com.zzz.service.utils;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -19,7 +19,7 @@ import org.springframework.util.Assert;
 import java.io.IOException;
 import java.net.URI;
 import java.util.List;
-import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
+import static com.zzz.model.entitymodel.servicebase.constants.IpServiceConstant.*;
 
 @Component
 public class HttpClientUtil {
@@ -30,9 +30,9 @@ public class HttpClientUtil {
 
     private static final HttpHost HTTP_HOST = new HttpHost(PROXY_IP, PROXY_IP_PORT);
 
-
     @Autowired
     private PageUtil pageUtil;
+
     /**
      * create a default httpClient
      *
@@ -42,6 +42,8 @@ public class HttpClientUtil {
      */
     public HttpResponse exeuteDefaultRequest(HttpRequestBase httpType, List<Header> headers, boolean useProxy) {
         LOG.info(" begin send a request ");
+        LOG.info(" prepare to send a request ");
+        LOG.info(" URI : {} ", httpType.getURI().toString());
         HttpResponse response = null;
         try {
             HttpClient client = HttpClientBuilder.create().build();
@@ -54,6 +56,7 @@ public class HttpClientUtil {
             httpType.setConfig(requestConfig);
             printHeaders(httpType.getAllHeaders());
             response = client.execute(httpType);
+            printHeaders(response.getAllHeaders());
         } catch (IOException e) {
             LOG.error(" execute request error : messages {} ", e.getMessage());
         }
@@ -64,12 +67,11 @@ public class HttpClientUtil {
      * @param response vaildate response is success by code is 200 and print
      *                 response headers
      */
-    public void vaildateReponse(HttpResponse response) {
-
+    public String vaildateReponse(HttpResponse response) {
         Assert.notNull(response, " respnse could't empty ");
         if (response.getStatusLine() == null) {
             LOG.info(" response statusline is null , will not validate");
-            return;
+            return null;
         }
         int responseCodeString = response.getStatusLine().getStatusCode();
         if (responseCodeString == RESPONSE_CODE_PREFIX) {
@@ -80,6 +82,13 @@ public class HttpClientUtil {
         LOG.info(" execute done,response code : {} , will print headers ", responseCodeString);
         Header[] headers = response.getAllHeaders();
         printHeaders(headers);
+        String resultEntityString = null;
+        try {
+            resultEntityString = pageUtil.vaildateEntity(response.getEntity());
+        } catch (Exception e) {
+            LOG.error(" pageUtils validateEntity error,message :{} ", e.getMessage());
+        }
+        return resultEntityString;
     }
 
     /**
@@ -100,18 +109,19 @@ public class HttpClientUtil {
     }
 
     /**
-     * 通用get请求
+     * common get request
      * 
      * @param uri
      * @param headerList
-     * @return String -> the response entity string
+     * @param useProxy
+     * @return
      * @throws IOException
      */
-    public String ipFetchGetRequest(URI uri, List<Header> headerList) throws IOException {
+    public String ipFetchGetRequest(URI uri, List<Header> headerList, boolean useProxy) throws IOException {
         LOG.info(" prepare to send a request ");
         LOG.info(" URI : {} ", uri);
         HttpGet get = new HttpGet(uri);
-        HttpResponse response = exeuteDefaultRequest(get, headerList, true);
+        HttpResponse response = exeuteDefaultRequest(get, headerList, useProxy);
         vaildateReponse(response);
         HttpEntity httpEntity = response.getEntity();
         String currentPage = pageUtil.vaildateEntity(httpEntity);

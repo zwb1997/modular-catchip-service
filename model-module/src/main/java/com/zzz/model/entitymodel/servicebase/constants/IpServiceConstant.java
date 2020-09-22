@@ -1,7 +1,9 @@
-package com.zzz.entitymodel.servicebase.constants;
+package com.zzz.model.entitymodel.servicebase.constants;
 
 public class IpServiceConstant {
     //general
+    public static final String XH_TASK_NAME = "XIAO_HUAN_PROXY";
+    public static final String NM_TASK_NAME = "NI_MA_PROXY";
     public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36";
     public static final String IP_HTTP = "http";
     public static final String IP_HTTPS = "https";
@@ -38,7 +40,6 @@ public class IpServiceConstant {
     public static final int STORAGE_SERVICE_LOCATION_PORT= 37240;
 
     //XIAO_HUAN
-    public static final String X_H_SERVICE_TAG = "XIAOHUAN";
     public static final String XIAO_HUAN_TQDL = "//ip.ihuan.me/tqdl.html";
     public static final String XIAO_HUAN_ME = "https://ip.ihuan.me";
     public static final String XIAO_HUAN_TI = "https://ip.ihuan.me/ti.html";

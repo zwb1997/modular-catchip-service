@@ -1,17 +1,17 @@
 package com.zzz.service.ipservices;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.zzz.entitymodel.servicebase.DTO.IpLocation;
-import com.zzz.common.provider.TaskThreadPoolProvider;
-import com.zzz.entitymodel.servicebase.DTO.IpPoolMainDTO;
-import com.zzz.entitymodel.servicebase.constants.IpServiceConstant;
+import com.zzz.model.entitymodel.servicebase.DTO.IpLocation;
+import com.zzz.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
+import com.zzz.model.entitymodel.servicebase.constants.IpServiceConstant;
+import com.zzz.service.common.provider.TaskThreadPoolProvider;
 import com.zzz.service.ipservices.abstractservice.AbsrtactFetchIpService;
 import com.zzz.service.ipservices.task.XHGetpageInfoTask;
-import com.zzz.utils.SignUtil;
+import com.zzz.service.utils.SignUtil;
+
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.*;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
@@ -31,30 +31,34 @@ import java.util.Map.Entry;
 import java.util.concurrent.*;
 import java.util.stream.Collectors;
 
-import static com.zzz.entitymodel.servicebase.constants.IpServiceConstant.*;
+import static com.zzz.model.entitymodel.servicebase.constants.IpServiceConstant.*;
 
 /**
  * 记得超时重连
  */
-@Service
+@Service("xiaohuanipfetchservice")
 public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
+
+    public XiaoHuanIpFetchService() {
+        taskName = IpServiceConstant.XH_TASK_NAME;
+    }
 
     private static final Logger LOG = LoggerFactory.getLogger(XiaoHuanIpFetchService.class);
 
     @Override
     protected void serviceEntry() {
         START_TIME = System.currentTimeMillis();
-        LOG.info(" === {} SERVICE START === ", X_H_SERVICE_TAG);
+        LOG.info(" === {} SERVICE START === ", XH_TASK_NAME);
         LOG.info(" start time : {} ", DateFormatUtils.format(new Date(), COMMON_DATE_FORMAT_REGIX));
-        fetchIpPages(run());
+        fetchIpPages(runService());
         END_TIME = System.currentTimeMillis();
         var useTime = END_TIME - START_TIME;
-        LOG.info(" === {} SERVICE END === ", X_H_SERVICE_TAG);
+        LOG.info(" === {} SERVICE END === ", XH_TASK_NAME);
         LOG.info(" end time : {} ", DateFormatUtils.format(new Date(), COMMON_DATE_FORMAT_REGIX));
         LOG.info(" using time : miniutes :{} ,seconds :{} ", useTime / 1000 / 60, useTime / 1000);
     }
 
-    public List<String> run() {
+    public List<String> runService() {
         List<String> aTagList = new LinkedList<>();
         List<String> aTagLists = getXHlist();
         if (CollectionUtils.isEmpty(aTagLists)) {
@@ -94,7 +98,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
                     .build();
             List<Header> requestHeaders = new ArrayList<>();
             requestHeaders.add(new BasicHeader("user-agent", USER_AGENT));
-            String html = ipFetchGetRequest(uri, requestHeaders);
+            String html = clientUtil.ipFetchGetRequest(uri, requestHeaders, true);
             TreeMap<Integer, IpLocation> resAtags = pageUtil.matchAtages(1, html,
                     IpServiceConstant.PAGE_AREA_LIST_REGIX);
             // 增加花刺连接
@@ -133,7 +137,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
                 List<Header> headerList = new ArrayList<>();
                 headerList.add(new BasicHeader("user-agent", USER_AGENT));
                 LOG.info(" do with current type :{} ", curUriString);
-                String currentPage = ipFetchGetRequest(uri, headerList);
+                String currentPage = clientUtil.ipFetchGetRequest(uri, headerList, true);
                 LOG.info(" current html : {} ", currentPage);
                 TreeMap<Integer, IpLocation> aTags = pageUtil.matchAtages(pageNum, currentPage,
                         IpServiceConstant.PAGE_NUM_REGIS);
@@ -157,6 +161,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
 
     /**
      * fetch every page links
+     * 
      * @param curUriString
      * @param pageNumsStack
      */
@@ -177,7 +182,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
                 URI uri = new URIBuilder(curFullHref).setScheme("https").build();
                 List<Header> headerList = new ArrayList<>();
                 headerList.add(new BasicHeader("user-agent", USER_AGENT));
-                String currentPage = ipFetchGetRequest(uri, headerList);
+                String currentPage = clientUtil.ipFetchGetRequest(uri, headerList, true);
                 if (pageUtil.hasNextPage(currentPage, HAS_PAGE_REGIX)) {
                     TreeMap<Integer, IpLocation> curMap = pageUtil.matchAtages(0, currentPage, PAGE_NUM_REGIS);
                     sortAndAdd(curMap, pageNumsStack);
@@ -194,6 +199,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
 
     /**
      * assigned works to threads
+     * 
      * @param curUriString
      * @param pageNumsList
      */
@@ -232,7 +238,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
         for (Future<List<IpPoolMainDTO>> future : futures) {
             try {
                 LOG.info(" \\\\waiting to get future result...\\\\ ");
-                List<IpPoolMainDTO> lists = future.get(10,TimeUnit.MINUTES);
+                List<IpPoolMainDTO> lists = future.get(10, TimeUnit.MINUTES);
                 if (CollectionUtils.isEmpty(lists)) {
                     LOG.info(" current IpPoolMainDO list is empty , will not do insert ");
                     continue;
@@ -248,7 +254,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
                 headerList.add(new BasicHeader("user-agent", USER_AGENT));
                 headerList.add(new BasicHeader(ORIGIN_NAME, STORAGE_SERVICE_LOCATION));
                 headerList.add(new BasicHeader(CUR_TIME_SPAN, curTimeMillions));
-                headerList.add(new BasicHeader(SECRET_SIGN, SignUtil.createSign(curTimeMillions, SECRET)));
+                headerList.add(new BasicHeader(SECRET_SIGN, signUtil.createSign(curTimeMillions, SECRET)));
                 headerList.add(new BasicHeader("Content-Type", HTTP_CONTENT_TYPE_JSON));
                 HttpResponse response = clientUtil.exeuteDefaultRequest(httpPost, headerList, false);
                 clientUtil.vaildateReponse(response);
@@ -282,6 +288,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
 
     /**
      * 保证顺序加入link
+     * 
      * @param curMap
      * @param pageNumsStack
      */
@@ -298,6 +305,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
 
     /**
      * 移除重复link
+     * 
      * @param curSet
      * @return
      */
@@ -317,25 +325,8 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
     }
 
     /**
-     * 本类通用get请求
-     * @param uri
-     * @param headerList
-     * @return
-     * @throws IOException
-     */
-    private String ipFetchGetRequest(URI uri, List<Header> headerList) throws IOException {
-        LOG.info(" prepare to send a request ");
-        LOG.info(" URI : {} ", uri);
-        HttpGet get = new HttpGet(uri);
-        HttpResponse response = clientUtil.exeuteDefaultRequest(get, headerList, true);
-        clientUtil.vaildateReponse(response);
-        HttpEntity httpEntity = response.getEntity();
-        String currentPage = pageUtil.vaildateEntity(httpEntity);
-        return currentPage;
-    }
-
-    /**
      * 增加指定的页面
+     * 
      * @param resAtags
      */
     private void removeMutiple(TreeMap<Integer, IpLocation> resAtags) {

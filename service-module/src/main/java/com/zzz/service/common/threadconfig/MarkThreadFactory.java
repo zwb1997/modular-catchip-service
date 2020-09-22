@@ -1,4 +1,4 @@
-package com.zzz.common.threadconfig;
+package com.zzz.service.common.threadconfig;
 
 import org.apache.http.client.utils.DateUtils;
 import org.slf4j.Logger;
@@ -8,7 +8,8 @@ import java.util.Date;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import com.zzz.entitymodel.servicebase.constants.IpServiceConstant;
+import com.zzz.model.entitymodel.servicebase.constants.IpServiceConstant;
+
 
 public class MarkThreadFactory implements ThreadFactory {
     private static final Logger LOG = LoggerFactory.getLogger(MarkThreadFactory.class);

@@ -1,4 +1,4 @@
-package com.zzz.utils;
+package com.zzz.service.utils;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.slf4j.Logger;
@@ -17,7 +17,7 @@ public class SignUtil {
      * @param localSecret
      * @return
      */
-    public static String createSign(String timeSpan, String localSecret) {
+    public String createSign(String timeSpan, String localSecret) {
         String fullMessage = timeSpan + localSecret;
         String md5Hex = DigestUtils.md5Hex(fullMessage).toLowerCase();
         LOG.info("local md5 : {}", md5Hex);

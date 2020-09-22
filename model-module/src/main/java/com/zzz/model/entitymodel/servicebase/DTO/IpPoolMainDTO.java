@@ -1,26 +1,37 @@
-package com.zzz.entitymodel.servicebase.DO;
+package com.zzz.model.entitymodel.servicebase.DTO;
 
-import java.util.Date;
-import java.util.Objects;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import org.apache.commons.lang3.builder.EqualsBuilder;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
-public class IpPoolMainDO {
-    private String dataID;
+import java.util.*;
+
+public class IpPoolMainDTO {
+    @JsonProperty("in")
     private String ipNum;
+    @JsonProperty("ip")
     private int ipPort;
+    @JsonProperty("il")
     private String ipLocation;
+    @JsonProperty("iv")
     private String ipVendor;
-    private int supportHttps;
-    private int supportPost;
-    private int anonymityDegree;
+    @JsonProperty("sh")
+    private byte supportHttps;
+    @JsonProperty("sp")
+    private byte supportPost;
+    @JsonProperty("ad")
+    private byte anonymityDegree;
+    @JsonProperty("se")
     private String accessSpeed;
+    @JsonProperty("it")
     private String insertTime;
+    @JsonProperty("ldt")
     private String lastDetectTime;
-    private String statusCode;
-    private Date dataInsertTime;
-    private Date dataDetectTime;
 
-    public IpPoolMainDO(String dataID, String ipNum, int ipPort, String ipLocation, String ipVendor, int supportHttps, int supportPost, int anonymityDegree, String accessSpeed, String insertTime, String lastDetectTime, String statusCode, Date dataInsertTime, Date dataDetectTime) {
-        this.dataID = dataID;
+    public IpPoolMainDTO() {
+    }
+
+    public IpPoolMainDTO(String ipNum, int ipPort, String ipLocation, String ipVendor, byte supportHttps, byte supportPost, byte anonymityDegree, String accessSpeed, String insertTime, String lastDetectTime) {
         this.ipNum = ipNum;
         this.ipPort = ipPort;
         this.ipLocation = ipLocation;
@@ -31,17 +42,6 @@ public class IpPoolMainDO {
         this.accessSpeed = accessSpeed;
         this.insertTime = insertTime;
         this.lastDetectTime = lastDetectTime;
-        this.statusCode = statusCode;
-        this.dataInsertTime = dataInsertTime;
-        this.dataDetectTime = dataDetectTime;
-    }
-
-    public String getDataID() {
-        return dataID;
-    }
-
-    public void setDataID(String dataID) {
-        this.dataID = dataID;
     }
 
     public String getIpNum() {
@@ -76,27 +76,27 @@ public class IpPoolMainDO {
         this.ipVendor = ipVendor;
     }
 
-    public int getSupportHttps() {
+    public byte getSupportHttps() {
         return supportHttps;
     }
 
-    public void setSupportHttps(int supportHttps) {
+    public void setSupportHttps(byte supportHttps) {
         this.supportHttps = supportHttps;
     }
 
-    public int getSupportPost() {
+    public byte getSupportPost() {
         return supportPost;
     }
 
-    public void setSupportPost(int supportPost) {
+    public void setSupportPost(byte supportPost) {
         this.supportPost = supportPost;
     }
 
-    public int getAnonymityDegree() {
+    public byte getAnonymityDegree() {
         return anonymityDegree;
     }
 
-    public void setAnonymityDegree(int anonymityDegree) {
+    public void setAnonymityDegree(byte anonymityDegree) {
         this.anonymityDegree = anonymityDegree;
     }
 
@@ -124,60 +124,40 @@ public class IpPoolMainDO {
         this.lastDetectTime = lastDetectTime;
     }
 
-    public String getStatusCode() {
-        return statusCode;
-    }
-
-    public void setStatusCode(String statusCode) {
-        this.statusCode = statusCode;
-    }
-
-    public Date getDataInsertTime() {
-        return dataInsertTime;
-    }
-
-    public void setDataInsertTime(Date dataInsertTime) {
-        this.dataInsertTime = dataInsertTime;
-    }
-
-    public Date getDataDetectTime() {
-        return dataDetectTime;
-    }
-
-    public void setDataDetectTime(Date dataDetectTime) {
-        this.dataDetectTime = dataDetectTime;
-    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        IpPoolMainDO that = (IpPoolMainDO) o;
-        return ipNum == that.ipNum;
+
+        if (!(o instanceof IpPoolMainDTO)) return false;
+
+        IpPoolMainDTO that = (IpPoolMainDTO) o;
+
+        return new EqualsBuilder()
+                .append(ipNum, that.ipNum)
+                .isEquals();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(ipNum);
+        return new HashCodeBuilder(17, 37)
+                .append(ipNum)
+                .toHashCode();
     }
 
     @Override
     public String toString() {
-        return "IpPoolMainDO{" +
-                "dataID='" + dataID + '\'' +
-                ", ipNum=" + ipNum +
+        return "IpPoolMainDTO{" +
+                "ipNum='" + ipNum + '\'' +
                 ", ipPort=" + ipPort +
                 ", ipLocation='" + ipLocation + '\'' +
                 ", ipVendor='" + ipVendor + '\'' +
                 ", supportHttps=" + supportHttps +
                 ", supportPost=" + supportPost +
                 ", anonymityDegree=" + anonymityDegree +
-                ", accessSpeed=" + accessSpeed +
+                ", accessSpeed='" + accessSpeed + '\'' +
                 ", insertTime='" + insertTime + '\'' +
                 ", lastDetectTime='" + lastDetectTime + '\'' +
-                ", statusCode='" + statusCode + '\'' +
-                ", dataInsertTime=" + dataInsertTime +
-                ", dataDetectTime=" + dataDetectTime +
                 '}';
     }
 }

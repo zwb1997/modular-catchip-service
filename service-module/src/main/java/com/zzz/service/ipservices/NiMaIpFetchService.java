@@ -2,29 +2,27 @@ package com.zzz.service.ipservices;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-import com.zzz.entitymodel.servicebase.constants.IpServiceConstant;
+import com.zzz.model.entitymodel.servicebase.constants.IpServiceConstant;
 import com.zzz.service.ipservices.abstractservice.AbsrtactFetchIpService;
 
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.Header;
-import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.message.BasicHeader;
-import org.apache.http.message.BasicNameValuePair;
-import org.checkerframework.checker.guieffect.qual.UI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service("nimaipfetchservice")
 public class NiMaIpFetchService extends AbsrtactFetchIpService {
     private static final Logger LOG = LoggerFactory.getLogger(NiMaIpFetchService.class);
 
-    public List<URI> run() {
-        LOG.info(" nima ip works begin ");
+    public List<URI> runService() {
         List<URI> nimaTaskUris = new ArrayList<>();
         try {
             URI ptURI = new URIBuilder(IpServiceConstant.NI_MA_IP).setScheme(IpServiceConstant.IP_HTTP)
@@ -57,9 +55,8 @@ public class NiMaIpFetchService extends AbsrtactFetchIpService {
         for (URI uri : nimaUris) {
             try {
                 HttpGet get = new HttpGet(uri);
-                HttpResponse response = clientUtil.exeuteDefaultRequest(get, headers, true);
-                clientUtil.vaildateReponse(response);
-                
+                String responseEntityString = clientUtil.ipFetchGetRequest(uri, headers, true);
+
             } catch (Exception e) {
                 LOG.error(" NIMA fetching every page error ,message :{} ", e.getMessage());
             }
@@ -68,7 +65,15 @@ public class NiMaIpFetchService extends AbsrtactFetchIpService {
 
     @Override
     protected void serviceEntry() {
-        fetchEvertPage(run());
+        START_TIME = System.currentTimeMillis();
+        LOG.info(" === {} SERVICE START === ", IpServiceConstant.NM_TASK_NAME);
+        LOG.info(" start time : {} ", DateFormatUtils.format(new Date(), IpServiceConstant.COMMON_DATE_FORMAT_REGIX));
+        fetchEvertPage(runService());
+        END_TIME = System.currentTimeMillis();
+        var useTime = END_TIME - START_TIME;
+        LOG.info(" === {} SERVICE END === ", IpServiceConstant.NM_TASK_NAME);
+        LOG.info(" end time : {} ", DateFormatUtils.format(new Date(), IpServiceConstant.COMMON_DATE_FORMAT_REGIX));
+        LOG.info(" using time : miniutes :{} ,seconds :{} ", useTime / 1000 / 60, useTime / 1000);
     }
 
 }

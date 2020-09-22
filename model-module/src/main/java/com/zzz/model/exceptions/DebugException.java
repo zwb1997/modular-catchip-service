@@ -1,4 +1,4 @@
-package com.zzz.exceptions;
+package com.zzz.model.exceptions;
 
 public class DebugException extends RuntimeException {
     private String message;

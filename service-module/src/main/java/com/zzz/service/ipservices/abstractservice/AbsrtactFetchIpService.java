@@ -3,17 +3,22 @@ package com.zzz.service.ipservices.abstractservice;
 import java.util.Collection;
 import java.util.Map;
 
-import com.zzz.utils.HttpClientUtil;
-import com.zzz.utils.PageUtil;
-import com.zzz.utils.SignUtil;
+import com.zzz.service.utils.HttpClientUtil;
+import com.zzz.service.utils.PageUtil;
+import com.zzz.service.utils.SignUtil;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 /**
- *  抽象ip爬取服务
+ * 抽象ip爬取服务
  */
-public abstract class AbsrtactFetchIpService {
+@Component
+public abstract class AbsrtactFetchIpService implements Runnable {
     private static final Logger LOG = LoggerFactory.getLogger(AbsrtactFetchIpService.class);
+    // task name
+    protected String taskName;
     // request util
     protected HttpClientUtil clientUtil;
     // page util
@@ -65,5 +70,11 @@ public abstract class AbsrtactFetchIpService {
 
     public Collection<?> getPageList() {
         return pageList;
+    }
+
+    @Override
+    public void run() {
+        LOG.info(" task : {} begin...", this.taskName);
+        runTask();
     }
 }

@@ -1,4 +1,4 @@
-package com.zzz.basemodels.enummodel;
+package com.zzz.model.basemodels.enummodel;
 
 public enum ResponseCode {
 
