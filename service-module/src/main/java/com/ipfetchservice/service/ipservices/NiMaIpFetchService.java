@@ -52,7 +52,7 @@ public class NiMaIpFetchService extends AbsrtactFetchIpService {
         for (URI uri : nimaUris) {
             try {
                 String responseEntityString = clientUtil.ipFetchGetRequest(uri, headers, true);
-                LOG.info(" waiting ");
+                LOG.info(" response text : {} ", responseEntityString);
             } catch (Exception e) {
                 LOG.error(" NIMA fetching every page error ,message :{} ", e.getMessage());
             }

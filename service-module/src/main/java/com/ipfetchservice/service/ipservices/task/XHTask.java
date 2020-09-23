@@ -4,13 +4,8 @@ import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpLocation;
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.ipfetchservice.service.utils.HttpClientUtil;
 import com.ipfetchservice.service.utils.PageUtil;
-import com.ipfetchservice.service.utils.SignUtil;
-
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.Header;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.message.BasicHeader;
 import org.jsoup.select.Elements;
@@ -26,7 +21,6 @@ public class XHTask implements Callable<List<IpPoolMainDTO>> {
     private static final Logger LOG = LoggerFactory.getLogger(XHTask.class);
     private static final HttpClientUtil CLIENT_UTIL = new HttpClientUtil();
     private static final PageUtil PAGE_UTIL = new PageUtil();
-    private static final SignUtil SIGN_UTIL = new SignUtil();
     private List<IpLocation> workStack;
     private String curPrefixUrl;
     private Random random = new Random();

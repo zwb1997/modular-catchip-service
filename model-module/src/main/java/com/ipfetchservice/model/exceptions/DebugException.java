@@ -1,17 +1,15 @@
 package com.ipfetchservice.model.exceptions;
 
 public class DebugException extends RuntimeException {
-    private String message;
+    /**
+     *
+     */
+    private static final long serialVersionUID = -790238942356034071L;
     private int code;
 
     public DebugException(String message){
         super(message);
-        this.message = message;
         this.code = -1;
-    }
-
-    public void setMessage(String message) {
-        this.message = message;
     }
 
     public int getCode() {

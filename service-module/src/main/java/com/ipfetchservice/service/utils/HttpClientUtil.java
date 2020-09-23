@@ -22,7 +22,7 @@ public class HttpClientUtil {
     private static final Logger LOG = LoggerFactory.getLogger(HttpClientUtil.class);
     private static final int RESPONSE_CODE_PREFIX = 200;
     private static final int REQUEST_TIME_OUT = 20;
-    private static final int ESTABLISH_TIME_OUT = 30;
+    // private static final int ESTABLISH_TIME_OUT = 30;
 
     private static final HttpHost HTTP_HOST = new HttpHost(PROXY_IP, PROXY_IP_PORT);
 

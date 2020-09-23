@@ -2,9 +2,7 @@ package com.ipfetchservice.web.common.banner;
 
 import java.io.PrintStream;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.Banner;
-import org.springframework.boot.info.BuildProperties;
 import org.springframework.core.env.Environment;
 
 
