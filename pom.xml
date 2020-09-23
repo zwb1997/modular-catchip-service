@@ -2,7 +2,7 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.zzz</groupId>
+    <groupId>com.ipfetchservice</groupId>
     <artifactId>main-module</artifactId>
     <version>0.1</version>
     <packaging>pom</packaging>
@@ -27,9 +27,8 @@
         <junit-version>4.12</junit-version>
         <mybatis-spring-verison>1.3.2</mybatis-spring-verison>
         <mybatis_version>3.4.6</mybatis_version>
-        <com.zzz.web.common-lang3-version>3.10</com.zzz.web.common-lang3-version>
+        <common-lang3-version>3.10</common-lang3-version>
         <jackson-verison>2.10.4</jackson-verison>
-        <com.zzz.web.common-lang3-version>3.9</com.zzz.web.common-lang3-version>
         <httpclient-version>4.5.12</httpclient-version>
         <httpclient-async-version>4.1.4</httpclient-async-version>
         <jsoup-version>1.13.1</jsoup-version>
@@ -107,17 +106,17 @@
                 <scope>test</scope>
             </dependency>
             <dependency>
-                <groupId>com.zzz</groupId>
+                <groupId>com.ipfetchservice</groupId>
                 <artifactId>service-module</artifactId>
                 <version>${module-version}</version>
             </dependency>
             <dependency>
-                <groupId>com.zzz</groupId>
+                <groupId>com.ipfetchservice</groupId>
                 <artifactId>model-module</artifactId>
                 <version>${module-version}</version>
             </dependency>
             <dependency>
-                <groupId>com.zzz</groupId>
+                <groupId>com.ipfetchservice</groupId>
                 <artifactId>web-module</artifactId>
                 <version>${module-version}</version>
             </dependency>
@@ -125,7 +124,7 @@
             <dependency>
                 <groupId>org.apache.commons</groupId>
                 <artifactId>commons-lang3</artifactId>
-                <version>${com.zzz.web.common-lang3-version}</version>
+                <version>${common-lang3-version}</version>
             </dependency>
             <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
             <dependency>

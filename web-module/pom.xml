@@ -2,7 +2,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>com.zzz</groupId>
+        <groupId>com.ipfetchservice</groupId>
         <artifactId>main-module</artifactId>
         <version>0.1</version>
     </parent>
@@ -13,11 +13,11 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.zzz</groupId>
+            <groupId>com.ipfetchservice</groupId>
             <artifactId>service-module</artifactId>
         </dependency>
         <dependency>
-            <groupId>com.zzz</groupId>
+            <groupId>com.ipfetchservice</groupId>
             <artifactId>model-module</artifactId>
         </dependency>
         <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-autoconfigure -->

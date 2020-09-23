@@ -1,0 +1,115 @@
+package com.ipfetchservice.service.utils;
+
+import org.apache.http.Header;
+import org.apache.http.HttpHost;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpRequestBase;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+import org.springframework.util.Assert;
+import java.io.IOException;
+import java.net.URI;
+import java.util.List;
+import static com.ipfetchservice.model.entitymodel.servicebase.constants.IpServiceConstant.*;
+
+@Component
+public class HttpClientUtil {
+    private static final Logger LOG = LoggerFactory.getLogger(HttpClientUtil.class);
+    private static final int RESPONSE_CODE_PREFIX = 200;
+    private static final int REQUEST_TIME_OUT = 20;
+    private static final int ESTABLISH_TIME_OUT = 30;
+
+    private static final HttpHost HTTP_HOST = new HttpHost(PROXY_IP, PROXY_IP_PORT);
+
+    private static final PageUtil PAGE_UTIL = new PageUtil();
+
+    /**
+     * create a default httpClient
+     *
+     * @param httpType
+     * @param headers
+     * @return HttpResponse
+     */
+    public HttpResponse exeuteDefaultRequest(HttpRequestBase httpType, List<Header> headers, boolean useProxy) {
+        LOG.info(" begin send a request ");
+        LOG.info(" prepare to send a request ");
+        LOG.info(" URI : {} ", httpType.getURI().toString());
+        HttpResponse response = null;
+        try {
+            HttpClient client = HttpClientBuilder.create().build();
+            Assert.notNull(headers, " request header is null ");
+            int headerSize = headers.size();
+            httpType.setHeaders(headers.toArray(new Header[headerSize]));
+            RequestConfig requestConfig = useProxy
+                    ? RequestConfig.custom().setConnectionRequestTimeout(REQUEST_TIME_OUT).setProxy(HTTP_HOST).build()
+                    : RequestConfig.custom().setConnectionRequestTimeout(REQUEST_TIME_OUT).build();
+            httpType.setConfig(requestConfig);
+            printHeaders(httpType.getAllHeaders());
+            LOG.info(" waiting for response ");
+            response = client.execute(httpType);
+            LOG.info(" response send back ");
+            printHeaders(response.getAllHeaders());
+        } catch (IOException e) {
+            LOG.error(" execute request error : messages {} ", e.getMessage());
+        }
+        return response;
+    }
+
+    /**
+     * @param response vaildate response is success by code is 200 and print
+     *                 response headers
+     */
+    public void vaildateReponse(HttpResponse response) {
+        Assert.notNull(response, " respnse could't empty ");
+        if (response.getStatusLine() == null) {
+            LOG.info(" response statusline is null , will not validate");
+            return;
+        }
+        int responseCodeString = response.getStatusLine().getStatusCode();
+        if (responseCodeString == RESPONSE_CODE_PREFIX) {
+            LOG.info(" response success, will show headers ");
+        } else {
+            LOG.info(" response code is not '200', will show headers ");
+        }
+        LOG.info(" execute done,response code : {} , will print headers ", responseCodeString);
+        Header[] headers = response.getAllHeaders();
+        printHeaders(headers);
+    }
+
+    /**
+     * print headers
+     *
+     * @param headers
+     */
+    public void printHeaders(Header[] headers) {
+        Assert.notEmpty(headers, " error , response header is null,messages");
+        LOG.info(" === request/response headers start === ");
+        for (Header h : headers) {
+            LOG.info(" header : {} value : {} ", h.getName(), h.getValue());
+        }
+        LOG.info(" === request/response headers end === ");
+    }
+
+    /**
+     * common get request way,take true or false to choose if use proxy for sending
+     * request
+     * 
+     * @param uri
+     * @param headerList
+     * @param useProxy
+     * @return String currentPage , the response text
+     * @throws IOException
+     */
+    public String ipFetchGetRequest(URI uri, List<Header> headerList, boolean useProxy) throws IOException {
+        HttpGet get = new HttpGet(uri);
+        HttpResponse response = exeuteDefaultRequest(get, headerList, useProxy);
+        vaildateReponse(response);
+        String currentPage = PAGE_UTIL.validateEntity(response.getEntity());
+        return currentPage;
+    }
+}

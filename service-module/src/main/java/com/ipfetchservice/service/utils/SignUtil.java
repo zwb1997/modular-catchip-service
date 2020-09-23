@@ -1,0 +1,26 @@
+package com.ipfetchservice.service.utils;
+
+import org.apache.commons.codec.digest.DigestUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
+
+@Component
+public class SignUtil {
+    private static final Logger LOG = LoggerFactory.getLogger(SignUtil.class);
+
+
+    /**
+     * create sign by timeSpan + localSecret
+     *
+     * @param timeSpan
+     * @param localSecret
+     * @return
+     */
+    public String createSign(String timeSpan, String localSecret) {
+        String fullMessage = timeSpan + localSecret;
+        String md5Hex = DigestUtils.md5Hex(fullMessage).toLowerCase();
+        LOG.info("local md5 : {}", md5Hex);
+        return md5Hex;
+    }
+}
