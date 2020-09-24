@@ -1,12 +1,15 @@
 package com.ipfetchservice.service.ipservices.abstractservice;
 
 import java.util.Collection;
+import java.util.Date;
 import java.util.Map;
 
+import com.ipfetchservice.model.entitymodel.servicebase.constants.IpServiceConstant;
 import com.ipfetchservice.service.utils.HttpClientUtil;
 import com.ipfetchservice.service.utils.PageUtil;
 import com.ipfetchservice.service.utils.SignUtil;
 
+import org.apache.commons.lang3.time.DateFormatUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -45,7 +48,15 @@ public abstract class AbsrtactFetchIpService implements Runnable {
     protected abstract void serviceEntry();
 
     public void runTask() {
-        serviceEntry();
+        START_TIME = System.currentTimeMillis();
+        LOG.info(" === {} SERVICE START || start time : {} === ", taskName,
+                DateFormatUtils.format(new Date(), IpServiceConstant.COMMON_DATE_FORMAT_REGIX));
+                serviceEntry();
+        END_TIME = System.currentTimeMillis();
+        var useTime = END_TIME - START_TIME;
+        LOG.info(" === {} SERVICE END  || end time : {} === \t using time : miniutes :{} ,seconds :{} ", taskName,
+                DateFormatUtils.format(new Date(), IpServiceConstant.COMMON_DATE_FORMAT_REGIX), useTime / 1000 / 60, useTime / 1000);
+        
     }
 
     public HttpClientUtil getClientUtil() {

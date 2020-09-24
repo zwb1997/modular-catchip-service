@@ -31,7 +31,5 @@ public class RunApp {
         ConfigurableApplicationContext applicationContext = application.run(args);
         // start batch tasks
         applicationContext.getBean(BatchService.class).tasksRunEntry();
-        // var pageUtil = applicationContext.getBean(PageUtil.class);
-        // LOG.info(" page util entity :{} ",pageUtil);
     }
 }

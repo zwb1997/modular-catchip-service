@@ -6,6 +6,7 @@ import com.ipfetchservice.service.utils.HttpClientUtil;
 import com.ipfetchservice.service.utils.PageUtil;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.Header;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.message.BasicHeader;
 import org.jsoup.select.Elements;
@@ -43,8 +44,7 @@ public class XHTask implements Callable<List<IpPoolMainDTO>> {
 
         Iterator<IpLocation> ipLocationIterator = workStack.iterator();
         List<IpPoolMainDTO> ipPoolMainDOs = Collections.synchronizedList(new LinkedList<>());
-        List<Header> headerList = new ArrayList<>();
-        headerList.add(new BasicHeader("user-agent", USER_AGENT));
+        HttpGet getReuqest = new HttpGet();
         while (ipLocationIterator.hasNext()) {
             try {
                 Thread.sleep(random.nextInt(4) * 1000);
@@ -54,9 +54,11 @@ public class XHTask implements Callable<List<IpPoolMainDTO>> {
                 LOG.info(" begin fetching page proxy infos , page url : {} ", fullUrl);
 
                 URI uri = new URIBuilder(fullUrl).setScheme("https").build();
+                getReuqest.setURI(uri);
                 String curUriString = uri.toString();
                 LOG.info(" do with current url :{} ", curUriString);
-                String currentPage = CLIENT_UTIL.ipFetchGetRequest(uri, headerList, true);
+
+                String currentPage = CLIENT_UTIL.exeuteDefaultRequest(getReuqest, null, true);
                 Elements elements = PAGE_UTIL.fetchElementWithSection(currentPage, HAS_PAGE_REGIX);
                 if (ObjectUtils.isNotEmpty(elements)) {
                     ipPoolMainDOs.addAll(Objects.requireNonNull(PAGE_UTIL.combineXiaoHuanInfo(elements)));
@@ -67,7 +69,6 @@ public class XHTask implements Callable<List<IpPoolMainDTO>> {
                 LOG.error(" error , message : {} ", e.getMessage());
             }
         }
-        headerList = null;
         workStack = null;
         return ipPoolMainDOs;
     }

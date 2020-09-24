@@ -74,25 +74,6 @@ public class PageUtil {
     }
 
     /**
-     * validate httpEntity is empty
-     * 
-     * @param entity
-     * @return
-     * @throws IOException
-     * @throws ParseException
-     */
-    public String validateEntity(HttpEntity entity) throws IOException, ParseException {
-        if (ObjectUtils.isEmpty(entity)) {
-            LOG.info(" current response entity is empty ");
-        }
-        String responseEntityString = EntityUtils.toString(entity, "utf-8");
-        if (StringUtils.isBlank(responseEntityString)) {
-            LOG.info(" current response entity is empty ");
-        }
-        return responseEntityString;
-    }
-
-    /**
      * match element by given regix
      *
      * @param html
@@ -107,6 +88,11 @@ public class PageUtil {
         return elements;
     }
 
+    /**
+     * XIAO HUAN ip combine service
+     * @param elements
+     * @return
+     */
     public List<IpPoolMainDTO> combineXiaoHuanInfo(Elements elements) {
         if (CollectionUtils.isEmpty(elements)) {
             LOG.info(" elements is empty,will not work ");
@@ -169,7 +155,7 @@ public class PageUtil {
     /**
      * 替代所有空格 为 斜杠
      *
-     * @param cure
+     * @param Element cure
      * @return List<String>
      */
     public List<String> findTextNode(Element cure) {

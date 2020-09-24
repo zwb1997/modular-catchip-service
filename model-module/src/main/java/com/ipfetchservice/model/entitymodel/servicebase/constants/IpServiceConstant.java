@@ -33,7 +33,7 @@ public class IpServiceConstant {
     public static final String COMMON_DATE_FORMAT_REGIX = "yyyy-MM-dd HH:mm:ss";
     public static final String PROXY_IP = "104.207.151.166";
     public static final int PROXY_IP_PORT = 37720;
-
+    public static String HAS_PAGE_REGIX = "tbody > tr";
     public static final String STORAGE_SERVICE_LOCATION="http://39.105.41.230";
 //    public static final String STORAGE_SERVICE_LOCATION = "http://127.0.0.1";
 //    public static final int STORAGE_SERVICE_LOCATION_PORT = 8010;
@@ -43,7 +43,7 @@ public class IpServiceConstant {
     public static final String XIAO_HUAN_TQDL = "//ip.ihuan.me/tqdl.html";
     public static final String XIAO_HUAN_ME = "https://ip.ihuan.me";
     public static final String XIAO_HUAN_TI = "https://ip.ihuan.me/ti.html";
-    public static String HAS_PAGE_REGIX = "tbody > tr";
+
     public static String PAGE_NUM_REGIS = "[href~=^(\\?page=)([a-zA-Z0-9]){8,}$]";
     public static String PAGE_AREA_LIST_REGIX = "a[href~=^/address]";
     public static final String HC_LINK = "/Proxies.7z";

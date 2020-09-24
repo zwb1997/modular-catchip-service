@@ -9,6 +9,7 @@ import com.ipfetchservice.service.ipservices.task.XHTask;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.*;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
@@ -19,7 +20,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
@@ -44,14 +44,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
 
     @Override
     protected void serviceEntry() {
-        START_TIME = System.currentTimeMillis();
-        LOG.info(" === {} SERVICE START || start time : {} === ", XH_TASK_NAME,
-                DateFormatUtils.format(new Date(), COMMON_DATE_FORMAT_REGIX));
         fetchIpPages(runService());
-        END_TIME = System.currentTimeMillis();
-        var useTime = END_TIME - START_TIME;
-        LOG.info(" === {} SERVICE END  || end time : {} === \n using time : miniutes :{} ,seconds :{} ", XH_TASK_NAME,
-                DateFormatUtils.format(new Date(), COMMON_DATE_FORMAT_REGIX), useTime / 1000 / 60, useTime / 1000);
     }
 
     public List<String> runService() {
@@ -93,7 +86,8 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
             URI uri = new URIBuilder(XIAO_HUAN_TQDL).setParameters(requestParams).setScheme("https").build();
             List<Header> requestHeaders = new ArrayList<>();
             requestHeaders.add(new BasicHeader("user-agent", USER_AGENT));
-            String html = clientUtil.ipFetchGetRequest(uri, requestHeaders, true);
+            HttpGet getRequest = new HttpGet(uri);
+            String html = clientUtil.exeuteDefaultRequest(getRequest, requestHeaders, true);
             TreeMap<Integer, IpLocation> resAtags = pageUtil.matchAtages(1, html, PAGE_AREA_LIST_REGIX);
             // 增加花刺连接
             removeMutiple(resAtags);
@@ -120,6 +114,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
      * @param ipPrefixLists
      */
     public void fetchIpPages(List<String> ipPrefixLists) {
+        HttpGet getRequest = new HttpGet();
         for (String targetPrefix : ipPrefixLists) {
             String curUriString = null;
             int pageNum = 1;
@@ -128,10 +123,9 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
                 LOG.info(" === begin fetching these pages === ");
                 URI uri = new URIBuilder(XIAO_HUAN_TQDL).setScheme("https").setPath(targetPrefix).build();
                 curUriString = uri.toString();
-                List<Header> headerList = new ArrayList<>();
-                headerList.add(new BasicHeader("user-agent", USER_AGENT));
                 LOG.info(" do with current type :{} ", curUriString);
-                String currentPage = clientUtil.ipFetchGetRequest(uri, headerList, true);
+                getRequest.setURI(uri);
+                String currentPage = clientUtil.exeuteDefaultRequest(getRequest, null, true);
                 LOG.info(" current html : {} ", currentPage);
                 TreeMap<Integer, IpLocation> aTags = pageUtil.matchAtages(pageNum, currentPage, PAGE_NUM_REGIS);
                 LOG.info(" done ");
@@ -146,7 +140,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
                 // 移除'>>'
                 pageNumsList.pop();
                 fetchCurrentPages(curUriString, pageNumsList);
-            } catch (URISyntaxException | IOException e1) {
+            } catch (URISyntaxException e1) {
                 LOG.error("{}  page error :  message : {}", curUriString, e1.getMessage());
             }
         }
@@ -165,6 +159,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
         }
         LOG.info(" === start getting current  <a> tags === ");
         boolean flag = true;
+        HttpGet getReuqest = new HttpGet();
         while (flag) {
             try {
                 Thread.sleep(2 * 1000);
@@ -173,9 +168,8 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
                 String curFullHref = curUriString + curLocatioHref;
                 LOG.info(" current page : {} ", curFullHref);
                 URI uri = new URIBuilder(curFullHref).setScheme("https").build();
-                List<Header> headerList = new ArrayList<>();
-                headerList.add(new BasicHeader("user-agent", USER_AGENT));
-                String currentPage = clientUtil.ipFetchGetRequest(uri, headerList, true);
+                getReuqest.setURI(uri);
+                String currentPage = clientUtil.exeuteDefaultRequest(getReuqest, null, true);
                 if (pageUtil.hasNextPage(currentPage, HAS_PAGE_REGIX)) {
                     TreeMap<Integer, IpLocation> curMap = pageUtil.matchAtages(0, currentPage, PAGE_NUM_REGIS);
                     sortAndAdd(curMap, pageNumsStack);
@@ -228,6 +222,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
     private void uploadData(List<Future<List<IpPoolMainDTO>>> futures) {
         LOG.info(" === begin stage data === ");
         Assert.notEmpty(futures, " future task wouldn't empty ");
+        HttpPost httpPost = new HttpPost();
         for (Future<List<IpPoolMainDTO>> future : futures) {
             try {
                 LOG.info(" \\\\waiting to get future result...\\\\ ");
@@ -236,23 +231,21 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
                     LOG.info(" current IpPoolMainDO list is empty , will not do insert ");
                     continue;
                 }
+                int size = lists.size();
+                LOG.info(" list size :{} ",size);
                 ObjectMapper objectMapper = new ObjectMapper();
                 String curData = objectMapper.writeValueAsString(lists);
                 URI uri = new URIBuilder(STORAGE_SERVICE_LOCATION).setScheme("http").setCharset(StandardCharsets.UTF_8)
                         .setPort(STORAGE_SERVICE_LOCATION_PORT).setPath(STORAGE_SERVICE_PATH).build();
-                HttpPost httpPost = new HttpPost(uri);
+                        httpPost.setURI(uri);
                 httpPost.setEntity(new StringEntity(curData, Consts.UTF_8));
                 List<Header> headerList = new ArrayList<>();
                 String curTimeMillions = String.valueOf(System.currentTimeMillis());
-                headerList.add(new BasicHeader("user-agent", USER_AGENT));
                 headerList.add(new BasicHeader(ORIGIN_NAME, STORAGE_SERVICE_LOCATION));
                 headerList.add(new BasicHeader(CUR_TIME_SPAN, curTimeMillions));
                 headerList.add(new BasicHeader(SECRET_SIGN, signUtil.createSign(curTimeMillions, SECRET)));
                 headerList.add(new BasicHeader("Content-Type", HTTP_CONTENT_TYPE_JSON));
-                HttpResponse response = clientUtil.exeuteDefaultRequest(httpPost, headerList, false);
-                clientUtil.vaildateReponse(response);
-                HttpEntity entity = response.getEntity();
-                String responseText = pageUtil.validateEntity(entity);
+                String responseText = clientUtil.exeuteDefaultRequest(httpPost, headerList, false);
                 LOG.info(" sent storage data success , response text : {} ", responseText);
             } catch (Exception e) {
                 LOG.error(" send stage data error , message : {} ", e.getMessage());

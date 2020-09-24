@@ -12,6 +12,7 @@ import static com.ipfetchservice.model.entitymodel.servicebase.constants.IpServi
 
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.Header;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.message.BasicHeader;
 import org.slf4j.Logger;
@@ -25,6 +26,11 @@ import org.springframework.stereotype.Service;
 @Service("nimaipfetchservice")
 public class NiMaIpFetchService extends AbsrtactFetchIpService {
     private static final Logger LOG = LoggerFactory.getLogger(NiMaIpFetchService.class);
+
+
+    public NiMaIpFetchService(){
+        this.taskName = NM_TASK_NAME;
+    }
 
     public List<URI> runService() {
         List<URI> nimaTaskUris = new ArrayList<>();
@@ -44,15 +50,24 @@ public class NiMaIpFetchService extends AbsrtactFetchIpService {
         return nimaTaskUris;
     }
 
+    /**
+     * nima proxy 页数没有加密 直接先搞页数
+     * 
+     * @param nimaUris
+     */
     public void fetchEvertPage(List<URI> nimaUris) {
         List<Header> headers = new LinkedList<>();
-        headers.add(new BasicHeader("User_Agent", USER_AGENT));
         headers.add(new BasicHeader("Host", NI_MA_IP));
         headers.add(new BasicHeader("Referer", NIMA_REFERER));
+        HttpGet get = new HttpGet();
         for (URI uri : nimaUris) {
             try {
-                String responseEntityString = clientUtil.ipFetchGetRequest(uri, headers, true);
-                LOG.info(" response text : {} ", responseEntityString);
+                get.setURI(uri);
+                String responseEntityString = clientUtil.exeuteDefaultRequest(get, headers, true);
+                if (pageUtil.hasNextPage(responseEntityString, HAS_PAGE_REGIX)) {
+
+                }
+                // LOG.info(" response text : {} ", responseEntityString);
             } catch (Exception e) {
                 LOG.error(" NIMA fetching every page error ,message :{} ", e.getMessage());
             }
@@ -61,14 +76,7 @@ public class NiMaIpFetchService extends AbsrtactFetchIpService {
 
     @Override
     protected void serviceEntry() {
-        START_TIME = System.currentTimeMillis();
-        LOG.info(" === {} SERVICE START || start time : {} === ", NM_TASK_NAME,
-                DateFormatUtils.format(new Date(), COMMON_DATE_FORMAT_REGIX));
         fetchEvertPage(runService());
-        END_TIME = System.currentTimeMillis();
-        var useTime = END_TIME - START_TIME;
-        LOG.info(" === {} SERVICE END  || end time : {} === \n using time : miniutes :{} ,seconds :{} ", NM_TASK_NAME,
-                DateFormatUtils.format(new Date(), COMMON_DATE_FORMAT_REGIX), useTime / 1000 / 60, useTime / 1000);
     }
 
 }
