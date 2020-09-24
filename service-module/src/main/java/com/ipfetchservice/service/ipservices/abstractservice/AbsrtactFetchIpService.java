@@ -10,6 +10,7 @@ import com.ipfetchservice.service.utils.PageUtil;
 import com.ipfetchservice.service.utils.SignUtil;
 
 import org.apache.commons.lang3.time.DateFormatUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -35,8 +36,8 @@ public abstract class AbsrtactFetchIpService implements Runnable {
     // page details map
     protected Map<?, ?> pageMaps;
 
-    protected static long START_TIME = 0L;
-    protected static long END_TIME = 0L;
+    protected  long startTime = 0L;
+    protected  long endTime = 0L;
 
     protected AbsrtactFetchIpService() {
         this.clientUtil = new HttpClientUtil();
@@ -48,15 +49,17 @@ public abstract class AbsrtactFetchIpService implements Runnable {
     protected abstract void serviceEntry();
 
     public void runTask() {
-        START_TIME = System.currentTimeMillis();
+        
+        startTime = System.currentTimeMillis();
         LOG.info(" === {} SERVICE START || start time : {} === ", taskName,
                 DateFormatUtils.format(new Date(), IpServiceConstant.COMMON_DATE_FORMAT_REGIX));
-                serviceEntry();
-        END_TIME = System.currentTimeMillis();
-        var useTime = END_TIME - START_TIME;
+        serviceEntry();
+        endTime = System.currentTimeMillis();
+        var useTime = endTime - startTime;
         LOG.info(" === {} SERVICE END  || end time : {} === \t using time : miniutes :{} ,seconds :{} ", taskName,
-                DateFormatUtils.format(new Date(), IpServiceConstant.COMMON_DATE_FORMAT_REGIX), useTime / 1000 / 60, useTime / 1000);
-        
+                DateFormatUtils.format(new Date(), IpServiceConstant.COMMON_DATE_FORMAT_REGIX), useTime / 1000 / 60,
+                useTime / 1000);
+
     }
 
     public HttpClientUtil getClientUtil() {

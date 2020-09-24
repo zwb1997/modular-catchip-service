@@ -2,17 +2,12 @@ package com.ipfetchservice.service.utils;
 
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpHost;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.conn.ConnectionKeepAliveStrategy;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -20,12 +15,9 @@ import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
-import java.net.URI;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -40,7 +32,6 @@ public class HttpClientUtil {
 
     private static final HttpHost HTTP_HOST = new HttpHost(PROXY_IP, PROXY_IP_PORT);
 
-    private static final PageUtil PAGE_UTIL = new PageUtil();
     private static final PoolingHttpClientConnectionManager poolClientConnectionManager = new PoolingHttpClientConnectionManager(
             60L, TimeUnit.SECONDS);
     private static CloseableHttpClient CLIENT;
@@ -52,7 +43,7 @@ public class HttpClientUtil {
     }
 
     /**
-     * create a default httpClient
+     * create a default httpClient ,reuse httpclient
      * @param httpType
      * @param headers
      * @return String the response text
@@ -74,7 +65,7 @@ public class HttpClientUtil {
             httpType.setConfig(requestConfig);
             printHeaders(httpType.getAllHeaders());
             LOG.info(" waiting for response ");
-            try(CloseableHttpResponse response = CLIENT.execute(httpType);){
+            try(CloseableHttpResponse response = CLIENT.execute(httpType)){
                 LOG.info(" response send back ");
                 printHeaders(response.getAllHeaders());
                 HttpEntity responseEntity = response.getEntity();
