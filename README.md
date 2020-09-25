@@ -15,3 +15,19 @@ Plan:
   3.Try to use cache(like redis..memecached..) <strong>working</strong> <br>
   4.How to efficient read and write datas..<br>
   etc...<br>
+  ////////////////////
+record some parameters
+
+"120.84.100.203:9999" ip + port
+"HTTP代理" proxy support
+"普通代理" proxy type
+"中国" location
+"广东"location
+"揭阳"location
+"联通"location
+"3.17" speed
+"384天" alive time
+"18小时" alive time
+"20分钟" alive time
+"58秒" alive time
+"274" web set score
