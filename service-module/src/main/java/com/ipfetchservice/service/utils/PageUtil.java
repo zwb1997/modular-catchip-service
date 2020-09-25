@@ -2,9 +2,6 @@ package com.ipfetchservice.service.utils;
 
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.ParseException;
-import org.apache.http.util.EntityUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -14,14 +11,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
-import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpLocation;
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
-import com.ipfetchservice.model.exceptions.DebugException;
+import com.ipfetchservice.service.utils.page.extractservice.PageExtractor;
 
 import static com.ipfetchservice.model.entitymodel.servicebase.constants.IpServiceConstant.*;
 
@@ -29,7 +25,6 @@ import static com.ipfetchservice.model.entitymodel.servicebase.constants.IpServi
 public class PageUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(PageUtil.class);
-    private static final String[] EMPTY_ARR = new String[] { "", "", "", "", "", "", "", "", "", "" };
     private static final int COMBINE_ARRAY_REQUIRE_LENGTH = 10;
     private static final Lock LOCK = new ReentrantLock();
 
@@ -67,6 +62,7 @@ public class PageUtil {
     public boolean hasNextPage(String curDocmentHtml, String exceptSection) {
         Document doc = Jsoup.parse(curDocmentHtml);
         Elements bodyEs = doc.select(exceptSection);
+
         if (bodyEs.isEmpty()) {
             return false;
         }
@@ -89,41 +85,14 @@ public class PageUtil {
     }
 
     /**
-     * XIAO HUAN ip combine service
-     * @param elements
-     * @return
-     */
-    public List<IpPoolMainDTO> combineXiaoHuanInfo(Elements elements) {
-        if (CollectionUtils.isEmpty(elements)) {
-            LOG.info(" elements is empty,will not work ");
-            return null;
-        }
-        LOCK.lock();
-        Iterator<Element> iterator = elements.iterator();
-        LinkedList<IpPoolMainDTO> res = new LinkedList<>();
-        while (iterator.hasNext()) {
-            try {
-                Element e = iterator.next();
-                List<String> infos = findTextNode(e);
-                LOG.info(" current infos : {} ", infos);
-                res.add(createInstance(infos));
-            } catch (Exception e) {
-                LOG.error(" error , message :{} ", e.getMessage());
-            }
-        }
-        LOCK.unlock();
-        return res;
-    }
-
-    /**
      * list must be 10 elements; 固定格式的集合; 0 -> ip ; 1 -> port ; 2 -> ip地址 ; 3 ->
      * ip供应商 ; 4 -> 是否支持https ; 5 -> 是否支持post请求 ; 6 -> 匿名程度 ; 7 -> 速度; 8 -> 网站检测
-     * ip入库时间 ; 9 -> 网站检测 ip最后有效时间;
+     * ip入库时间 ; 9 -> 网站检测 ip最后有效时间; 具体请看 {@link IpPoolMainDTO }
      * 
      * @param infos
      * @return IpPoolMainDTO
      */
-    private IpPoolMainDTO createInstance(List<String> infos) {
+    public IpPoolMainDTO createInstance(List<String> infos) {
         if (CollectionUtils.isEmpty(infos) || infos.size() < COMBINE_ARRAY_REQUIRE_LENGTH
                 || infos.size() > COMBINE_ARRAY_REQUIRE_LENGTH) {
             LOG.error(" error instance size must be 10 ");
@@ -153,38 +122,49 @@ public class PageUtil {
     }
 
     /**
-     * 替代所有空格 为 斜杠
-     *
-     * @param Element cure
-     * @return List<String>
+     * check page name is match the section
+     * 
+     * @param pageText : use to check
+     * @param section  : regex
+     * @return true if match the section
      */
-    public List<String> findTextNode(Element cure) {
-        if (cure == null) {
-            LOG.info(" current Element is empty ");
-            return null;
-        }
-        Elements tds = cure.select("td");
-        List<String> resList = Arrays.asList(EMPTY_ARR);
-        int i = 0;
-        for (Element e : tds) {
-            if (i >= 10) {
-                throw new DebugException(" parameters size is overflow ");
-            }
-            String val = e.text().replace(" ", "/");
-            resList.set(i++, val);
-        }
-        return resList;
+    public boolean checkPageLegal(String pageText, String section) {
+        Assert.notNull(section, " section could not null ");
+        Assert.notNull(pageText, " num could not null ");
+        return pageText.matches(section);
     }
 
     /**
-     * check page name is match the section
+     * extract page infos method ; use strategy pattern to adapt different web page
+     * structure
      * 
-     * @param num
+     * @param page
      * @param section
-     * @return could match the section
+     * @param extractor
+     * @return List<IpPoolMainDTO> the extract info stationary infos
+     *         {@link IpPoolMainDTO}
      */
-    public boolean checkPageLegal(Object num, String section) {
-        Assert.notNull(section, " section could not null ");
-        return String.valueOf(num).matches(section);
+    public List<IpPoolMainDTO> getInfos(String page, String section, PageExtractor extractor) {
+        List<IpPoolMainDTO> infoLists = new LinkedList<>();
+        try {
+            LOCK.lock();
+            Elements elements = fetchElementWithSection(page, HAS_PAGE_REGIX);
+            if (ObjectUtils.isNotEmpty(elements)) {
+                infoLists.addAll(extractor.doExtractStrategy(page, elements));
+            } else {
+                LOG.info(" current elements is empty,will not work ,page : {} ", page);
+            }
+            return infoLists;
+        } catch (Exception e) {
+            LOG.error(" get IpPoolMainDTO infos error , message :{} ", e.getMessage());
+            return infoLists;
+        } finally {
+            try {
+                LOCK.unlock();
+            } catch (Exception e) {
+                LOG.info(" here is no lock ,cannot unlock,message :{}", e.getMessage());
+            }
+        }
     }
+
 }

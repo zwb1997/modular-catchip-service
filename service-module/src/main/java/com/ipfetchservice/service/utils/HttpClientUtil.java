@@ -90,13 +90,13 @@ public class HttpClientUtil {
     public void printHeaders(Header[] headers) {
       
         if(ArrayUtils.isEmpty(headers)){
-            LOG.info(" === request/response headers empty === ");
+            LOG.debug(" === request/response headers empty === ");
             return;
         }
-        LOG.info(" === request/response headers start === ");
+        LOG.debug(" === request/response headers start === ");
         for (Header h : headers) {
-            LOG.info(" header : {} value : {} ", h.getName(), h.getValue());
+            LOG.debug(" header : {} value : {} ", h.getName(), h.getValue());
         }
-        LOG.info(" === request/response headers end === ");
+        LOG.debug(" === request/response headers end === ");
     }
 }

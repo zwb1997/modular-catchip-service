@@ -1,13 +1,13 @@
-package com.ipfetchservice.service.ipservices;
+package com.ipfetchservice.service.ipservices.abstractservice.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpLocation;
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.ipfetchservice.service.common.provider.TaskThreadPoolProvider;
 import com.ipfetchservice.service.ipservices.abstractservice.AbsrtactFetchIpService;
-import com.ipfetchservice.service.ipservices.task.XHTask;
+import com.ipfetchservice.service.ipservices.task.impl.XHTask;
+
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.*;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
@@ -186,7 +186,6 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
 
     /**
      * assigned works to threads
-     * 
      * @param curUriString
      * @param pageNumsList
      */

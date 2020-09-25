@@ -1,14 +1,15 @@
-package com.ipfetchservice.service.ipservices.task;
+package com.ipfetchservice.service.ipservices.task.impl;
 
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpLocation;
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.ipfetchservice.service.utils.HttpClientUtil;
 import com.ipfetchservice.service.utils.PageUtil;
+import com.ipfetchservice.service.utils.page.extractservice.PageExtractor;
+import com.ipfetchservice.service.utils.page.extractservice.impl.XHPageExtractStrategy;
+
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.http.Header;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.message.BasicHeader;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,6 +26,8 @@ public class XHTask implements Callable<List<IpPoolMainDTO>> {
     private List<IpLocation> workStack;
     private String curPrefixUrl;
     private Random random = new Random();
+
+    private static final PageExtractor EXTRACTOR = new PageExtractor(new XHPageExtractStrategy());
 
     public XHTask(String curPrefixUrl, List<IpLocation> workStack) {
         this.curPrefixUrl = curPrefixUrl;
@@ -59,12 +62,8 @@ public class XHTask implements Callable<List<IpPoolMainDTO>> {
                 LOG.info(" do with current url :{} ", curUriString);
 
                 String currentPage = CLIENT_UTIL.exeuteDefaultRequest(getReuqest, null, true);
-                Elements elements = PAGE_UTIL.fetchElementWithSection(currentPage, HAS_PAGE_REGIX);
-                if (ObjectUtils.isNotEmpty(elements)) {
-                    ipPoolMainDOs.addAll(Objects.requireNonNull(PAGE_UTIL.combineXiaoHuanInfo(elements)));
-                } else {
-                    LOG.info(" current elements is empty,will not work ,page : {} ", fullUrl);
-                }
+                ipPoolMainDOs.addAll(PAGE_UTIL.getInfos(currentPage, HAS_PAGE_REGIX, EXTRACTOR));
+
             } catch (Exception e) {
                 LOG.error(" error , message : {} ", e.getMessage());
             }
