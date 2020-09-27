@@ -2,7 +2,6 @@ package com.ipfetchservice.service.ipservices.abstractservice.impl;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -16,7 +15,6 @@ import com.ipfetchservice.service.ipservices.task.impl.NMTask;
 
 import static com.ipfetchservice.model.entitymodel.servicebase.constants.IpServiceConstant.*;
 
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -35,7 +33,7 @@ public class NiMaIpFetchService extends AbsrtactFetchIpService {
     private static final int BEGIN_PAGE_NUMBER = 50;
     private static final int PAGE_STEP = 50;
     private static final Random RANDOM = new Random();
-
+    private static final TaskThreadPoolProvider TASK_PROVIDER = TaskThreadPoolProvider.getInstance();
     public NiMaIpFetchService() {
         this.taskName = NM_TASK_NAME;
     }
@@ -96,7 +94,7 @@ public class NiMaIpFetchService extends AbsrtactFetchIpService {
             while (workPos < workSize) {
                 int endPos = Math.min(workSize, workPos + workGrowStep);
                 List<URI> subWorkUris = workUris.subList(workPos, endPos);
-                Future<List<IpPoolMainDTO>> future = TaskThreadPoolProvider.submitTaskWork(new NMTask(subWorkUris,path));
+                Future<List<IpPoolMainDTO>> future = TASK_PROVIDER.submitTaskWork(new NMTask(subWorkUris,path));
                 waitingResutls.add(future);
                 workPos += workGrowStep;
             }
@@ -111,14 +109,19 @@ public class NiMaIpFetchService extends AbsrtactFetchIpService {
      * @param waitingResutls
      */
     private void doUpload(List<Future<List<IpPoolMainDTO>>> waitingResutls) {
-        
+        LOG.info(" waiting for get futures... ");
+        int taskResultSize = waitingResutls.size();
+        boolean flag = true;
+        while(flag){
+            
+        }
     }
 
     /**
      * detect current uri page nums
-     * 
-     * @param i
-     * @return
+     * 先以每50页为步长查下个页面有没有值; 当没有值时 从当前页数开始往回按每页查，并直到页面有值为止
+     * @param URI i
+     * @return int pageSize
      */
     private int pageNumDetect(URI i) {
         String path = i.getPath().split("/")[1];

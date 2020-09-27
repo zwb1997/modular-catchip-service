@@ -38,7 +38,7 @@ public class IpServiceConstant {
 //    public static final String STORAGE_SERVICE_LOCATION = "http://127.0.0.1";
 //    public static final int STORAGE_SERVICE_LOCATION_PORT = 8010;
     public static final int STORAGE_SERVICE_LOCATION_PORT= 37240;
-
+    public static final int COMBINE_ARRAY_REQUIRE_LENGTH = 10;
     //XIAO_HUAN
     public static final String XIAO_HUAN_TQDL = "//ip.ihuan.me/tqdl.html";
     public static final String XIAO_HUAN_ME = "https://ip.ihuan.me";
@@ -57,7 +57,10 @@ public class IpServiceConstant {
     public static final String NI_MA_IP_HIGH = "gaoni";
     public static final String NI_MA_IP_HTTP = "http";
     public static final String NI_MA_IP_HTTPS = "https";
-
+    public static final String NI_MA_PROXY_LEVEL_NORMAL = "普通代理";
+    public static final String NI_MA_PROXY_LEVEL_HIGH = "高匿代理";
+    public static final String NI_MA_PROXY_TYPE_HTTP = "HTTP代理";
+    public static final String NI_MA_PROXY_TYPE_HTTPS = "HTTPS代理";
     public static final String NIMA_REFERER = "http://www.nimadaili.com/";
 
 }

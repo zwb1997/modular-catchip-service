@@ -17,18 +17,23 @@ import org.slf4j.LoggerFactory;
 public class TaskThreadPoolProvider {
     private static final Logger LOG = LoggerFactory.getLogger(TaskThreadPoolProvider.class);
     // the executorService instance
-    private static volatile ThreadPoolExecutor EXECUTOR_SERVICE;
+    private ThreadPoolExecutor poolExecutor;
+    private static volatile TaskThreadPoolProvider POOL_PROVIDER;
     private static final int BLOCKING_QUEUE_SIZE = 12;
-    private static final LinkedBlockingQueue<Runnable> BLOCKING_QUEUE = new LinkedBlockingQueue<>(BLOCKING_QUEUE_SIZE);
+    private final LinkedBlockingQueue<Runnable> BLOCKING_QUEUE = new LinkedBlockingQueue<>(BLOCKING_QUEUE_SIZE);
     private static final int CORE_POOL_SIZE = 3;
     private static final int MAX_POOL_SIZE = 6;
     private static final int KEEP_ALIVE_TIME = 60;
     private static final int MAX_TASK_SIZE = MAX_POOL_SIZE + BLOCKING_QUEUE_SIZE;
     private static final TimeUnit ALIVE_TIME_UNIT = TimeUnit.SECONDS;
-    public static final Lock LOCK = new ReentrantLock();
+    private static final Lock LOCK = new ReentrantLock();
 
     private TaskThreadPoolProvider() {
-
+        poolExecutor = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME,
+        ALIVE_TIME_UNIT, BLOCKING_QUEUE, (Runnable r, ThreadPoolExecutor executor) -> {
+            LOG.info(" current task type is not FutureTask will discard {}",
+                    r.getClass().getSimpleName());
+        });
     }
 
     /**
@@ -36,20 +41,17 @@ public class TaskThreadPoolProvider {
      * 
      * @return
      */
-    private static void getInstance() {
+    public static TaskThreadPoolProvider getInstance() {
         try {
-            if (EXECUTOR_SERVICE == null) {
+            if (POOL_PROVIDER == null) {
                 LOCK.tryLock();
-                if (EXECUTOR_SERVICE == null) {
-                    EXECUTOR_SERVICE = new ThreadPoolExecutor(CORE_POOL_SIZE, MAX_POOL_SIZE, KEEP_ALIVE_TIME,
-                            ALIVE_TIME_UNIT, BLOCKING_QUEUE, (Runnable r, ThreadPoolExecutor executor) -> {
-                                LOG.info(" current task type is not FutureTask will discard {}",
-                                        r.getClass().getSimpleName());
-                            });
+                if (POOL_PROVIDER == null) {
+                    POOL_PROVIDER = new TaskThreadPoolProvider();
+                    return POOL_PROVIDER;
                 }
             }
         } catch (Exception e) {
-            LOG.error(" get executorService error , message :{} ", e.getMessage());
+            LOG.error(" get executorService error will return null; message :{} ", e.getMessage());
         } finally {
             try {
                 LOCK.unlock();
@@ -57,6 +59,7 @@ public class TaskThreadPoolProvider {
                 LOG.info(" instance already exists, here is no lock , message : {} ", e.getMessage());
             }
         }
+        return POOL_PROVIDER;
     }
 
     /**
@@ -66,25 +69,22 @@ public class TaskThreadPoolProvider {
      * @return
      * @throws Exception
      */
-    public static Future<List<IpPoolMainDTO>> submitTaskWork(Callable<List<IpPoolMainDTO>> task) throws Exception {
+    public Future<List<IpPoolMainDTO>> submitTaskWork(Callable<List<IpPoolMainDTO>> task) throws Exception {
         Future<List<IpPoolMainDTO>> resFuture = null;
-        if (checkExecutorServiceIsNull()) {
-            getInstance();
-        }
         try {
-            var largestPoolSize = EXECUTOR_SERVICE.getLargestPoolSize();
+            var largestPoolSize = poolExecutor.getLargestPoolSize();
             LOG.info(" thread pool appear larget size :{} ", largestPoolSize);
             boolean flag = true;
             while (flag) {
                 LOG.info(String.format(" thread pool core size :%5d\tmax core size : %5d\ton queue size :%5d",
                         CORE_POOL_SIZE, MAX_POOL_SIZE, BLOCKING_QUEUE.size()));
-                if (EXECUTOR_SERVICE.getPoolSize() + BLOCKING_QUEUE.size() == MAX_TASK_SIZE) {
+                if (poolExecutor.getPoolSize() + BLOCKING_QUEUE.size() == MAX_TASK_SIZE) {
                     LOG.info(" over capacity, thread : {} will waiting 1 mininutes to continue detect ",
                             Thread.currentThread().getName());
                     Thread.sleep(1 * 60 * 1000);
                 } else {
                     LOG.info(" Thread : {} ,submit work ", Thread.currentThread().getName());
-                    resFuture = EXECUTOR_SERVICE.submit(task);
+                    resFuture = poolExecutor.submit(task);
                     flag = false;
                 }
             }
@@ -94,9 +94,6 @@ public class TaskThreadPoolProvider {
         return resFuture;
     }
 
-    public static boolean checkExecutorServiceIsNull() {
-        return EXECUTOR_SERVICE == null;
-    }
 
     public static int getKeepAliveTime() {
         return KEEP_ALIVE_TIME;

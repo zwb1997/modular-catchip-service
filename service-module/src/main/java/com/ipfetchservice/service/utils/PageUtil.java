@@ -10,22 +10,24 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
-import org.springframework.util.CollectionUtils;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpLocation;
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.ipfetchservice.service.utils.page.extractservice.PageExtractor;
-
-import static com.ipfetchservice.model.entitymodel.servicebase.constants.IpServiceConstant.*;
-
+/**
+ * list must be 10 elements; 固定格式的集合; 0 -> ip ; 1 -> port ; 2 -> ip地址 ; 3 ->
+ * ip供应商 ; 4 -> 是否支持https ; 5 -> 是否支持post请求 ; 6 -> 匿名程度 ; 7 -> 速度; 8 ->
+ * 网站检测ip入库时间 ; 9 -> 网站检测 ip最后有效时间; 自定义组装时,请注意一下 具体请看 
+ * {@link com.ipfetchservice.model.entitymodel.servicebase.DTO.IpPoolMainDTO  IpPoolMainDTO}
+ * {@link com.ipfetchservice.service.utils.page.extractservice.impl.XHPageExtractStrategy XHPageExtractStrategy}
+ */
 @Component
 public class PageUtil {
 
     private static final Logger LOG = LoggerFactory.getLogger(PageUtil.class);
-    private static final int COMBINE_ARRAY_REQUIRE_LENGTH = 10;
+
     private static final Lock LOCK = new ReentrantLock();
 
     /**
@@ -85,43 +87,6 @@ public class PageUtil {
     }
 
     /**
-     * list must be 10 elements; 固定格式的集合; 0 -> ip ; 1 -> port ; 2 -> ip地址 ; 3 ->
-     * ip供应商 ; 4 -> 是否支持https ; 5 -> 是否支持post请求 ; 6 -> 匿名程度 ; 7 -> 速度; 8 -> 网站检测
-     * ip入库时间 ; 9 -> 网站检测 ip最后有效时间; 具体请看 {@link IpPoolMainDTO }
-     * 
-     * @param infos
-     * @return IpPoolMainDTO
-     */
-    public IpPoolMainDTO createInstance(List<String> infos) {
-        if (CollectionUtils.isEmpty(infos) || infos.size() < COMBINE_ARRAY_REQUIRE_LENGTH
-                || infos.size() > COMBINE_ARRAY_REQUIRE_LENGTH) {
-            LOG.error(" error instance size must be 10 ");
-            return null;
-        }
-        byte anonymityDegree = 0;
-        switch (infos.get(6)) {
-            case ANONYMITY_NORMAL:
-                anonymityDegree = DEGREE_TRANSPARENT_PROXY;
-                break;
-            case ANONYMITY_HIGH:
-                anonymityDegree = DEGREE_HIGHT_PROXY;
-                break;
-            default:
-                anonymityDegree = DEGREE_UNKNOW_PROXY;
-        }
-        IpPoolMainDTO model = null;
-        try {
-            model = new IpPoolMainDTO(String.valueOf(infos.get(0)), Integer.parseInt(infos.get(1)), infos.get(2),
-                    infos.get(3), NOT_SUPPORT_CHINESE.equals(infos.get(4)) ? SUPPORT_NUM : NOT_SUPPORT_NUM,
-                    NOT_SUPPORT_CHINESE.equals(infos.get(5)) ? SUPPORT_NUM : NOT_SUPPORT_NUM, anonymityDegree,
-                    infos.get(7), infos.get(8), infos.get(9));
-        } catch (Exception e) {
-            LOG.error(" combine error,messgae : {} ", e.getMessage());
-        }
-        return model;
-    }
-
-    /**
      * check page name is match the section
      * 
      * @param pageText : use to check
@@ -148,12 +113,17 @@ public class PageUtil {
         List<IpPoolMainDTO> infoLists = new LinkedList<>();
         try {
             LOCK.lock();
-            Elements elements = fetchElementWithSection(page, HAS_PAGE_REGIX);
-            if (ObjectUtils.isNotEmpty(elements)) {
+            long combineStartTime = System.currentTimeMillis();
+            Elements elements = fetchElementWithSection(page, section);
+            if (ObjectUtils.isNotEmpty(elements) && !elements.isEmpty()) {
                 infoLists.addAll(extractor.doExtractStrategy(page, elements));
             } else {
                 LOG.info(" current elements is empty,will not work ,page : {} ", page);
             }
+            long combineEndTime = System.currentTimeMillis();
+            var usingTime = (combineEndTime - combineStartTime);
+            LOG.info(" combine dto model use time >> miniutes :{} seconds :{} ", usingTime / 60 / 1000,
+                    usingTime / 100);
             return infoLists;
         } catch (Exception e) {
             LOG.error(" get IpPoolMainDTO infos error , message :{} ", e.getMessage());

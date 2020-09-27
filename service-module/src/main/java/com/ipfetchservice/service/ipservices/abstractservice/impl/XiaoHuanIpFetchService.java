@@ -36,6 +36,7 @@ import static com.ipfetchservice.model.entitymodel.servicebase.constants.IpServi
 @Service("xiaohuanipfetchservice")
 public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
 
+    private static TaskThreadPoolProvider TASK_PROVIDER = TaskThreadPoolProvider.getInstance();
     public XiaoHuanIpFetchService() {
         taskName = XH_TASK_NAME;
     }
@@ -203,7 +204,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
             List<IpLocation> workList = pageNumsList.subList(cur, curEndPos);
             cur = curEndPos;
             try {
-                Future<List<IpPoolMainDTO>> future = TaskThreadPoolProvider
+                Future<List<IpPoolMainDTO>> future = TASK_PROVIDER
                         .submitTaskWork(new XHTask(curUriString, workList));
                 futures.add(future);
             } catch (Exception e) {
