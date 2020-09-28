@@ -1,24 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE mapper
-  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.datastorage.service.mapper.IpPoolMainDOMapper">
 
     <resultMap id="IpPoolMainDOBaseMap" type="com.datastorage.models.basicalmodels.basicaldo.IpPoolMainDO">
-        <id property="dataID" column="dataID"/>
-        <result property="ipNum" column="ip_num"/>
-        <result property="ipPort" column="ip_port"/>
-        <result property="ipLocation" column="ip_location"/>
-        <result property="ipVendor" column="ip_vendor"/>
-        <result property="supportHttps" column="support_https"/>
-        <result property="supportPost" column="support_post"/>
-        <result property="anonymityDegree" column="anonymity_degree"/>
-        <result property="accessSpeed" column="access_speed"/>
-        <result property="insertTime" column="insert_time"/>
-        <result property="lastDetectTime" column="last_detect_time"/>
-        <result property="statusCode" column="statusCode"/>
-        <result property="dataInsertTime" column="data_insert_time"/>
-        <result property="dataDetectTime" column="data_detect_time"/>
+        <id property="dataID" column="dataID" />
+        <result property="ipNum" column="ip_num" />
+        <result property="ipPort" column="ip_port" />
+        <result property="ipLocation" column="ip_location" />
+        <result property="ipVendor" column="ip_vendor" />
+        <result property="supportHttps" column="support_https" />
+        <result property="supportPost" column="support_post" />
+        <result property="anonymityDegree" column="anonymity_degree" />
+        <result property="accessSpeed" column="access_speed" />
+        <result property="insertTime" column="insert_time" />
+        <result property="lastDetectTime" column="last_detect_time" />
+        <result property="statusCode" column="statusCode" />
+        <result property="dataInsertTime" column="data_insert_time" />
+        <result property="dataDetectTime" column="data_detect_time" />
     </resultMap>
     <insert id="insertIpPoolMainDO">
         INSERT IGNORE INTO ip_pool_main values
@@ -41,4 +39,10 @@
             )
         </foreach>
     </insert>
+    <select id="selectOnlyIpAndPort" resultType="com.datastorage.models.basicalmodels.basicaldo.IpPoolMainDO">
+        SELECT dataID,ip_num,ip_port FROM ip_pool_main limit #{queryParam.startPos}
+        <if test="queryParam.startPos != null">
+            ,#{queryParam.endPos}
+        </if>
+    </select>
 </mapper>

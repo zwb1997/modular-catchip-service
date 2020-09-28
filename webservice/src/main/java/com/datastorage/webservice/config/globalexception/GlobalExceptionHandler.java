@@ -1,5 +1,4 @@
 package com.datastorage.webservice.config.globalexception;
-import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.servlet.HandlerExceptionResolver;

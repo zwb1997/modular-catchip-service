@@ -18,11 +18,11 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-       <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
-       <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-      </dependency>
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-lang3 -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+    </dependency>
     <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter -->
     <dependency>
       <groupId>org.springframework.boot</groupId>
@@ -54,7 +54,7 @@
   </dependencies>
 
   <build>
-    <finalName>models-module</finalName>
+    <finalName>${project.artifactId}.${module-version}</finalName>
     <pluginManagement>
       <!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>

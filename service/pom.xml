@@ -20,8 +20,8 @@
       <artifactId>junit</artifactId>
       <scope>test</scope>
     </dependency>
-     <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
-     <dependency>
+    <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+    <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
     </dependency>
@@ -60,16 +60,16 @@
       <groupId>org.mybatis</groupId>
       <artifactId>mybatis</artifactId>
     </dependency>
-      <!-- https://mvnrepository.com/artifact/org.mybatis/mybatis-spring -->
-      <dependency>
-        <groupId>org.mybatis</groupId>
-        <artifactId>mybatis-spring</artifactId>
-      </dependency>
-       <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
-       <dependency>
-        <groupId>mysql</groupId>
-        <artifactId>mysql-connector-java</artifactId>
-      </dependency>
+    <!-- https://mvnrepository.com/artifact/org.mybatis/mybatis-spring -->
+    <dependency>
+      <groupId>org.mybatis</groupId>
+      <artifactId>mybatis-spring</artifactId>
+    </dependency>
+    <!-- https://mvnrepository.com/artifact/mysql/mysql-connector-java -->
+    <dependency>
+      <groupId>mysql</groupId>
+      <artifactId>mysql-connector-java</artifactId>
+    </dependency>
     <!-- https://mvnrepository.com/artifact/redis.clients/jedis -->
     <dependency>
       <groupId>redis.clients</groupId>
@@ -78,7 +78,7 @@
   </dependencies>
 
   <build>
-    <finalName>service-module</finalName>
+    <finalName>${project.artifactId}.${module-version}</finalName>
     <pluginManagement>
       <!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>

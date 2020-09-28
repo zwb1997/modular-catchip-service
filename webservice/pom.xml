@@ -9,7 +9,7 @@
 
   <artifactId>webservice</artifactId>
   <version>${module-version}</version>
-   <packaging>war</packaging>
+  <packaging>war</packaging>
 
 
   <properties></properties>
@@ -78,7 +78,7 @@
   </dependencies>
 
   <build>
-    <finalName>ipstorage</finalName>
+    <finalName>${project.artifactId}.${module-version}</finalName>
     <pluginManagement>
       <!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
