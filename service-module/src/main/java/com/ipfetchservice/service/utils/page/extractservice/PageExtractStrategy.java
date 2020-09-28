@@ -1,11 +1,8 @@
 package com.ipfetchservice.service.utils.page.extractservice;
 
 import java.util.LinkedHashSet;
-import java.util.List;
-
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.ipfetchservice.service.utils.PageUtil;
-
 import org.jsoup.select.Elements;
 
 @FunctionalInterface

@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -29,7 +28,6 @@ import static com.ipfetchservice.model.entitymodel.servicebase.constants.IpServi
 @Component
 public class HttpClientUtil {
     private static final Logger LOG = LoggerFactory.getLogger(HttpClientUtil.class);
-    private static final int RESPONSE_CODE_PREFIX = 200;
     private static final int REQUEST_TIME_OUT = 20;
     // private static final int ESTABLISH_TIME_OUT = 30;
 
@@ -98,13 +96,13 @@ public class HttpClientUtil {
     public void printHeaders(Header[] headers) {
 
         if (ArrayUtils.isEmpty(headers)) {
-            LOG.debug(" === request/response headers empty === ");
+            LOG.info(" === request/response headers empty === ");
             return;
         }
-        LOG.debug(" === request/response headers start === ");
+        LOG.info(" === request/response headers start === ");
         for (Header h : headers) {
-            LOG.debug(" header : {} value : {} ", h.getName(), h.getValue());
+            LOG.info(" header : {} value : {} ", h.getName(), h.getValue());
         }
-        LOG.debug(" === request/response headers end === ");
+        LOG.info(" === request/response headers end === ");
     }
 }

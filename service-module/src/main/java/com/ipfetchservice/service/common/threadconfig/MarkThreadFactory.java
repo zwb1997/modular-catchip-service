@@ -3,11 +3,9 @@ package com.ipfetchservice.service.common.threadconfig;
 import org.apache.http.client.utils.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.Date;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
-
 import com.ipfetchservice.model.entitymodel.servicebase.constants.IpServiceConstant;
 
 

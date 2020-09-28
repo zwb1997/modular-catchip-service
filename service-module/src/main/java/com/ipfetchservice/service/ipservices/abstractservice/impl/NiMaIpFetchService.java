@@ -8,13 +8,10 @@ import java.util.Random;
 import java.util.concurrent.Future;
 
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
-import com.ipfetchservice.model.entitymodel.servicebase.constants.IpServiceConstant;
 import com.ipfetchservice.service.common.provider.TaskThreadPoolProvider;
 import com.ipfetchservice.service.ipservices.abstractservice.AbsrtactFetchIpService;
 import com.ipfetchservice.service.ipservices.task.impl.NMTask;
-
 import static com.ipfetchservice.model.entitymodel.servicebase.constants.IpServiceConstant.*;
-
 import org.apache.http.Header;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
@@ -130,7 +127,7 @@ public class NiMaIpFetchService extends AbsrtactFetchIpService {
             while (flag1 || flag2) {
                 get.setURI(uri);
                 String responsetext = clientUtil.exeuteDefaultRequest(get, headers, true);
-                boolean haseffectivePage = pageUtil.hasNextPage(responsetext, IpServiceConstant.HAS_PAGE_REGIX);
+                boolean haseffectivePage = pageUtil.hasNextPage(responsetext, HAS_PAGE_REGIX);
                 LOG.info(" if page has tbody > tr : {} ", haseffectivePage);
                 if (flag1) {
                     if (haseffectivePage) {

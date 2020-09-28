@@ -3,13 +3,10 @@ package com.ipfetchservice.service.utils.page.extractservice.impl;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
-
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.ipfetchservice.model.exceptions.DebugException;
 import com.ipfetchservice.service.utils.page.extractservice.PageExtractStrategy;
-
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.slf4j.Logger;

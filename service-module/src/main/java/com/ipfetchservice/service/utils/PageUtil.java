@@ -112,7 +112,6 @@ public class PageUtil {
     public List<IpPoolMainDTO> getInfos(String page, String section, PageExtractor extractor) {
         List<IpPoolMainDTO> infoLists = new LinkedList<>();
         try {
-            // LOCK.lock();
             long assembleStartTime = System.currentTimeMillis();
             Elements elements = fetchElementWithSection(page, section);
             if (ObjectUtils.isNotEmpty(elements) && !elements.isEmpty()) {
@@ -128,13 +127,7 @@ public class PageUtil {
         } catch (Exception e) {
             LOG.error(" get IpPoolMainDTO infos error , message :{} ", e.getMessage());
             return infoLists;
-        } finally {
-            // try {
-            //     LOCK.unlock();
-            // } catch (Exception e) {
-            //     LOG.info(" here is no lock ,cannot unlock,message :{}", e.getMessage());
-            // }
-        }
+        } 
     }
 
 }

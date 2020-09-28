@@ -1,9 +1,7 @@
 package com.ipfetchservice.service;
 
 import java.util.Date;
-
 import com.ipfetchservice.service.ipservices.abstractservice.AbsrtactFetchIpService;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

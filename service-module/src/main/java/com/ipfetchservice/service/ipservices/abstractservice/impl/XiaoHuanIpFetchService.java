@@ -1,18 +1,14 @@
 package com.ipfetchservice.service.ipservices.abstractservice.impl;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpLocation;
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.ipfetchservice.service.common.provider.TaskThreadPoolProvider;
 import com.ipfetchservice.service.ipservices.abstractservice.AbsrtactFetchIpService;
 import com.ipfetchservice.service.ipservices.task.impl.XHTask;
-
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.http.*;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.javatuples.Pair;
@@ -23,7 +19,6 @@ import org.springframework.util.Assert;
 import org.springframework.util.CollectionUtils;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.concurrent.*;

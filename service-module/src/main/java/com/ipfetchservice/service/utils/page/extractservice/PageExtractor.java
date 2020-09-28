@@ -1,10 +1,7 @@
 package com.ipfetchservice.service.utils.page.extractservice;
 
 import java.util.LinkedHashSet;
-import java.util.List;
-
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
-
 import org.jsoup.select.Elements;
 
 public class PageExtractor {

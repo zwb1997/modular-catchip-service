@@ -1,28 +1,19 @@
 package com.ipfetchservice.service.utils.page.extractservice.impl;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.nio.charset.Charset;
-import java.util.ArrayList;
+
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
-
 import com.google.common.collect.Lists;
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
 import com.ipfetchservice.service.utils.page.extractservice.PageExtractStrategy;
-
 import org.apache.commons.lang3.StringUtils;
 import org.jsoup.nodes.Element;
 import org.jsoup.nodes.Node;
 import org.jsoup.select.Elements;
 import static com.ipfetchservice.model.entitymodel.servicebase.constants.IpServiceConstant.*;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
