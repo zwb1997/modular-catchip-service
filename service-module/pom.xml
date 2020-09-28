@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>com.ipfetchservice</groupId>
@@ -11,12 +10,10 @@
     <artifactId>service-module</artifactId>
     <packaging>jar</packaging>
 
-    <properties>
-
-    </properties>
+    <properties></properties>
 
     <dependencies>
-       
+
         <dependency>
             <groupId>com.ipfetchservice</groupId>
             <artifactId>model-module</artifactId>
@@ -69,8 +66,8 @@
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
         </dependency>
-         <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
-         <dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+        <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
         </dependency>
@@ -78,6 +75,11 @@
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.javatuples/javatuples -->
+        <dependency>
+            <groupId>org.javatuples</groupId>
+            <artifactId>javatuples</artifactId>
         </dependency>
     </dependencies>
     <build>

@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,6 +19,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -36,14 +39,19 @@ public class HttpClientUtil {
             60L, TimeUnit.SECONDS);
     private static CloseableHttpClient CLIENT;
     static {
+        List<Header> defaultHeaders = new LinkedList<>();
+        Collections.addAll(defaultHeaders, new BasicHeader("Cache-Control", "no-cache"));
+        Collections.addAll(defaultHeaders, new BasicHeader("Pragma", "no-cache"));
         poolClientConnectionManager.setMaxTotal(10);
         poolClientConnectionManager.setDefaultMaxPerRoute(500);
-        CLIENT = HttpClientBuilder.create().setUserAgent(USER_AGENT).setConnectionManager(poolClientConnectionManager)
-                .build();
+        CLIENT = HttpClientBuilder.create().setUserAgent(USER_AGENT)
+                .setDefaultHeaders(defaultHeaders)
+                .setConnectionManager(poolClientConnectionManager).build();
     }
 
     /**
      * create a default httpClient ,reuse httpclient
+     * 
      * @param httpType
      * @param headers
      * @return String the response text
@@ -55,7 +63,7 @@ public class HttpClientUtil {
         LOG.info(" URI : {} ", targetUri);
         String responseText = "";
         try {
-            if(!CollectionUtils.isEmpty(headers)){
+            if (!CollectionUtils.isEmpty(headers)) {
                 int headerSize = headers.size();
                 httpType.setHeaders(headers.toArray(new Header[headerSize]));
             }
@@ -65,12 +73,12 @@ public class HttpClientUtil {
             httpType.setConfig(requestConfig);
             printHeaders(httpType.getAllHeaders());
             LOG.info(" waiting for response ");
-            try(CloseableHttpResponse response = CLIENT.execute(httpType)){
+            try (CloseableHttpResponse response = CLIENT.execute(httpType)) {
                 LOG.info(" response send back ");
                 printHeaders(response.getAllHeaders());
                 HttpEntity responseEntity = response.getEntity();
-                if(ObjectUtils.isEmpty(responseEntity)){
-                    LOG.info(" request to uri :{} response text is null ",targetUri);
+                if (ObjectUtils.isEmpty(responseEntity)) {
+                    LOG.info(" request to uri :{} response text is null ", targetUri);
                     return responseText;
                 }
                 responseText = EntityUtils.toString(responseEntity, "utf-8");
@@ -88,8 +96,8 @@ public class HttpClientUtil {
      * @param headers
      */
     public void printHeaders(Header[] headers) {
-      
-        if(ArrayUtils.isEmpty(headers)){
+
+        if (ArrayUtils.isEmpty(headers)) {
             LOG.debug(" === request/response headers empty === ");
             return;
         }

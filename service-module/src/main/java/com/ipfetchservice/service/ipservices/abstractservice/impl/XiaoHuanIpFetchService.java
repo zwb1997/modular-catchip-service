@@ -15,6 +15,7 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
+import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -37,6 +38,7 @@ import static com.ipfetchservice.model.entitymodel.servicebase.constants.IpServi
 public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
 
     private static TaskThreadPoolProvider TASK_PROVIDER = TaskThreadPoolProvider.getInstance();
+
     public XiaoHuanIpFetchService() {
         taskName = XH_TASK_NAME;
     }
@@ -187,12 +189,14 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
 
     /**
      * assigned works to threads
+     * 
      * @param curUriString
      * @param pageNumsList
      */
     private void doWork(String curUriString, Stack<IpLocation> pageNumsList) {
         // 划分任务
         // 做任务
+        int submitTaskCount = 0;
         int cur = 0;
         int curWorkSize = pageNumsList.size();
         LOG.info(" === current page nums  : {} ,list : {} === ", curWorkSize, pageNumsList);
@@ -204,9 +208,12 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
             List<IpLocation> workList = pageNumsList.subList(cur, curEndPos);
             cur = curEndPos;
             try {
-                Future<List<IpPoolMainDTO>> future = TASK_PROVIDER
+                Pair<Future<List<IpPoolMainDTO>>, Boolean> resultPire = TASK_PROVIDER
                         .submitTaskWork(new XHTask(curUriString, workList));
-                futures.add(future);
+                if (resultPire.getValue1()) {
+                    futures.add(resultPire.getValue0());
+                    LOG.info(" current page {}\tsubmit count {}", curUriString, ++submitTaskCount);
+                }
             } catch (Exception e) {
                 LOG.error(" submit task error , message :{} ", e);
             }
@@ -214,44 +221,7 @@ public class XiaoHuanIpFetchService extends AbsrtactFetchIpService {
         uploadData(futures);
     }
 
-    /**
-     * 获取每个任务的结果
-     * 
-     * @param futures
-     */
-    private void uploadData(List<Future<List<IpPoolMainDTO>>> futures) {
-        LOG.info(" === begin stage data === ");
-        Assert.notEmpty(futures, " future task wouldn't empty ");
-        HttpPost httpPost = new HttpPost();
-        for (Future<List<IpPoolMainDTO>> future : futures) {
-            try {
-                LOG.info(" \\\\waiting to get future result...\\\\ ");
-                List<IpPoolMainDTO> lists = future.get(10, TimeUnit.MINUTES);
-                if (CollectionUtils.isEmpty(lists)) {
-                    LOG.info(" current IpPoolMainDO list is empty , will not do insert ");
-                    continue;
-                }
-                int size = lists.size();
-                LOG.info(" list size :{} ",size);
-                ObjectMapper objectMapper = new ObjectMapper();
-                String curData = objectMapper.writeValueAsString(lists);
-                URI uri = new URIBuilder(STORAGE_SERVICE_LOCATION).setScheme("http").setCharset(StandardCharsets.UTF_8)
-                        .setPort(STORAGE_SERVICE_LOCATION_PORT).setPath(STORAGE_SERVICE_PATH).build();
-                        httpPost.setURI(uri);
-                httpPost.setEntity(new StringEntity(curData, Consts.UTF_8));
-                List<Header> headerList = new ArrayList<>();
-                String curTimeMillions = String.valueOf(System.currentTimeMillis());
-                headerList.add(new BasicHeader(ORIGIN_NAME, STORAGE_SERVICE_LOCATION));
-                headerList.add(new BasicHeader(CUR_TIME_SPAN, curTimeMillions));
-                headerList.add(new BasicHeader(SECRET_SIGN, signUtil.createSign(curTimeMillions, SECRET)));
-                headerList.add(new BasicHeader("Content-Type", HTTP_CONTENT_TYPE_JSON));
-                String responseText = clientUtil.exeuteDefaultRequest(httpPost, headerList, false);
-                LOG.info(" sent storage data success , response text : {} ", responseText);
-            } catch (Exception e) {
-                LOG.error(" send stage data error , message : {} ", e.getMessage());
-            }
-        }
-    }
+  
 
     /**
      * add map values to a list

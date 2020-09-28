@@ -112,28 +112,28 @@ public class PageUtil {
     public List<IpPoolMainDTO> getInfos(String page, String section, PageExtractor extractor) {
         List<IpPoolMainDTO> infoLists = new LinkedList<>();
         try {
-            LOCK.lock();
-            long combineStartTime = System.currentTimeMillis();
+            // LOCK.lock();
+            long assembleStartTime = System.currentTimeMillis();
             Elements elements = fetchElementWithSection(page, section);
             if (ObjectUtils.isNotEmpty(elements) && !elements.isEmpty()) {
                 infoLists.addAll(extractor.doExtractStrategy(page, elements));
             } else {
                 LOG.info(" current elements is empty,will not work ,page : {} ", page);
             }
-            long combineEndTime = System.currentTimeMillis();
-            var usingTime = (combineEndTime - combineStartTime);
-            LOG.info(" combine dto model use time >> miniutes :{} seconds :{} ", usingTime / 60 / 1000,
-                    usingTime / 100);
+            long assembleEndTime = System.currentTimeMillis();
+            var usingTime = (assembleEndTime - assembleStartTime);
+            LOG.info(" assemble dto model use time >> miniutes :{} seconds :{} ", usingTime / 60 / 1000,
+                    usingTime / 1000);
             return infoLists;
         } catch (Exception e) {
             LOG.error(" get IpPoolMainDTO infos error , message :{} ", e.getMessage());
             return infoLists;
         } finally {
-            try {
-                LOCK.unlock();
-            } catch (Exception e) {
-                LOG.info(" here is no lock ,cannot unlock,message :{}", e.getMessage());
-            }
+            // try {
+            //     LOCK.unlock();
+            // } catch (Exception e) {
+            //     LOG.info(" here is no lock ,cannot unlock,message :{}", e.getMessage());
+            // }
         }
     }
 

@@ -2,6 +2,7 @@ package com.ipfetchservice.service.utils.page.extractservice.impl;
 
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -21,18 +22,18 @@ public class XHPageExtractStrategy implements PageExtractStrategy {
     private static final Logger LOG = LoggerFactory.getLogger(XHPageExtractStrategy.class);
 
     @Override
-    public List<IpPoolMainDTO> extractInfoWithPage(String page, Elements elements) {
+    public LinkedHashSet<IpPoolMainDTO> extractInfoWithPage(String page, Elements elements) {
         if (CollectionUtils.isEmpty(elements)) {
             LOG.info(" elements is empty,will not work ");
             return null;
         }
         Iterator<Element> iterator = elements.iterator();
-        LinkedList<IpPoolMainDTO> res = new LinkedList<>();
+        LinkedHashSet<IpPoolMainDTO> res = new LinkedHashSet<IpPoolMainDTO>();
         while (iterator.hasNext()) {
             try {
                 Element e = iterator.next();
                 List<String> infos = findTextNode(e);
-                LOG.info(" current infos : {} ", infos);
+                // LOG.info(" current infos : {} ", infos);
                 res.add(createInstance(infos));
             } catch (Exception e) {
                 LOG.error(" error , message :{} ", e.getMessage());
@@ -97,7 +98,7 @@ public class XHPageExtractStrategy implements PageExtractStrategy {
                     NOT_SUPPORT_CHINESE.equals(infos.get(5)) ? SUPPORT_NUM : NOT_SUPPORT_NUM, anonymityDegree,
                     infos.get(7), infos.get(8), infos.get(9));
         } catch (Exception e) {
-            LOG.error(" combine error,messgae : {} ", e.getMessage());
+            LOG.error(" xiaohuan createInstance error,messgae : {} ", e.getMessage());
         }
         return model;
 

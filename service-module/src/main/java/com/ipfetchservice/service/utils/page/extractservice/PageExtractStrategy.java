@@ -1,5 +1,6 @@
 package com.ipfetchservice.service.utils.page.extractservice;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
@@ -10,6 +11,9 @@ import org.jsoup.select.Elements;
 @FunctionalInterface
 public interface PageExtractStrategy {
     public static final PageUtil PAGE_UTIL = new PageUtil();
+    /**
+     * default transmission model array ,help to assemble IpPoolMainDTO model;
+     */
     public static final String[] EMPTY_ARR = new String[] { "", "", "", "", "", "", "", "", "", "" };
-    List<IpPoolMainDTO> extractInfoWithPage(String page,Elements elements);
+    LinkedHashSet<IpPoolMainDTO> extractInfoWithPage(String page,Elements elements);
 }

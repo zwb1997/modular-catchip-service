@@ -44,6 +44,7 @@
         <jedis-version>3.2.0</jedis-version>
         <jackson-version>2.10.4</jackson-version>
         <guava-version>29.0-jre</guava-version>
+        <java-tuple-version>1.2</java-tuple-version>
     </properties>
 
     <dependencyManagement>
@@ -185,6 +186,12 @@
                 <groupId>com.google.guava</groupId>
                 <artifactId>guava</artifactId>
                 <version>${guava-version}</version>
+            </dependency>
+            <!-- https://mvnrepository.com/artifact/org.javatuples/javatuples -->
+            <dependency>
+                <groupId>org.javatuples</groupId>
+                <artifactId>javatuples</artifactId>
+                <version>${java-tuple-version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

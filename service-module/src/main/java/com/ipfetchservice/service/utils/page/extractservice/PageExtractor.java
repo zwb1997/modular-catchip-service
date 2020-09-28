@@ -1,5 +1,6 @@
 package com.ipfetchservice.service.utils.page.extractservice;
 
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import com.ipfetchservice.model.entitymodel.servicebase.DTO.IpPoolMainDTO;
@@ -12,7 +13,7 @@ public class PageExtractor {
         this.extractStrategy = extractStrategy;
     }
 
-    public List<IpPoolMainDTO> doExtractStrategy(String page,Elements elements){
+    public LinkedHashSet<IpPoolMainDTO> doExtractStrategy(String page,Elements elements){
         return extractStrategy.extractInfoWithPage(page,elements);
     }
 }

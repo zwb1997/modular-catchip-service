@@ -50,8 +50,10 @@ public class NMTask implements Callable<List<IpPoolMainDTO>> {
             LOG.info(" thread :{} doing job ,uri :{} ", Thread.currentThread().getName(), targetUri);
             get.setURI(targetUri);
             String responseText = CLIENT_UTIL.exeuteDefaultRequest(get, commonHeaders, true);
-            // combine infos to IpPoolMainDTO
-            resultDtos.addAll(PAGE_UTIL.getInfos(responseText, HAS_PAGE_REGIX, EXTRACTOR));
+            // assemble IpPoolMainDTO infos 
+            List<IpPoolMainDTO> extractList = PAGE_UTIL.getInfos(responseText, HAS_PAGE_REGIX, EXTRACTOR);
+            LOG.debug(" nima  uri :{} ,extract list :{} ",targetUri.toString(),extractList);
+            resultDtos.addAll(extractList);
             Thread.sleep(RANDOM.nextInt(3) * 1000);
         }
         return resultDtos;

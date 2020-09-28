@@ -19,6 +19,7 @@ import org.apache.http.Header;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.message.BasicHeader;
+import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -65,7 +66,6 @@ public class NiMaIpFetchService extends AbsrtactFetchIpService {
      * @param nimaUris
      */
     public void fetchEvertPage(List<URI> nimaUris) {
-
         for (URI i : nimaUris) {
             int pageSize = pageNumDetect(i);
             // 直接提交任务
@@ -80,6 +80,7 @@ public class NiMaIpFetchService extends AbsrtactFetchIpService {
      */
     private void doWork(int pageSize, URI i) {
         List<Future<List<IpPoolMainDTO>>> waitingResutls = new LinkedList<>();
+        int submitTaskWork = 0;
         try {
             List<URI> workUris = new LinkedList<>();
             String path = i.getPath().split("/")[1];
@@ -94,28 +95,19 @@ public class NiMaIpFetchService extends AbsrtactFetchIpService {
             while (workPos < workSize) {
                 int endPos = Math.min(workSize, workPos + workGrowStep);
                 List<URI> subWorkUris = workUris.subList(workPos, endPos);
-                Future<List<IpPoolMainDTO>> future = TASK_PROVIDER.submitTaskWork(new NMTask(subWorkUris,path));
-                waitingResutls.add(future);
+                Pair<Future<List<IpPoolMainDTO>>, Boolean>  resultPair = TASK_PROVIDER.submitTaskWork(new NMTask(subWorkUris,path));
+                if(resultPair.getValue1()){
+                    waitingResutls.add(resultPair.getValue0());
+                    LOG.info(" current page {}\tsubmit count {}", path, ++submitTaskWork);
+                }
                 workPos += workGrowStep;
             }
         } catch (Exception e) {
             LOG.error(" doWork error , message :{} ", e.getMessage());
         }
-        doUpload(waitingResutls);
+        uploadData(waitingResutls);
     }
 
-    /**
-     * sending ip data to remote service
-     * @param waitingResutls
-     */
-    private void doUpload(List<Future<List<IpPoolMainDTO>>> waitingResutls) {
-        LOG.info(" waiting for get futures... ");
-        int taskResultSize = waitingResutls.size();
-        boolean flag = true;
-        while(flag){
-            
-        }
-    }
 
     /**
      * detect current uri page nums
