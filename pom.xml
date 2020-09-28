@@ -26,6 +26,7 @@
     <jackson-xml-version>2.10.3</jackson-xml-version>
     <guava-verison>29.0-jre</guava-verison>
     <commons-codec-version>1.11</commons-codec-version>
+    <java-tuple-version>1.2</java-tuple-version>
   </properties>
 
   <groupId>com.datastorage</groupId>
@@ -194,6 +195,12 @@
         <artifactId>junit</artifactId>
         <version>${junit-version}</version>
         <scope>test</scope>
+      </dependency>
+      <!-- https://mvnrepository.com/artifact/org.javatuples/javatuples -->
+      <dependency>
+        <groupId>org.javatuples</groupId>
+        <artifactId>javatuples</artifactId>
+        <version>${java-tuple-version}</version>
       </dependency>
     </dependencies>
   </dependencyManagement>

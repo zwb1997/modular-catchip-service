@@ -4,6 +4,15 @@ public class IpPoolMainDOParams {
     private int startPos;
     private int endPos;
 
+    public IpPoolMainDOParams(int startPos, int endPos) {
+        this.startPos = startPos;
+        this.endPos = endPos;
+    }
+
+    public IpPoolMainDOParams() {
+
+    }
+
     public void setEndPos(int endPos) {
         this.endPos = endPos;
     }
