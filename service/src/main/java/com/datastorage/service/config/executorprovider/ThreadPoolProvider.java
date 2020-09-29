@@ -9,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
+import com.datastorage.models.basicalmodels.basicaldo.IpPoolMainDO;
 import com.datastorage.models.basicalmodels.basicaldto.responsedto.IpPoolMainDTO;
 
 import org.javatuples.Pair;
@@ -69,9 +70,9 @@ public class ThreadPoolProvider {
      * @return Pair<Future<List<IpPoolMainDTO>>,Boolean>
      * @throws Exception
      */
-    public Pair<Future<List<IpPoolMainDTO>>, Boolean> submitTaskWork(Callable<List<IpPoolMainDTO>> task)
+    public Pair<Future<List<IpPoolMainDO>>, Boolean> submitTaskWork(Callable<List<IpPoolMainDO>> task)
             throws Exception {
-        Pair<Future<List<IpPoolMainDTO>>, Boolean> pair = Pair.with(null, false);
+        Pair<Future<List<IpPoolMainDO>>, Boolean> pair = Pair.with(null, false);
         try {
             var largestPoolSize = poolExecutor.getLargestPoolSize();
             LOG.info(" thread pool appear larget size :{} ", largestPoolSize);

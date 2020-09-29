@@ -40,7 +40,7 @@
         </foreach>
     </insert>
     <select id="selectOnlyIpAndPort" resultType="com.datastorage.models.basicalmodels.basicaldo.IpPoolMainDO">
-        SELECT dataID,ip_num,ip_port FROM ip_pool_main limit #{queryParam.startPos}
+        SELECT dataID AS dataID,INET_NTOA(ip_num) AS ipNum,ip_port AS ipPort,statusCode as statusCode FROM ip_pool_main limit #{queryParam.startPos}
         <if test="queryParam.startPos != null">
             ,#{queryParam.endPos}
         </if>

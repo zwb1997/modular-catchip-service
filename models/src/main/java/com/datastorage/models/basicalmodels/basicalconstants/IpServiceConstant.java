@@ -1,5 +1,7 @@
 package com.datastorage.models.basicalmodels.basicalconstants;
 
+import java.net.URI;
+
 public class IpServiceConstant {
     public static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.97 Safari/537.36";
     public static final String XIAO_HUAN_POS_CHINA = "中国";
@@ -25,4 +27,9 @@ public class IpServiceConstant {
 //    public static final String ORIGIN_VALUE = "http://127.0.0.1";
     public static final String TIME_PATTERN_END_WITH_SECOND = "yyyy-MM-dd HH:mm:ss";
     public static final String NUMBER_PATTERN = "^\\d+$";
+
+
+    //ip detect service
+    public static final String BAIDU_URI_STRING = "https://www.baidu.com";
+    public static final String GOOGLE_URI_STRING = "https://www.google.com";
 }

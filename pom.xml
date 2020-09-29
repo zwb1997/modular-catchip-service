@@ -27,6 +27,7 @@
     <guava-verison>29.0-jre</guava-verison>
     <commons-codec-version>1.11</commons-codec-version>
     <java-tuple-version>1.2</java-tuple-version>
+    <httpcomponents-version>4.5.12</httpcomponents-version>
   </properties>
 
   <groupId>com.datastorage</groupId>
@@ -196,6 +197,13 @@
         <version>${junit-version}</version>
         <scope>test</scope>
       </dependency>
+      <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+      <dependency>
+        <groupId>org.apache.httpcomponents</groupId>
+        <artifactId>httpclient</artifactId>
+        <version>${httpcomponents-version}</version>
+      </dependency>
+
       <!-- https://mvnrepository.com/artifact/org.javatuples/javatuples -->
       <dependency>
         <groupId>org.javatuples</groupId>
