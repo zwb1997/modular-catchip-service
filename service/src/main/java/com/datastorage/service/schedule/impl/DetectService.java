@@ -15,6 +15,7 @@ import com.datastorage.models.basicalmodels.queryparams.IpPoolMainDOParams;
 import com.datastorage.service.config.executorprovider.ThreadPoolProvider;
 import com.datastorage.service.mapper.IpPoolMainDOMapper;
 import com.datastorage.service.schedule.AbstractSchedulingService;
+import com.google.common.net.InetAddresses;
 
 @Service("DetectService")
 public class DetectService extends AbstractSchedulingService {
@@ -34,7 +35,7 @@ public class DetectService extends AbstractSchedulingService {
         Map<String,Object> sqlResultMap = jdbcTemplate.queryForMap(sql, new Object[] {});
         int ipCounts = (Integer)sqlResultMap.get("ipcounts");
         int pos = 0;
-        int step = ipCounts / ThreadPoolProvider.getCorePoolSize() << 1;
+        int step = ipCounts / ThreadPoolProvider.getCorePoolSize() * 5 << 1;
         while (pos < ipCounts) {
             int limitCount = Math.min(ipCounts, pos + step);
             List<IpPoolMainDO> models = IpPoolMainDOMapper.selectOnlyIpAndPort(new IpPoolMainDOParams(pos, limitCount));
@@ -50,7 +51,7 @@ public class DetectService extends AbstractSchedulingService {
 
     private void convertInetAddress(List<IpPoolMainDO> models) {
         for(IpPoolMainDO ipPoolMainDO : models){
-            
+
         }
         
     }

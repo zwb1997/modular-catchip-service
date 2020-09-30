@@ -4,10 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentLinkedDeque;
-
 import com.datastorage.models.basicalmodels.basicaldo.IpPoolMainDO;
-import com.datastorage.models.basicalmodels.basicaldto.responsedto.IpPoolMainDTO;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

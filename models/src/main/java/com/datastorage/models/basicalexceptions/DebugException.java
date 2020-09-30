@@ -5,6 +5,10 @@ import org.slf4j.LoggerFactory;
 
 
 public class DebugException extends RuntimeException {
+    /**
+     *
+     */
+    private static final long serialVersionUID = 8231388711503326228L;
     private static final Logger LOGGER = LoggerFactory.getLogger(DebugException.class);
     public DebugException() {
         super();

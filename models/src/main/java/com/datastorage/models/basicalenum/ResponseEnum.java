@@ -13,4 +13,12 @@ public enum ResponseEnum {
 
     private int responseCode;
     private String responseMessage;
+
+
+    public int getResponseCode() {
+        return responseCode;
+    }
+    public String getResponseMessage() {
+        return responseMessage;
+    }
 }

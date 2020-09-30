@@ -8,10 +8,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-
 import com.datastorage.models.basicalmodels.basicaldo.IpPoolMainDO;
-import com.datastorage.models.basicalmodels.basicaldto.responsedto.IpPoolMainDTO;
-
 import org.javatuples.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

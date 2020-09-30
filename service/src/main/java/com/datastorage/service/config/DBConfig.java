@@ -1,15 +1,11 @@
 package com.datastorage.service.config;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-
 import javax.sql.DataSource;
-
 import com.alibaba.druid.filter.Filter;
 import com.alibaba.druid.filter.logging.Slf4jLogFilter;
 import com.alibaba.druid.pool.DruidDataSource;
-
 import org.apache.ibatis.session.SqlSessionFactory;
 import org.mybatis.spring.SqlSessionFactoryBean;
 import org.mybatis.spring.SqlSessionTemplate;
