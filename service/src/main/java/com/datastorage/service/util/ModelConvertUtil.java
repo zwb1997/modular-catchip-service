@@ -28,10 +28,10 @@ public class ModelConvertUtil {
      * 7 -> 速度
      * 8 -> 网站检测 ip入库时间
      * 9 -> 网站检测 ip最后有效时间
+     * 这边一个方法就应该create好 所有list controller 接受参数的时候接受一个数组 并 标记好每个对象的值
      * @param params
      * @return
      */
-    //这边一个方法就应该create好 所有list controller 接受参数的时候接受一个数组 并 标记好每个对象的值
     public List<IpPoolMainDO> createIpPoolMainDOInstance(List<IpPoolMainDTO> params) {
         List<IpPoolMainDO> postModel = new LinkedList<>();
         for (IpPoolMainDTO ipPoolMainDTO : params) {

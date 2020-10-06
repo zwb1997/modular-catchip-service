@@ -18,16 +18,19 @@ public class IpServiceConstant {
     public static final byte DEGREE_HIGHT_PROXY = 2;
     public static final byte DEGREE_MIX = 3;
     public static final String ORIGIN_NAME = "Origin";
-    public static final String CUR_TIME_SPAN = "";
-    public static final String SECRET_SIGN = "";
-    public static final String SECRET = "";
-    public static final String ORIGIN_VALUE = "http://";
-//    public static final String ORIGIN_VALUE = "http://127.0.0.1";
+    public static final String CUR_TIME_SPAN = "curspan";
+    public static final String SECRET_SIGN = "secretsign";
+    public static final String SECRET = "r{Bh\\\\Ky-Au*Li:Ji=Ke-Zt'Fh\\\"Zs[Ll-Xs$Kr$Fl=Md#At-Cg'Ky|Ka%Dz'Lq*Is;Dl.Hn%Ex+Vr)Xq*Jg*Ks'Ia{H'v)Od-L'Kf:I";
+    public static final String ORIGIN_VALUE = "http://39.105.41.230";
+    // public static final String ORIGIN_VALUE = "http://127.0.0.1";
     public static final String TIME_PATTERN_END_WITH_SECOND = "yyyy-MM-dd HH:mm:ss";
     public static final String NUMBER_PATTERN = "^\\d+$";
+    public static final int RESPONSE_SUCCESS_CODE = 200;
+    public static final byte DETECT_DOMESTIC = (byte)1;
+    public static final byte DETECT_FOREIGN = (byte)2;
+    public static final byte DETECT_UNAVAILABLE = (byte)0;
 
-
-    //ip detect service
+    // ip detect service
     public static final String BAIDU_URI_STRING = "https://www.baidu.com";
     public static final String GOOGLE_URI_STRING = "https://www.google.com";
 }

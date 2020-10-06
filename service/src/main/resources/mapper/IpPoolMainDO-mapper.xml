@@ -45,4 +45,9 @@
             ,#{queryParam.endPos}
         </if>
     </select>
+    <update id="updateIpPoolMainDO">
+        <foreach collection="ipPoolMainModels" item="val" separator=";">
+            UPDATE ip_pool_main SET statusCode = #{val.statusCode} WHERE dataID = #{val.dataID}
+        </foreach>
+    </update>
 </mapper>

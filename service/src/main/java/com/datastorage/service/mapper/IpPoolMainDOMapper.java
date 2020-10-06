@@ -12,4 +12,6 @@ public interface IpPoolMainDOMapper {
     void insertIpPoolMainDO(@Param("ipPoolMainModels") List<IpPoolMainDO> models);
 
     List<IpPoolMainDO> selectOnlyIpAndPort(@Param("queryParam")IpPoolMainDOParams queryParam);
+
+    int updateIpPoolMainDO(@Param("ipPoolMainModels") List<IpPoolMainDO> models);
 }

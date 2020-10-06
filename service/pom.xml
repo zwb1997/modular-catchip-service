@@ -88,7 +88,6 @@
 
   <build>
     <finalName>${project.artifactId}.${module-version}</finalName>
-    <pluginManagement>
       <!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
       <plugins>
         <plugin>
@@ -96,6 +95,5 @@
           <artifactId>spring-boot-maven-plugin</artifactId>
         </plugin>
       </plugins>
-    </pluginManagement>
   </build>
 </project>

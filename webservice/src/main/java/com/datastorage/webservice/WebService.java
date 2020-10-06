@@ -1,43 +1,43 @@
 package com.datastorage.webservice;
 
-import com.datastorage.service.ServiceRun;
 import com.datastorage.service.schedule.SchedulingServiceEntry;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.boot.SpringApplication;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.ConfigurableApplicationContext;
+import org.springframework.context.annotation.ComponentScan;
 
 /**
- * start at webservice
+ * @author
  */
-@SpringBootApplication(exclude = {DataSourceAutoConfiguration.class},scanBasePackages = {"com.datastorage"})
-public class WebService extends SpringBootServletInitializer {
+@SpringBootApplication(scanBasePackages = {"com.datastorage.webservice", "com.datastorage.service"})
+@ComponentScan({"com.datastorage.service"})
+public class WebService extends SpringBootServletInitializer implements CommandLineRunner {
     private static final Logger LOG = LoggerFactory.getLogger(WebService.class);
-    private static Class<?>[] RUN_CLASSES = new Class[] { ServiceRun.class, WebService.class };
 
+    @Autowired
+    @Qualifier("schedulingServiceEntry")
+    private SchedulingServiceEntry serviceEntry;
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
-        LOG.info(" loading springboot start reources ,{} ", getStartUpLoadingClassName());
-        return super.configure(builder.sources(RUN_CLASSES));
+        LOG.info(" SpringApplicationBuilder  configure ");
+        return builder.sources(WebService.class);
     }
-    public static void main(String[] args) {
-        LOG.info(" web service start ");
-        SpringApplication application = new SpringApplication(RUN_CLASSES);
-        ConfigurableApplicationContext context = application.run(args);
-        LOG.info(" begin scheduling service ");
-        context.getBean(SchedulingServiceEntry.class).runSchedulingService();
-    }
+    // public static void main(String[] args) {
+    //     LOG.info(" web service start ");
+    //     SpringApplication application = new SpringApplication(RUN_CLASSES);
+    //     ConfigurableApplicationContext context = application.run(args);
+    //     LOG.info(" begin scheduling service ");
+    //     context.getBean(SchedulingServiceEntry.class).runSchedulingService();
+    // }
 
-    public String getStartUpLoadingClassName(){
-        StringBuffer stringBuffer = new StringBuffer();
-        for(Class c : RUN_CLASSES){
-            stringBuffer.append(c.getName()+",");
-        }
-        return stringBuffer.toString();
+    @Override
+    public void run(String... args) throws Exception {
+        LOG.info(" scheduling service will start... ");
+        serviceEntry.runSchedulingService();
     }
 }

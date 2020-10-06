@@ -7,17 +7,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
-@Service("SchedulingServiceEntry")
+@Service("schedulingServiceEntry")
 public class SchedulingServiceEntry {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchedulingServiceEntry.class);
     @Autowired
-    @Qualifier("taskscheduler")
     private ThreadPoolTaskScheduler poolScheduler;
     @Autowired
-    @Qualifier("DetectService")
+    @Qualifier("detectService")
     private AbstractSchedulingService detectService;
 
     public void runSchedulingService() {

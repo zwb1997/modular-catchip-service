@@ -8,6 +8,7 @@
     <junit-version>4.12</junit-version>
     <module-version>0.1</module-version>
     <spring-boot-maven-plugin-version>2.3.3.RELEASE</spring-boot-maven-plugin-version>
+    <maven-assembly-verison>3.3.0</maven-assembly-verison>
     <spring-boot-start-version>2.2.6.RELEASE</spring-boot-start-version>
     <spring-boot-autoconfig-version>2.2.2.RELEASE</spring-boot-autoconfig-version>
     <spring-boot-web-version>2.2.6.RELEASE</spring-boot-web-version>
@@ -48,6 +49,16 @@
           <groupId>org.springframework.boot</groupId>
           <artifactId>spring-boot-maven-plugin</artifactId>
           <version>${spring-boot-maven-plugin-version}</version>
+        </plugin>
+        <!-- <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-assembly-plugin</artifactId>
+          <version>${maven-assembly-verison}</version>
+        </plugin> -->
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-war-plugin</artifactId>
+          <version>3.3.1</version>
         </plugin>
       </plugins>
     </pluginManagement>
@@ -148,12 +159,12 @@
       <dependency>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-web</artifactId>
-        <!-- <exclusions>
+        <exclusions>
           <exclusion>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
           </exclusion>
-        </exclusions> -->
+        </exclusions>
         <version>${spring-boot-web-version}</version>
       </dependency>
       <!-- https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-autoconfigure -->
