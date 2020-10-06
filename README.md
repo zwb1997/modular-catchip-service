@@ -1,7 +1,7 @@
 # mutiple-modules
 mutiple modules test for threads web tasks
 
-[Libraries]:
+<strong>use libraries</strong><br>
   springboot<br>
   muti-thread<br>
   httpcomponents 4.5<br>
@@ -11,6 +11,6 @@ mutiple modules test for threads web tasks
   mysql<br>
   javatuple<br>
   guava<br>
-[Branch]:
+<strong>branches for different services</strong><br>
   fetching ip service -> ipfetchservice<br>
   data storage service -> datastorageservice<br>
