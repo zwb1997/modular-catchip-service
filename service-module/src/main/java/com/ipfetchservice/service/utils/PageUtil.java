@@ -85,7 +85,6 @@ public class PageUtil {
         try{
             Element element = Jsoup.parse(html);
             elements = element.select(sectionRegix);
-            LOCK.unlock();
         }catch(Exception e){
             LOG.error(" fetchElementWithSection error , message : ", e);
         }finally{
