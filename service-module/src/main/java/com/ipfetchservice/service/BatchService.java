@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Service;
 
-@Service
+@Service("BatchService")
 public class BatchService {
     private static final int TASK_DELAY_INTERVAL = 3 * 60 * 1000;
     private static final Logger LOG = LoggerFactory.getLogger(BatchService.class);
@@ -28,7 +28,7 @@ public class BatchService {
 
     public void tasksRunEntry() {
         LOG.info(" tasks entry ");
-        // taskscheduler.scheduleWithFixedDelay(xhFetchIpService, new Date(), TASK_DELAY_INTERVAL);
+        taskscheduler.scheduleWithFixedDelay(xhFetchIpService, new Date(), TASK_DELAY_INTERVAL);
         taskscheduler.scheduleWithFixedDelay(nimaFetchIpService, new Date(), TASK_DELAY_INTERVAL);
     }
 

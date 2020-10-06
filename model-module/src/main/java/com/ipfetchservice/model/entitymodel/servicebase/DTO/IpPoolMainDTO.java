@@ -125,9 +125,9 @@ public class IpPoolMainDTO {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
+        if (this == o) {return true;}
 
-        if (!(o instanceof IpPoolMainDTO)) return false;
+        if (!(o instanceof IpPoolMainDTO)) {return false;}
 
         IpPoolMainDTO that = (IpPoolMainDTO) o;
 

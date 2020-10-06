@@ -150,8 +150,8 @@ public class IpPoolMainDO {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {return true;}
+        if (o == null || getClass() != o.getClass()) {return false;}
         IpPoolMainDO that = (IpPoolMainDO) o;
         return ipNum == that.ipNum;
     }

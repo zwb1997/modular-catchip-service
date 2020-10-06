@@ -79,10 +79,18 @@ public class PageUtil {
      * @return
      */
     public Elements fetchElementWithSection(String html, String sectionRegix) {
+       
+        Elements elements = null;
         LOCK.lock();
-        Element element = Jsoup.parse(html);
-        Elements elements = element.select(sectionRegix);
-        LOCK.unlock();
+        try{
+            Element element = Jsoup.parse(html);
+            elements = element.select(sectionRegix);
+            LOCK.unlock();
+        }catch(Exception e){
+            LOG.error(" fetchElementWithSection error , message : ", e);
+        }finally{
+            LOCK.unlock();  
+        }
         return elements;
     }
 

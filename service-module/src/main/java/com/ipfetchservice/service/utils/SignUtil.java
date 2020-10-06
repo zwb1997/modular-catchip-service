@@ -20,8 +20,8 @@ public class SignUtil {
      * @return
      */
     public String createSign(String timeSpan, String localSecret) {
-        LOCK.lock();
         String md5Hex = "";
+        LOCK.lock();
         try {
             String fullMessage = timeSpan + localSecret;
             md5Hex = DigestUtils.md5Hex(fullMessage).toLowerCase();
