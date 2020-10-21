@@ -21,28 +21,27 @@
         <model-module-version>0.1</model-module-version>
         <web-module-version>0.2</web-module-version> -->
         <module-version>0.1</module-version>
-        <mysql-version>8.0.16</mysql-version>
+        <mysql-version>8.0.20</mysql-version>
         <druid-springboot-start-version>1.1.10</druid-springboot-start-version>
         <druid-version>1.1.22</druid-version>
         <junit-version>4.12</junit-version>
         <mybatis-spring-verison>1.3.2</mybatis-spring-verison>
         <mybatis_version>3.4.6</mybatis_version>
         <common-lang3-version>3.10</common-lang3-version>
-        <jackson-verison>2.10.4</jackson-verison>
-        <httpclient-version>4.5.12</httpclient-version>
+        <httpclient-version>4.5.13</httpclient-version>
         <httpclient-async-version>4.1.4</httpclient-async-version>
         <jsoup-version>1.13.1</jsoup-version>
         <logback-version>1.2.3</logback-version>
-        <spring-jdbc-version>5.2.7.RELEASE</spring-jdbc-version>
-        <spring-data-jdbc-version>1.1.0.RELEASE</spring-data-jdbc-version>
-        <spring-boot-autoconfig-version>2.2.6.RELEASE</spring-boot-autoconfig-version>
-        <spring-boot-test-version>2.2.6.RELEASE</spring-boot-test-version>
-        <spring-boot-start-version>2.2.6.RELEASE</spring-boot-start-version>
-        <spring-boot-web-version>2.2.6.RELEASE</spring-boot-web-version>
+        <spring-jdbc-version>5.2.9.RELEASE</spring-jdbc-version>
+        <spring-data-jdbc-version>2.0.4.RELEASE</spring-data-jdbc-version>
+        <spring-boot-autoconfig-version>2.3.4.RELEASE</spring-boot-autoconfig-version>
+        <spring-boot-test-version>2.3.4.RELEASE</spring-boot-test-version>
+        <spring-boot-start-version>2.3.4.RELEASE</spring-boot-start-version>
+        <spring-boot-web-version>2.3.4.RELEASE</spring-boot-web-version>
         <javax-version>4.0.1</javax-version>
         <spring-boot-maven-plug-version>2.3.3.RELEASE</spring-boot-maven-plug-version>
         <jedis-version>3.2.0</jedis-version>
-        <jackson-version>2.10.4</jackson-version>
+        <jackson-version>2.11.2</jackson-version>
         <guava-version>29.0-jre</guava-version>
         <java-tuple-version>1.2</java-tuple-version>
     </properties>
